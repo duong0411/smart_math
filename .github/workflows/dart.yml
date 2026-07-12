@@ -3,19 +3,24 @@ name: iOS-ipa-build
 on:
   workflow_dispatch:
 
+# Required to create/update GitHub Releases with GITHUB_TOKEN.
+# Without this, the Releases API returns 404 Not Found instead of 403.
+permissions:
+  contents: write
+
 jobs:
   build-ios:
-    name: 🎉 iOS Build
+    name: iOS Build
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - uses: subosito/flutter-action@v2
         with:
-          channel: 'stable'
+          channel: stable
           architecture: x64
+
       - run: flutter pub get
-      
 
       - run: pod repo update
         working-directory: ios
@@ -32,11 +37,13 @@ jobs:
         run: zip -qq -r -9 FlutterIpaExport.ipa Payload
         working-directory: build/ios/iphoneos
 
-      - name: Upload binaries to release
-        uses: svenstaro/upload-release-action@v2
+      - name: Upload IPA to GitHub Release
+        uses: softprops/action-gh-release@v2
         with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: build/ios/iphoneos/FlutterIpaExport.ipa
-          tag: v1.0
-          overwrite: true
-          body: "This is first release"
+          tag_name: ios-v1.0.${{ github.run_number }}
+          name: iOS IPA v1.0.${{ github.run_number }}
+          body: Automated unsigned iOS IPA build from workflow_dispatch.
+          files: build/ios/iphoneos/FlutterIpaExport.ipa
+          fail_on_unmatched_files: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
