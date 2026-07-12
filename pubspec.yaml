@@ -1,0 +1,35 @@
+name: eduself_study_app
+description: "EduSelf Study App"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.12.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  flutter_riverpod: ^2.6.1
+  go_router: ^15.1.2
+  collection: ^1.19.1
+  flutter_dotenv: ^6.0.1
+  shared_preferences: ^2.5.5
+  flutter_secure_storage: ^10.3.1
+  http: ^1.6.0
+  gpt_markdown: ^1.1.7
+  image_picker: ^1.1.2
+  pdfrx: ^2.2.4
+  url_launcher: ^6.3.1
+  fl_chart: ^1.2.0
+  file_picker: ^10.3.10
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/prompts/eduself_system_prompt.md
+    - assets/env/
