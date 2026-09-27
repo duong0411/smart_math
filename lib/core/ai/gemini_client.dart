@@ -22,6 +22,7 @@ class GeminiClient {
     required String systemPrompt,
     required List<GeminiTurn> history,
     required String userMessage,
+    GeminiImage? image,
     Duration timeout = const Duration(seconds: 55),
   }) async {
     final key = apiKey.trim();
@@ -30,6 +31,23 @@ class GeminiClient {
         ValidationFailure('Chưa có Gemini API key. Vào Cài đặt để dán key.'),
       );
     }
+
+    final userParts = <Map<String, Object?>>[
+      if (image != null)
+        {
+          'inline_data': {
+            'mime_type': image.mimeType,
+            'data': image.base64,
+          },
+        },
+      {
+        'text': userMessage.trim().isEmpty
+            ? (image != null
+                ? 'Em gửi ảnh bài tập Toán. Hãy đọc đề trên ảnh và hướng dẫn em giải từng bước (chưa đưa đáp án ngay).'
+                : '')
+            : userMessage.trim(),
+      },
+    ];
 
     final contents = <Map<String, Object?>>[
       for (final turn in history)
@@ -42,9 +60,7 @@ class GeminiClient {
           },
       {
         'role': 'user',
-        'parts': [
-          {'text': userMessage.trim()},
-        ],
+        'parts': userParts,
       },
     ];
 
@@ -147,4 +163,10 @@ class GeminiTurn {
   const GeminiTurn({required this.role, required this.text});
   final GeminiRole role;
   final String text;
+}
+
+class GeminiImage {
+  const GeminiImage({required this.base64, required this.mimeType});
+  final String base64;
+  final String mimeType;
 }

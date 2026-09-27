@@ -248,18 +248,27 @@ class MathChatMessage {
     required this.role,
     required this.content,
     required this.at,
+    this.imageBase64,
+    this.imageMimeType,
   });
 
   final String id;
   final MathChatRole role;
   final String content;
   final DateTime at;
+  final String? imageBase64;
+  final String? imageMimeType;
+
+  bool get hasImage =>
+      imageBase64 != null && imageBase64!.isNotEmpty;
 
   Map<String, dynamic> toJson() => {
         'id': id,
         'role': role.name,
         'content': content,
         'at': at.toIso8601String(),
+        if (imageBase64 != null) 'imageBase64': imageBase64,
+        if (imageMimeType != null) 'imageMimeType': imageMimeType,
       };
 
   factory MathChatMessage.fromJson(Map<String, dynamic> json) {
@@ -271,6 +280,8 @@ class MathChatMessage {
       content: json['content'] as String? ?? '',
       at: DateTime.tryParse(json['at'] as String? ?? '') ??
           DateTime.now().toUtc(),
+      imageBase64: json['imageBase64'] as String?,
+      imageMimeType: json['imageMimeType'] as String?,
     );
   }
 }

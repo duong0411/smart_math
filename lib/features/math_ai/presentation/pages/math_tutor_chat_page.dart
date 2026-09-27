@@ -1,11 +1,16 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:eduself_study_app/core/ai/gemini_client.dart';
 import 'package:eduself_study_app/core/error/result.dart';
 import 'package:eduself_study_app/features/math_ai/infrastructure/math_local_store.dart';
 import 'package:eduself_study_app/features/math_ai/presentation/providers/math_ai_providers.dart';
+import 'package:eduself_study_app/shared/utils/image_picker_errors.dart';
 import 'package:eduself_study_app/shared/widgets/app_toast.dart';
 import 'package:eduself_study_app/shared/widgets/glass_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 
 class MathTutorChatPage extends ConsumerStatefulWidget {
   const MathTutorChatPage({super.key, required this.sessionId});
@@ -19,9 +24,12 @@ class MathTutorChatPage extends ConsumerStatefulWidget {
 class _MathTutorChatPageState extends ConsumerState<MathTutorChatPage> {
   final _controller = TextEditingController();
   final _scroll = ScrollController();
+  final _picker = ImagePicker();
   MathTutorSession? _session;
   var _loading = true;
   var _sending = false;
+  Uint8List? _pendingImageBytes;
+  String? _pendingImageMime;
 
   @override
   void initState() {
@@ -44,16 +52,95 @@ class _MathTutorChatPageState extends ConsumerState<MathTutorChatPage> {
       _session = session;
       _loading = false;
     });
-    if (session != null && session.messages.isEmpty) {
-      // Soft welcome without API call if no key — still invite first message.
+  }
+
+  Future<void> _showAttachMenu() async {
+    if (_sending) return;
+    final choice = await showModalBottomSheet<String>(
+      context: context,
+      showDragHandle: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(8, 0, 8, 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.photo_camera_rounded),
+                title: const Text('Chụp ảnh'),
+                subtitle: const Text('Chụp đề bài bằng camera'),
+                onTap: () => Navigator.pop(ctx, 'camera'),
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_library_outlined),
+                title: const Text('Chọn ảnh có sẵn'),
+                subtitle: const Text('Lấy từ thư viện ảnh'),
+                onTap: () => Navigator.pop(ctx, 'gallery'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    if (choice == 'camera') {
+      await _pickImage(ImageSource.camera);
+    } else if (choice == 'gallery') {
+      await _pickImage(ImageSource.gallery);
+    }
+  }
+
+  Future<void> _pickImage(ImageSource source) async {
+    try {
+      final file = await _picker.pickImage(
+        source: source,
+        imageQuality: 75,
+        maxWidth: 1600,
+      );
+      if (file == null) return;
+      final bytes = await file.readAsBytes();
+      if (bytes.isEmpty) {
+        AppToast.error('Không đọc được ảnh.');
+        return;
+      }
+      if (bytes.length > 8 * 1024 * 1024) {
+        AppToast.error('Ảnh quá lớn (tối đa ~8MB sau nén).');
+        return;
+      }
+      final lower = file.name.toLowerCase();
+      final mime = lower.endsWith('.png')
+          ? 'image/png'
+          : lower.endsWith('.webp')
+              ? 'image/webp'
+              : 'image/jpeg';
+      if (!mounted) return;
+      setState(() {
+        _pendingImageBytes = bytes;
+        _pendingImageMime = mime;
+      });
+    } on Object catch (e) {
+      AppToast.error(imagePickerErrorMessage(e));
     }
   }
 
   Future<void> _send() async {
     final text = _controller.text.trim();
-    if (text.isEmpty || _sending || _session == null) return;
+    final hasImage = _pendingImageBytes != null;
+    if ((text.isEmpty && !hasImage) || _sending || _session == null) return;
 
-    setState(() => _sending = true);
+    final imageBytes = _pendingImageBytes;
+    final imageMime = _pendingImageMime ?? 'image/jpeg';
+    final displayContent = text.isEmpty
+        ? (hasImage ? '📷 Ảnh bài tập' : '')
+        : text;
+
+    setState(() {
+      _sending = true;
+      _pendingImageBytes = null;
+      _pendingImageMime = null;
+    });
     _controller.clear();
 
     final store = ref.read(mathLocalStoreProvider);
@@ -61,8 +148,10 @@ class _MathTutorChatPageState extends ConsumerState<MathTutorChatPage> {
     final userMsg = MathChatMessage(
       id: '${now.millisecondsSinceEpoch}-u',
       role: MathChatRole.user,
-      content: text,
+      content: displayContent,
       at: now,
+      imageBase64: imageBytes != null ? base64Encode(imageBytes) : null,
+      imageMimeType: imageBytes != null ? imageMime : null,
     );
 
     try {
@@ -78,7 +167,11 @@ class _MathTutorChatPageState extends ConsumerState<MathTutorChatPage> {
             role: m.role == MathChatRole.user
                 ? GeminiRole.user
                 : GeminiRole.model,
-            text: m.content,
+            text: m.hasImage && m.content.trim().isEmpty
+                ? '[Học sinh đã gửi ảnh bài tập]'
+                : (m.hasImage
+                    ? '${m.content}\n[Kèm ảnh bài tập]'
+                    : m.content),
           ),
       ];
 
@@ -86,6 +179,12 @@ class _MathTutorChatPageState extends ConsumerState<MathTutorChatPage> {
         ref,
         userMessage: text,
         history: history,
+        image: imageBytes == null
+            ? null
+            : GeminiImage(
+                base64: base64Encode(imageBytes),
+                mimeType: imageMime,
+              ),
       );
 
       switch (result) {
@@ -105,7 +204,9 @@ class _MathTutorChatPageState extends ConsumerState<MathTutorChatPage> {
               id: reply.id,
               type: MathStudyEventType.tutor,
               topic: session.topic ?? 'Gia sư Toán',
-              detail: 'Buổi chat · ${session.title}',
+              detail: hasImage
+                  ? 'Chat kèm ảnh · ${session.title}'
+                  : 'Buổi chat · ${session.title}',
               at: reply.at,
             ),
           );
@@ -127,7 +228,7 @@ class _MathTutorChatPageState extends ConsumerState<MathTutorChatPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!_scroll.hasClients) return;
       _scroll.animateTo(
-        _scroll.position.maxScrollExtent + 80,
+        _scroll.position.maxScrollExtent + 120,
         duration: const Duration(milliseconds: 280),
         curve: Curves.easeOut,
       );
@@ -181,15 +282,48 @@ class _MathTutorChatPageState extends ConsumerState<MathTutorChatPage> {
                     );
                   }
                   final m = session.messages[index];
+                  final isUser = m.role == MathChatRole.user;
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 6),
                     child: Align(
-                      alignment: m.role == MathChatRole.user
+                      alignment: isUser
                           ? Alignment.centerRight
                           : Alignment.centerLeft,
-                      child: ChatBubble(
-                        text: m.content,
-                        isUser: m.role == MathChatRole.user,
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          maxWidth: MediaQuery.sizeOf(context).width * 0.82,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: isUser
+                              ? CrossAxisAlignment.end
+                              : CrossAxisAlignment.start,
+                          children: [
+                            if (m.hasImage)
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 6),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(16),
+                                  child: Image.memory(
+                                    base64Decode(m.imageBase64!),
+                                    fit: BoxFit.cover,
+                                    width: 220,
+                                    errorBuilder: (_, _, _) => Container(
+                                      width: 160,
+                                      height: 100,
+                                      color: Colors.black26,
+                                      alignment: Alignment.center,
+                                      child: const Text('Không hiện ảnh'),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            if (m.content.trim().isNotEmpty)
+                              ChatBubble(
+                                text: m.content,
+                                isUser: isUser,
+                              ),
+                          ],
+                        ),
                       ),
                     ),
                   );
@@ -201,25 +335,75 @@ class _MathTutorChatPageState extends ConsumerState<MathTutorChatPage> {
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
                 child: GlassCard(
-                  padding: const EdgeInsets.fromLTRB(12, 8, 8, 8),
-                  child: Row(
+                  padding: const EdgeInsets.fromLTRB(4, 8, 8, 8),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Expanded(
-                        child: TextField(
-                          controller: _controller,
-                          minLines: 1,
-                          maxLines: 5,
-                          textInputAction: TextInputAction.send,
-                          onSubmitted: (_) => _send(),
-                          decoration: const InputDecoration(
-                            hintText: 'Hỏi bài Toán, ghi đề bài…',
-                            border: InputBorder.none,
+                      if (_pendingImageBytes != null)
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
+                          child: Stack(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: Image.memory(
+                                  _pendingImageBytes!,
+                                  height: 96,
+                                  width: 96,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                              Positioned(
+                                top: 2,
+                                right: 2,
+                                child: Material(
+                                  color: Colors.black54,
+                                  shape: const CircleBorder(),
+                                  child: InkWell(
+                                    customBorder: const CircleBorder(),
+                                    onTap: () => setState(() {
+                                      _pendingImageBytes = null;
+                                      _pendingImageMime = null;
+                                    }),
+                                    child: const Padding(
+                                      padding: EdgeInsets.all(4),
+                                      child: Icon(
+                                        Icons.close,
+                                        size: 16,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                      ),
-                      IconButton.filled(
-                        onPressed: _sending ? null : _send,
-                        icon: const Icon(Icons.send_rounded),
+                      Row(
+                        children: [
+                          IconButton(
+                            tooltip: 'Chụp / chọn ảnh',
+                            onPressed: _sending ? null : _showAttachMenu,
+                            icon: const Icon(Icons.add_a_photo_outlined),
+                          ),
+                          Expanded(
+                            child: TextField(
+                              controller: _controller,
+                              minLines: 1,
+                              maxLines: 5,
+                              textInputAction: TextInputAction.send,
+                              onSubmitted: (_) => _send(),
+                              decoration: const InputDecoration(
+                                hintText: 'Gõ câu hỏi hoặc gửi ảnh đề…',
+                                border: InputBorder.none,
+                              ),
+                            ),
+                          ),
+                          IconButton.filled(
+                            onPressed: _sending ? null : _send,
+                            icon: const Icon(Icons.send_rounded),
+                          ),
+                        ],
                       ),
                     ],
                   ),

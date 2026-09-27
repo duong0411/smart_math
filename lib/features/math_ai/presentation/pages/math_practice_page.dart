@@ -1,14 +1,18 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
+import 'package:eduself_study_app/core/ai/gemini_client.dart';
 import 'package:eduself_study_app/core/error/result.dart';
 import 'package:eduself_study_app/features/math_ai/infrastructure/math_local_store.dart';
 import 'package:eduself_study_app/features/math_ai/presentation/providers/math_ai_providers.dart';
+import 'package:eduself_study_app/shared/utils/image_picker_errors.dart';
 import 'package:eduself_study_app/shared/widgets/app_toast.dart';
 import 'package:eduself_study_app/shared/widgets/glass_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:gpt_markdown/gpt_markdown.dart';
+import 'package:image_picker/image_picker.dart';
 
 class MathPracticePage extends ConsumerStatefulWidget {
   const MathPracticePage({super.key});
@@ -20,12 +24,15 @@ class MathPracticePage extends ConsumerStatefulWidget {
 class _MathPracticePageState extends ConsumerState<MathPracticePage> {
   final _answerController = TextEditingController();
   final _topicController = TextEditingController();
+  final _picker = ImagePicker();
 
   String? _question;
   String? _topic;
   String? _feedback;
   bool? _correct;
   var _busy = false;
+  Uint8List? _answerImageBytes;
+  String? _answerImageMime;
 
   @override
   void dispose() {
@@ -48,6 +55,8 @@ class _MathPracticePageState extends ConsumerState<MathPracticePage> {
       _feedback = null;
       _correct = null;
       _question = null;
+      _answerImageBytes = null;
+      _answerImageMime = null;
     });
     _answerController.clear();
 
@@ -88,25 +97,114 @@ Câu hỏi dùng LaTeX \$...\$ nếu cần.
     }
   }
 
+  Future<void> _showAttachMenu() async {
+    if (_busy) return;
+    final choice = await showModalBottomSheet<String>(
+      context: context,
+      showDragHandle: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(8, 0, 8, 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.photo_camera_rounded),
+                title: const Text('Chụp ảnh bài làm'),
+                onTap: () => Navigator.pop(ctx, 'camera'),
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_library_outlined),
+                title: const Text('Chọn ảnh có sẵn'),
+                onTap: () => Navigator.pop(ctx, 'gallery'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    if (choice == 'camera') {
+      await _pickAnswerImage(ImageSource.camera);
+    } else if (choice == 'gallery') {
+      await _pickAnswerImage(ImageSource.gallery);
+    }
+  }
+
+  Future<void> _pickAnswerImage(ImageSource source) async {
+    try {
+      final file = await _picker.pickImage(
+        source: source,
+        imageQuality: 75,
+        maxWidth: 1600,
+      );
+      if (file == null) return;
+      final bytes = await file.readAsBytes();
+      if (bytes.isEmpty) {
+        AppToast.error('Không đọc được ảnh.');
+        return;
+      }
+      if (bytes.length > 8 * 1024 * 1024) {
+        AppToast.error('Ảnh quá lớn (tối đa ~8MB sau nén).');
+        return;
+      }
+      final lower = file.name.toLowerCase();
+      final mime = lower.endsWith('.png')
+          ? 'image/png'
+          : lower.endsWith('.webp')
+              ? 'image/webp'
+              : 'image/jpeg';
+      if (!mounted) return;
+      setState(() {
+        _answerImageBytes = bytes;
+        _answerImageMime = mime;
+        _feedback = null;
+        _correct = null;
+      });
+    } on Object catch (e) {
+      AppToast.error(imagePickerErrorMessage(e));
+    }
+  }
+
   Future<void> _submit() async {
     final answer = _answerController.text.trim();
-    if (answer.isEmpty || _question == null || _busy) return;
+    final hasImage = _answerImageBytes != null;
+    if ((answer.isEmpty && !hasImage) || _question == null || _busy) {
+      AppToast.info('Em gõ bài làm hoặc gửi ảnh bài làm trước khi nộp.');
+      return;
+    }
 
     setState(() => _busy = true);
+
+    final answerLabel = answer.isEmpty
+        ? '(Bài làm gửi bằng ảnh)'
+        : answer;
+    final imageNote = hasImage
+        ? '\n(Học sinh kèm ảnh bài làm — hãy đọc chữ/phép tính trên ảnh.)'
+        : '';
+
     final result = await askMathAi(
       ref,
       userMessage: '''
 Chấm bài luyện tập Toán.
 
 Đề: $_question
-Bài làm học sinh: $answer
+Bài làm học sinh (text): $answerLabel$imageNote
 
 Trả lời CHỈ bằng JSON thuần (không markdown):
 {"correct":true/false,"feedback":"giải thích ngắn, chỉ ra lỗi nếu sai, gợi ý bước tiếp theo. Dùng LaTeX nếu cần."}
 
 Không đưa đáp án đầy đủ nếu học sinh sai — chỉ gợi ý trừ khi gần đúng.
 ''',
-      extraSystemContext: 'Chế độ chấm luyện tập.',
+      image: hasImage
+          ? GeminiImage(
+              base64: base64Encode(_answerImageBytes!),
+              mimeType: _answerImageMime ?? 'image/jpeg',
+            )
+          : null,
+      extraSystemContext: 'Chế độ chấm luyện tập (text và/hoặc ảnh bài làm).',
     );
 
     if (!mounted) return;
@@ -120,7 +218,9 @@ Không đưa đáp án đầy đủ nếu học sinh sai — chỉ gợi ý tr�
           id: DateTime.now().millisecondsSinceEpoch.toString(),
           topic: _topic ?? 'Toán',
           question: _question!,
-          studentAnswer: answer,
+          studentAnswer: hasImage && answer.isEmpty
+              ? '📷 Ảnh bài làm'
+              : (hasImage ? '$answer\n📷 (kèm ảnh)' : answer),
           feedback: feedback,
           correct: correct,
           at: DateTime.now().toUtc(),
@@ -192,7 +292,7 @@ Không đưa đáp án đầy đủ nếu học sinh sai — chỉ gợi ý tr�
                   const SizedBox(height: 12),
                   FilledButton.icon(
                     onPressed: _busy ? null : _generate,
-                    icon: _busy
+                    icon: _busy && _question == null
                         ? const SizedBox(
                             width: 18,
                             height: 18,
@@ -227,20 +327,102 @@ Không đưa đáp án đầy đủ nếu học sinh sai — chỉ gợi ý tr�
                       style: Theme.of(context).textTheme.bodyLarge,
                     ),
                     const SizedBox(height: 16),
+                    Text(
+                      'Bài làm của em',
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Gõ text và/hoặc gửi ảnh bài làm (chụp / chọn từ thư viện).',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: scheme.onSurfaceVariant,
+                          ),
+                    ),
+                    const SizedBox(height: 10),
                     TextField(
                       controller: _answerController,
                       minLines: 2,
                       maxLines: 5,
                       decoration: const InputDecoration(
-                        labelText: 'Bài làm của em',
+                        hintText: 'Gõ lời giải, đáp án…',
                         border: OutlineInputBorder(),
                       ),
                     ),
                     const SizedBox(height: 12),
-                    FilledButton.tonalIcon(
-                      onPressed: _busy ? null : _submit,
-                      icon: const Icon(Icons.check_circle_outline),
-                      label: const Text('Nộp bài để AI chấm'),
+                    if (_answerImageBytes != null)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: Stack(
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: Image.memory(
+                                _answerImageBytes!,
+                                height: 140,
+                                width: double.infinity,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                            Positioned(
+                              top: 6,
+                              right: 6,
+                              child: Material(
+                                color: Colors.black54,
+                                shape: const CircleBorder(),
+                                child: InkWell(
+                                  customBorder: const CircleBorder(),
+                                  onTap: _busy
+                                      ? null
+                                      : () => setState(() {
+                                            _answerImageBytes = null;
+                                            _answerImageMime = null;
+                                          }),
+                                  child: const Padding(
+                                    padding: EdgeInsets.all(6),
+                                    child: Icon(
+                                      Icons.close,
+                                      size: 18,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: _busy ? null : _showAttachMenu,
+                            icon: const Icon(Icons.add_a_photo_outlined),
+                            label: Text(
+                              _answerImageBytes == null
+                                  ? 'Ảnh bài làm'
+                                  : 'Đổi ảnh',
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: FilledButton.tonalIcon(
+                            onPressed: _busy ? null : _submit,
+                            icon: _busy
+                                ? const SizedBox(
+                                    width: 18,
+                                    height: 18,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : const Icon(Icons.check_circle_outline),
+                            label: const Text('Nộp bài'),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),

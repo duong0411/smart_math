@@ -102,6 +102,7 @@ Future<Result<String>> askMathAi(
   required String userMessage,
   List<GeminiTurn> history = const [],
   String? extraSystemContext,
+  GeminiImage? image,
 }) async {
   final apiKey = ref.read(geminiApiKeyProvider).valueOrNull;
   if (apiKey == null || apiKey.trim().isEmpty) {
@@ -141,6 +142,7 @@ Future<Result<String>> askMathAi(
         systemPrompt: systemPrompt,
         history: history,
         userMessage: userMessage,
+        image: image,
         timeout: AppConfig.aiGatewayTimeout,
       );
 }
