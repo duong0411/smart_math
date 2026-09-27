@@ -61,11 +61,8 @@ jobs:
 
       - run: flutter pub get
 
-      - name: Install CocoaPods
-        run: |
-          cd ios
-          pod install --repo-update
-
+      # Project uses Swift Package Manager (no Podfile). Flutter resolves
+      # iOS deps during build — do not run `pod install`.
       - run: flutter build ios --release --no-codesign
 
       - name: Package unsigned IPA

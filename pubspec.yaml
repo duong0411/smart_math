@@ -30,6 +30,8 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  config:
+    enable-swift-package-manager: true
   assets:
     - assets/prompts/eduself_system_prompt.md
     - assets/env/
