@@ -2,14 +2,17 @@ import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 abstract final class AppConfig {
-  static const appName = 'EduSelf Study';
-  static const appVersion = '1.0.0';
-  static const storageMode = 'API (Cloudflare Workers)';
+  static const appName = 'EduSelf Toán AI';
+  static const appVersion = '2.0.0';
+  static const appTagline =
+      'Ứng dụng AI giám sát và hỗ trợ học sinh học tập môn Toán';
+  static const storageMode = 'Local + Gemini API';
   static const aiGatewayTimeout = Duration(seconds: 55);
   static const _apiBaseUrlKey = 'API_BASE_URL';
   static const _apiAccessTokenKey = 'API_ACCESS_TOKEN';
+  static const _geminiApiKeyKey = 'GEMINI_API_KEY';
 
-  /// Default Cloudflare Workers API (production).
+  /// Default Cloudflare Workers API (legacy / optional).
   static const defaultApiBaseUrl = 'http://localhost:8787';
 
   static Future<void> load() async {
@@ -29,6 +32,15 @@ abstract final class AppConfig {
     const fromDefine = String.fromEnvironment(_apiAccessTokenKey);
     if (fromDefine.isNotEmpty) return fromDefine;
     final fromEnv = dotenv.maybeGet(_apiAccessTokenKey);
+    if (fromEnv != null && fromEnv.trim().isNotEmpty) return fromEnv.trim();
+    return null;
+  }
+
+  /// Optional Gemini key from dart-define / env file (user can also paste in app).
+  static String? get fallbackGeminiApiKey {
+    const fromDefine = String.fromEnvironment(_geminiApiKeyKey);
+    if (fromDefine.isNotEmpty) return fromDefine;
+    final fromEnv = dotenv.maybeGet(_geminiApiKeyKey);
     if (fromEnv != null && fromEnv.trim().isNotEmpty) return fromEnv.trim();
     return null;
   }

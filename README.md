@@ -1,17 +1,44 @@
-# eduself_study_app
+# Smart Math (EduSelf Toán AI)
 
-EduSelf Study App
+Ứng dụng AI giám sát và hỗ trợ học sinh học tập môn **Toán**.
 
-## Getting Started
+Repo: [duong0411/smart_math](https://github.com/duong0411/smart_math)
 
-This project is a starting point for a Flutter application.
+## Cách dùng nhanh
 
-A few resources to get you started if this is your first Flutter project:
+1. Lấy Gemini API key tại [Google AI Studio](https://aistudio.google.com/apikey)
+2. Chạy app: `flutter run`
+3. Vào **Cài đặt** → dán API key → Lưu
+4. Điền tên & lớp học sinh
+5. Dùng:
+   - **Gia sư Toán AI** — hỏi đáp từng bước
+   - **Luyện tập Toán** — AI tạo bài & chấm
+   - **Giám sát học tập** — tiến độ, điểm yếu, kế hoạch ôn AI
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+API key được lưu trên thiết bị (secure storage), gọi thẳng Gemini — không cần backend.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Build bằng GitHub Actions
+
+Mỗi lần push lên `main` (hoặc chạy thủ công **Actions → Build APK & iOS → Run workflow**):
+
+| Job | Artifact / Release |
+|-----|--------------------|
+| Android APK | `app-release.apk` + release tag `android-v1.0.*` |
+| iOS IPA | `SmartMath.ipa` (unsigned) + release tag `ios-v1.0.*` |
+
+Tải file ở tab **Actions** (Artifacts) hoặc **Releases**.
+
+> IPA không có chữ ký Apple — chỉ dùng để kiểm thử / sideload, chưa đưa lên App Store.
+
+## Chạy local
+
+```bash
+flutter pub get
+flutter run
+```
+
+Tuỳ chọn pre-fill key qua `assets/env/gemini.env`:
+
+```
+GEMINI_API_KEY=your_key_here
+```

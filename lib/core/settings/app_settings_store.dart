@@ -20,6 +20,7 @@ class AppSettingsStore {
   static const _apiBaseUrlKey = 'api_base_url';
   static const _apiAccessTokenKey = 'api_access_token';
   static const _apiRefreshTokenKey = 'api_refresh_token';
+  static const _geminiApiKeyKey = 'gemini_api_key';
 
   Future<SharedPreferences> _preferences() async {
     return _prefsCache ??=
@@ -116,5 +117,31 @@ class AppSettingsStore {
   Future<void> clearApiTokens() async {
     await clearApiAccessToken();
     await clearApiRefreshToken();
+  }
+
+  Future<String?> readGeminiApiKey() {
+    final memory = _memorySecure;
+    if (memory != null) {
+      return Future.value(memory[_geminiApiKeyKey]);
+    }
+    return _secureStorage.read(key: _geminiApiKeyKey);
+  }
+
+  Future<void> writeGeminiApiKey(String key) {
+    final memory = _memorySecure;
+    if (memory != null) {
+      memory[_geminiApiKeyKey] = key.trim();
+      return Future.value();
+    }
+    return _secureStorage.write(key: _geminiApiKeyKey, value: key.trim());
+  }
+
+  Future<void> clearGeminiApiKey() {
+    final memory = _memorySecure;
+    if (memory != null) {
+      memory.remove(_geminiApiKeyKey);
+      return Future.value();
+    }
+    return _secureStorage.delete(key: _geminiApiKeyKey);
   }
 }

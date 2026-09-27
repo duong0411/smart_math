@@ -1,10 +1,9 @@
-name: iOS-ipa-build
+name: iOS-ipa-build (legacy)
 
+# Prefer "Build APK & iOS" (build-mobile.yml). Kept for manual iOS-only runs.
 on:
   workflow_dispatch:
 
-# Required to create/update GitHub Releases with GITHUB_TOKEN.
-# Without this, the Releases API returns 404 Not Found instead of 403.
 permissions:
   contents: write
 
@@ -18,24 +17,23 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
-          architecture: x64
+          cache: true
 
       - run: flutter pub get
 
-      - run: pod repo update
-        working-directory: ios
+      - name: Install CocoaPods
+        run: |
+          cd ios
+          pod install --repo-update
 
       - run: flutter build ios --release --no-codesign
 
-      - run: mkdir Payload
-        working-directory: build/ios/iphoneos
-
-      - run: mv Runner.app/ Payload
-        working-directory: build/ios/iphoneos
-
-      - name: Zip output
-        run: zip -qq -r -9 FlutterIpaExport.ipa Payload
-        working-directory: build/ios/iphoneos
+      - name: Package unsigned IPA
+        run: |
+          mkdir -p build/ios/ipa/Payload
+          cp -r build/ios/iphoneos/Runner.app build/ios/ipa/Payload/
+          cd build/ios/ipa
+          zip -qq -r -9 FlutterIpaExport.ipa Payload
 
       - name: Upload IPA to GitHub Release
         uses: softprops/action-gh-release@v2
@@ -43,7 +41,7 @@ jobs:
           tag_name: ios-v1.0.${{ github.run_number }}
           name: iOS IPA v1.0.${{ github.run_number }}
           body: Automated unsigned iOS IPA build from workflow_dispatch.
-          files: build/ios/iphoneos/FlutterIpaExport.ipa
+          files: build/ios/ipa/FlutterIpaExport.ipa
           fail_on_unmatched_files: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -10,9 +10,10 @@ void main() {
     SharedPreferences.setMockInitialValues({});
   });
 
-  testWidgets('app boots to login', (tester) async {
+  testWidgets('app boots to math home', (tester) async {
     await tester.pumpWidget(const ProviderScope(child: EduSelfApp()));
     await tester.pumpAndSettle();
     expect(find.textContaining('EduSelf'), findsWidgets);
+    expect(find.textContaining('Toán'), findsWidgets);
   });
 }
