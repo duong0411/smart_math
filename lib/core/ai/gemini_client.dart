@@ -7,7 +7,8 @@ import 'package:http/http.dart' as http;
 class GeminiClient {
   GeminiClient({
     http.Client? httpClient,
-    this.model = 'gemini-2.0-flash',
+    // Free-tier: Flash-Lite has the highest daily/minute quota.
+    this.model = 'gemini-2.5-flash-lite',
   }) : _http = httpClient ?? http.Client();
 
   final http.Client _http;
