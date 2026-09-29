@@ -67,15 +67,19 @@ class _MathPracticePageState extends ConsumerState<MathPracticePage> {
     final result = await askMathAi(
       ref,
       userMessage: '''
-Hãy tạo ĐÚNG 1 bài tập Toán (chưa có đáp án) cho học sinh.
+Hãy tạo ĐÚNG 1 bài tập Toán (chưa có đáp án trong phần hiển thị cho học sinh) phù hợp lớp hiện tại.
 Chủ đề: $topic
 
-Trả lời CHỈ bằng JSON thuần (không markdown):
+Yêu cầu chất lượng:
+- Đề phải có nghiệm / đáp án xác định, không mâu thuẫn, vừa sức lớp.
+- Nêu rõ đơn vị / điều kiện nếu cần.
+- Dùng LaTeX \$...\$ hoặc \$\$...\$\$ cho biểu thức.
+
+Trả lời CHỈ bằng JSON thuần (không markdown, không code fence):
 {"topic":"...","question":"..."}
-Câu hỏi dùng LaTeX \$...\$ nếu cần.
 ''',
       extraSystemContext:
-          'Chế độ luyện tập: chỉ tạo 1 bài phù hợp lớp, vừa sức.',
+          'Chế độ luyện tập: chỉ tạo 1 bài đúng kiến thức, phù hợp lớp, vừa sức. Ưu tiên độ chính xác đề bài.',
     );
 
     if (!mounted) return;
@@ -188,15 +192,20 @@ Câu hỏi dùng LaTeX \$...\$ nếu cần.
     final result = await askMathAi(
       ref,
       userMessage: '''
-Chấm bài luyện tập Toán.
+Chấm bài luyện tập Toán — ưu tiên độ chính xác toán học.
 
 Đề: $_question
 Bài làm học sinh (text): $answerLabel$imageNote
 
-Trả lời CHỈ bằng JSON thuần (không markdown):
-{"correct":true/false,"feedback":"giải thích ngắn, chỉ ra lỗi nếu sai, gợi ý bước tiếp theo. Dùng LaTeX nếu cần."}
+Quy trình chấm:
+1. Tự giải đúng đề (không hiện hết cho học sinh nếu sai).
+2. So sánh với bài làm (text và/hoặc ảnh); đọc kỹ phép tính trên ảnh nếu có.
+3. correct=true chỉ khi kết quả cuối cùng đúng (chấp nhận dạng tương đương hợp lệ).
+4. Nếu sai: chỉ ra bước/lỗi cụ thể + gợi ý bước tiếp theo — chưa đưa đáp án đầy đủ trừ khi gần đúng.
+5. Dùng LaTeX trong feedback khi cần.
 
-Không đưa đáp án đầy đủ nếu học sinh sai — chỉ gợi ý trừ khi gần đúng.
+Trả lời CHỈ bằng JSON thuần (không markdown, không code fence):
+{"correct":true/false,"feedback":"..."}
 ''',
       image: hasImage
           ? GeminiImage(
@@ -204,7 +213,8 @@ Không đưa đáp án đầy đủ nếu học sinh sai — chỉ gợi ý tr�
               mimeType: _answerImageMime ?? 'image/jpeg',
             )
           : null,
-      extraSystemContext: 'Chế độ chấm luyện tập (text và/hoặc ảnh bài làm).',
+      extraSystemContext:
+          'Chế độ chấm luyện tập: tự giải để đối chiếu trước khi kết luận đúng/sai. Không bịa.',
     );
 
     if (!mounted) return;

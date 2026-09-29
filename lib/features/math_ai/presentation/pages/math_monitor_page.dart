@@ -52,19 +52,20 @@ class _MathMonitorPageState extends ConsumerState<MathMonitorPage> {
     final result = await askMathAi(
       ref,
       userMessage: '''
-Dựa trên dữ liệu giám sát học tập bên dưới, hãy viết báo cáo ngắn bằng tiếng Việt:
+Dựa CHỈ trên dữ liệu giám sát bên dưới, viết báo cáo ngắn bằng tiếng Việt:
 
-1. Tổng quan mức độ học gần đây
-2. Chủ đề mạnh / yếu
-3. Lỗi hay gặp
-4. Kế hoạch ôn 5 ngày (cụ thể, vừa sức)
-5. 1 lời khích lệ
+1. Tổng quan mức độ học gần đây (dựa trên số phiên / đúng-sai có trong dữ liệu)
+2. Chủ đề mạnh / yếu (nêu bằng chứng từ nhật ký)
+3. Lỗi hay gặp (nếu có)
+4. Kế hoạch ôn 5 ngày: mỗi ngày 1 mục tiêu + dạng bài cụ thể, vừa sức lớp
+5. 1 lời khích lệ ngắn
 
-Không bịa số liệu ngoài dữ liệu. Nếu thiếu dữ liệu, nói rõ cần luyện thêm.
+Không bịa số liệu ngoài dữ liệu. Nếu thiếu dữ liệu, nói rõ cần luyện thêm thay vì suy đoán.
 
 $summary
 ''',
-      extraSystemContext: 'Chế độ giám sát & báo cáo tiến độ học Toán.',
+      extraSystemContext:
+          'Chế độ giám sát & báo cáo: trung thực với dữ liệu, kế hoạch ôn cụ thể theo lớp.',
     );
 
     if (!mounted) return;

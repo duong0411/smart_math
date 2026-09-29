@@ -10,7 +10,10 @@ final mathLocalStoreProvider = Provider<MathLocalStore>((ref) {
 });
 
 final geminiClientProvider = Provider<GeminiClient>((ref) {
-  return GeminiClient();
+  return GeminiClient(
+    models: AppConfig.geminiModelChain,
+    temperature: 0.2,
+  );
 });
 
 final systemPromptProvider = FutureProvider<String>((ref) {
@@ -137,9 +140,14 @@ Future<Result<String>> askMathAi(
       ? basePrompt
       : '$basePrompt\n\n## Thông tin học sinh hiện tại\n$profileBlock';
 
+  final reinforced = '$systemPrompt\n\n'
+      '## Nhắc ngắn cho lượt này\n'
+      '- Ưu tiên đúng kiến thức Toán; tự kiểm tra phép tính trước khi trả lời.\n'
+      '- Trả lời bằng tiếng Việt, rõ ràng, dùng LaTeX cho biểu thức.';
+
   return ref.read(geminiClientProvider).generate(
         apiKey: apiKey,
-        systemPrompt: systemPrompt,
+        systemPrompt: reinforced,
         history: history,
         userMessage: userMessage,
         image: image,

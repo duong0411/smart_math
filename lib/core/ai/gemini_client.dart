@@ -1,21 +1,38 @@
 import 'dart:convert';
 
+import 'package:eduself_study_app/core/config/app_config.dart';
 import 'package:eduself_study_app/core/error/result.dart';
 import 'package:http/http.dart' as http;
 
-/// Direct Google Gemini API client (no backend required).
+/// Direct Google Gemini API client with multi-model failover.
+///
+/// Tries models in [models] order (accuracy-first). On rate-limit / quota /
+/// overload errors, automatically switches to the next model.
 class GeminiClient {
   GeminiClient({
     http.Client? httpClient,
-    // Free-tier: Flash-Lite has the highest daily/minute quota.
-    this.model = 'gemini-2.5-flash-lite',
-  }) : _http = httpClient ?? http.Client();
+    List<String>? models,
+    this.temperature = 0.2,
+    this.maxOutputTokens = 8192,
+  })  : _http = httpClient ?? http.Client(),
+        models = List.unmodifiable(
+          (models == null || models.isEmpty)
+              ? AppConfig.geminiModelChain
+              : models,
+        );
 
   final http.Client _http;
-  final String model;
+
+  /// Accuracy-first chain; later entries are quota/failover fallbacks.
+  final List<String> models;
+  final double temperature;
+  final int maxOutputTokens;
 
   static const _base =
       'https://generativelanguage.googleapis.com/v1beta/models';
+
+  /// Last model that successfully answered (useful for UI / debug).
+  String? lastUsedModel;
 
   Future<Result<String>> generate({
     required String apiKey,
@@ -24,6 +41,7 @@ class GeminiClient {
     required String userMessage,
     GeminiImage? image,
     Duration timeout = const Duration(seconds: 55),
+    List<String>? modelOverride,
   }) async {
     final key = apiKey.trim();
     if (key.isEmpty) {
@@ -31,6 +49,10 @@ class GeminiClient {
         ValidationFailure('Chưa có Gemini API key. Vào Cài đặt để dán key.'),
       );
     }
+
+    final chain = (modelOverride == null || modelOverride.isEmpty)
+        ? models
+        : modelOverride;
 
     final userParts = <Map<String, Object?>>[
       if (image != null)
@@ -43,7 +65,7 @@ class GeminiClient {
       {
         'text': userMessage.trim().isEmpty
             ? (image != null
-                ? 'Em gửi ảnh bài tập Toán. Hãy đọc đề trên ảnh và hướng dẫn em giải từng bước (chưa đưa đáp án ngay).'
+                ? 'Em gửi ảnh bài tập Toán. Hãy đọc kỹ đề trên ảnh (OCR), nêu lại đề ngắn gọn, rồi hướng dẫn em giải từng bước (chưa đưa đáp án ngay trừ khi em yêu cầu).'
                 : '')
             : userMessage.trim(),
       },
@@ -64,65 +86,150 @@ class GeminiClient {
       },
     ];
 
-    final uri = Uri.parse(
-      '$_base/$model:generateContent?key=${Uri.encodeQueryComponent(key)}',
-    );
+    final body = jsonEncode({
+      'systemInstruction': {
+        'parts': [
+          {'text': systemPrompt},
+        ],
+      },
+      'contents': contents,
+      'generationConfig': {
+        'temperature': temperature,
+        'topP': 0.95,
+        'maxOutputTokens': maxOutputTokens,
+      },
+    });
 
-    try {
-      final response = await _http
-          .post(
-            uri,
-            headers: {'Content-Type': 'application/json'},
-            body: jsonEncode({
-              'systemInstruction': {
-                'parts': [
-                  {'text': systemPrompt},
-                ],
-              },
-              'contents': contents,
-              'generationConfig': {
-                'temperature': 0.7,
-                'maxOutputTokens': 4096,
-              },
-            }),
-          )
-          .timeout(timeout);
+    Failure? lastFailure;
+    final tried = <String>[];
 
-      if (response.statusCode == 401 || response.statusCode == 403) {
-        return const FailureResult(
-          ApiFailure(
-            'API key không hợp lệ hoặc bị từ chối. Kiểm tra lại key Gemini.',
-            statusCode: 401,
-          ),
-        );
-      }
+    for (final model in chain) {
+      tried.add(model);
+      final uri = Uri.parse(
+        '$_base/$model:generateContent?key=${Uri.encodeQueryComponent(key)}',
+      );
 
-      if (response.statusCode < 200 || response.statusCode >= 300) {
-        final detail = _errorDetail(response.body);
-        return FailureResult(
-          ApiFailure(
-            detail ??
+      try {
+        final response = await _http
+            .post(
+              uri,
+              headers: {'Content-Type': 'application/json'},
+              body: body,
+            )
+            .timeout(timeout);
+
+        if (response.statusCode == 401 || response.statusCode == 403) {
+          // Auth errors won't be fixed by switching models.
+          return const FailureResult(
+            ApiFailure(
+              'API key không hợp lệ hoặc bị từ chối. Kiểm tra lại key Gemini.',
+              statusCode: 401,
+            ),
+          );
+        }
+
+        if (_shouldFailover(response.statusCode, response.body)) {
+          lastFailure = ApiFailure(
+            _errorDetail(response.body) ??
+                'Model $model bị giới hạn (HTTP ${response.statusCode}).',
+            statusCode: response.statusCode,
+          );
+          continue;
+        }
+
+        if (response.statusCode < 200 || response.statusCode >= 300) {
+          lastFailure = ApiFailure(
+            _errorDetail(response.body) ??
                 'Gemini lỗi HTTP ${response.statusCode}. Thử lại sau.',
             statusCode: response.statusCode,
-          ),
-        );
-      }
+          );
+          // Model missing / server errors: try next model in the chain.
+          if (response.statusCode == 404 || response.statusCode >= 500) {
+            continue;
+          }
+          return FailureResult(lastFailure);
+        }
 
-      final decoded = jsonDecode(response.body);
-      if (decoded is! Map<String, dynamic>) {
-        return const FailureResult(AiFailure());
-      }
+        final decoded = jsonDecode(response.body);
+        if (decoded is! Map<String, dynamic>) {
+          lastFailure = const AiFailure();
+          continue;
+        }
 
-      final text = _extractText(decoded);
-      if (text == null || text.trim().isEmpty) {
-        return const FailureResult(AiFailure());
+        // Blocked / empty candidates → try next model.
+        if (_isBlockedOrEmpty(decoded)) {
+          lastFailure = const AiFailure(
+            'Model từ chối hoặc không trả lời được. Đang thử model khác…',
+          );
+          continue;
+        }
+
+        final text = _extractText(decoded);
+        if (text == null || text.trim().isEmpty) {
+          lastFailure = const AiFailure();
+          continue;
+        }
+
+        lastUsedModel = model;
+        return Success(text.trim());
+      } on Object catch (e) {
+        lastFailure = NetworkFailure('Không kết nối được Gemini ($model): $e');
+        // Network blip: try next model.
+        continue;
       }
-      return Success(text.trim());
-    } on Object catch (e) {
-      return FailureResult(
-        NetworkFailure('Không kết nối được Gemini: $e'),
-      );
     }
+
+    final triedList = tried.join(' → ');
+    final detail = lastFailure?.message ?? 'Không nhận được phản hồi AI.';
+    final status = switch (lastFailure) {
+      ApiFailure(:final statusCode) => statusCode,
+      _ => null,
+    };
+    return FailureResult(
+      ApiFailure(
+        'Tất cả model đều thất bại ($triedList). $detail',
+        statusCode: status,
+      ),
+    );
+  }
+
+  bool _shouldFailover(int statusCode, String body) {
+    if (statusCode == 429) return true;
+    if (statusCode == 503) return true;
+    final lower = body.toLowerCase();
+    const markers = [
+      'resource_exhausted',
+      'quota',
+      'rate limit',
+      'rate_limit',
+      'exceeded',
+      'too many requests',
+      'high demand',
+      'temporarily unavailable',
+      'overloaded',
+      'model is overloaded',
+      'try again later',
+    ];
+    for (final m in markers) {
+      if (lower.contains(m)) return true;
+    }
+    return false;
+  }
+
+  bool _isBlockedOrEmpty(Map<String, dynamic> body) {
+    final candidates = body['candidates'];
+    if (candidates is! List || candidates.isEmpty) {
+      final feedback = body['promptFeedback'];
+      if (feedback is Map && feedback['blockReason'] != null) return true;
+      return true;
+    }
+    final first = candidates.first;
+    if (first is! Map) return true;
+    final finish = first['finishReason']?.toString().toUpperCase();
+    if (finish == 'SAFETY' || finish == 'RECITATION' || finish == 'OTHER') {
+      return true;
+    }
+    return false;
   }
 
   String? _extractText(Map<String, dynamic> body) {

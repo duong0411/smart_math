@@ -17,6 +17,10 @@ Repo: [duong0411/smart_math](https://github.com/duong0411/smart_math)
 
 API key được lưu trên thiết bị (secure storage), gọi thẳng Gemini — không cần backend.
 
+App dùng chuỗi model ưu tiên độ chính xác và **tự chuyển model** khi bị rate-limit / hết quota:
+
+`gemini-2.5-pro` → `gemini-2.5-flash` → `gemini-2.0-flash` → `gemini-2.5-flash-lite`
+
 ## Build bằng GitHub Actions
 
 Mỗi lần push lên `main` (hoặc chạy thủ công **Actions → Build APK & iOS → Run workflow**):
