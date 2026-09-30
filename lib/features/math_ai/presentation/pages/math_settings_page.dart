@@ -112,15 +112,6 @@ class _MathSettingsPageState extends ConsumerState<MathSettingsPage> {
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Model (ưu tiên độ chính xác, tự chuyển khi bị giới hạn):\n'
-                    '${AppConfig.geminiModelChain.join(' → ')}',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          height: 1.35,
-                        ),
-                  ),
                   const SizedBox(height: 12),
                   TextField(
                     controller: _keyController,

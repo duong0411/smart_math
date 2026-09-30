@@ -129,6 +129,13 @@ class MathHomePage extends ConsumerWidget {
               ),
               const SizedBox(height: 10),
               _FeatureTile(
+                icon: Icons.sports_esports_rounded,
+                title: 'Giải trí Toán học',
+                subtitle: 'Tính nhanh · bong bóng số · ghép đôi',
+                onTap: () => context.push('/games'),
+              ),
+              const SizedBox(height: 10),
+              _FeatureTile(
                 icon: Icons.monitor_heart_outlined,
                 title: 'Giám sát học tập',
                 subtitle: 'Tiến độ, điểm yếu, kế hoạch ôn AI',

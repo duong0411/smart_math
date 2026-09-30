@@ -347,7 +347,7 @@ class MathTutorSession {
   }
 }
 
-enum MathStudyEventType { tutor, practice, monitor }
+enum MathStudyEventType { tutor, practice, monitor, game }
 
 class MathStudyEvent {
   const MathStudyEvent({

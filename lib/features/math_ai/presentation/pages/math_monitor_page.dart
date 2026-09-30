@@ -235,6 +235,8 @@ $summary
                                   Icons.fitness_center,
                                 MathStudyEventType.monitor =>
                                   Icons.insights_outlined,
+                                MathStudyEventType.game =>
+                                  Icons.sports_esports_rounded,
                               },
                               color: scheme.primary,
                             ),
