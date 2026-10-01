@@ -1,13 +1,39 @@
+import 'package:eduself_study_app/features/math_ai/presentation/providers/math_ai_providers.dart';
+import 'package:eduself_study_app/features/math_games/domain/grade_question_bank.dart';
 import 'package:eduself_study_app/shared/widgets/glass_card.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-class MathGamesHubPage extends StatelessWidget {
+class MathGamesHubPage extends ConsumerStatefulWidget {
   const MathGamesHubPage({super.key});
+
+  @override
+  ConsumerState<MathGamesHubPage> createState() => _MathGamesHubPageState();
+}
+
+class _MathGamesHubPageState extends ConsumerState<MathGamesHubPage> {
+  int _grade = 5;
+  var _didInitGrade = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || _didInitGrade) return;
+      final fromProfile =
+          ref.read(mathProfileProvider).valueOrNull?.gradeLevel;
+      setState(() {
+        _grade = (fromProfile ?? 5).clamp(1, 12);
+        _didInitGrade = true;
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final band = GradeBandX.fromGrade(_grade);
 
     return AtmosphericBackground(
       child: Scaffold(
@@ -25,7 +51,7 @@ class MathGamesHubPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Chơi mà học',
+                    'Chọn lớp · chọn nhiệm vụ',
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                           fontWeight: FontWeight.w800,
                           letterSpacing: -0.4,
@@ -33,7 +59,7 @@ class MathGamesHubPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    'Các trò chơi Toán sinh động — luyện phản xạ, trí nhớ và tính nhanh. Không cần API key.',
+                    'Câu hỏi đổi theo lớp ${band.labelVi}: ${band.blurb}. Không cần API key.',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: scheme.onSurfaceVariant,
                           height: 1.4,
@@ -42,36 +68,67 @@ class MathGamesHubPage extends StatelessWidget {
                 ],
               ),
             ),
+            const SizedBox(height: 16),
+            Text(
+              'Lớp đang chơi',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (var g = 1; g <= 12; g++)
+                  ChoiceChip(
+                    label: Text('L$g'),
+                    selected: _grade == g,
+                    onSelected: (_) => setState(() => _grade = g),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              band.labelVi,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: scheme.primary,
+                    fontWeight: FontWeight.w700,
+                  ),
+            ),
             const SizedBox(height: 18),
             Text(
-              'Chọn trò chơi',
+              'Nhiệm vụ hấp dẫn',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w700,
                   ),
             ),
             const SizedBox(height: 10),
-            _GameTile(
-              emoji: '⚡',
-              title: 'Tính siêu tốc',
-              subtitle: 'Đua thời gian 45 giây — combo càng cao điểm càng lớn',
-              accent: const Color(0xFFE85D04),
-              onTap: () => context.push('/games/speed'),
+            _MissionTile(
+              emoji: '🏝️',
+              title: 'Hành trình Kho báu',
+              subtitle:
+                  'Phiêu lưu 8 trạm · trái tim · ngôi sao — độ khó lớp $_grade',
+              accent: const Color(0xFFD4A373),
+              onTap: () => context.push('/games/treasure?grade=$_grade'),
             ),
             const SizedBox(height: 10),
-            _GameTile(
-              emoji: '🫧',
-              title: 'Bong bóng số',
-              subtitle: 'Chạm đúng đáp án trước khi bóng bay mất',
-              accent: const Color(0xFF2A9D8F),
-              onTap: () => context.push('/games/bubbles'),
+            _MissionTile(
+              emoji: '⚔️',
+              title: 'Đại chiến Boss Toán',
+              subtitle:
+                  'Đánh boss theo cấp lớp · combo sát thương · thanh máu',
+              accent: const Color(0xFFE76F51),
+              onTap: () => context.push('/games/boss?grade=$_grade'),
             ),
             const SizedBox(height: 10),
-            _GameTile(
-              emoji: '🧩',
-              title: 'Ghép đôi Toán',
-              subtitle: 'Lật thẻ — khớp phép tính với kết quả',
-              accent: const Color(0xFF577590),
-              onTap: () => context.push('/games/match'),
+            _MissionTile(
+              emoji: '🚀',
+              title: 'Phóng Tên Lửa',
+              subtitle:
+                  'Đua 50 giây nạp nhiên liệu · streak càng dài phóng càng nhanh',
+              accent: const Color(0xFF4CC9F0),
+              onTap: () => context.push('/games/rocket?grade=$_grade'),
             ),
           ],
         ),
@@ -80,8 +137,8 @@ class MathGamesHubPage extends StatelessWidget {
   }
 }
 
-class _GameTile extends StatelessWidget {
-  const _GameTile({
+class _MissionTile extends StatelessWidget {
+  const _MissionTile({
     required this.emoji,
     required this.title,
     required this.subtitle,
@@ -107,11 +164,18 @@ class _GameTile extends StatelessWidget {
           child: Row(
             children: [
               Container(
-                width: 56,
-                height: 56,
+                width: 58,
+                height: 58,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: accent.withValues(alpha: 0.18),
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      accent.withValues(alpha: 0.35),
+                      accent.withValues(alpha: 0.12),
+                    ],
+                  ),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Text(emoji, style: const TextStyle(fontSize: 28)),
@@ -140,7 +204,7 @@ class _GameTile extends StatelessWidget {
                   ],
                 ),
               ),
-              Icon(Icons.play_circle_fill_rounded, color: accent, size: 32),
+              Icon(Icons.play_circle_fill_rounded, color: accent, size: 34),
             ],
           ),
         ),

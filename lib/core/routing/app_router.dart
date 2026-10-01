@@ -4,12 +4,19 @@ import 'package:eduself_study_app/features/math_ai/presentation/pages/math_pract
 import 'package:eduself_study_app/features/math_ai/presentation/pages/math_settings_page.dart';
 import 'package:eduself_study_app/features/math_ai/presentation/pages/math_tutor_chat_page.dart';
 import 'package:eduself_study_app/features/math_ai/presentation/pages/math_tutor_sessions_page.dart';
-import 'package:eduself_study_app/features/math_games/presentation/pages/bubble_pop_game_page.dart';
-import 'package:eduself_study_app/features/math_games/presentation/pages/match_pairs_game_page.dart';
+import 'package:eduself_study_app/features/math_games/presentation/pages/boss_battle_game_page.dart';
 import 'package:eduself_study_app/features/math_games/presentation/pages/math_games_hub_page.dart';
-import 'package:eduself_study_app/features/math_games/presentation/pages/speed_calc_game_page.dart';
+import 'package:eduself_study_app/features/math_games/presentation/pages/rocket_rush_game_page.dart';
+import 'package:eduself_study_app/features/math_games/presentation/pages/treasure_trail_game_page.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
+int _gradeFrom(GoRouterState state) {
+  final raw = state.uri.queryParameters['grade'];
+  final parsed = int.tryParse(raw ?? '');
+  if (parsed == null) return 5;
+  return parsed.clamp(1, 12);
+}
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
@@ -43,16 +50,19 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const MathGamesHubPage(),
       ),
       GoRoute(
-        path: '/games/speed',
-        builder: (context, state) => const SpeedCalcGamePage(),
+        path: '/games/treasure',
+        builder: (context, state) =>
+            TreasureTrailGamePage(grade: _gradeFrom(state)),
       ),
       GoRoute(
-        path: '/games/bubbles',
-        builder: (context, state) => const BubblePopGamePage(),
+        path: '/games/boss',
+        builder: (context, state) =>
+            BossBattleGamePage(grade: _gradeFrom(state)),
       ),
       GoRoute(
-        path: '/games/match',
-        builder: (context, state) => const MatchPairsGamePage(),
+        path: '/games/rocket',
+        builder: (context, state) =>
+            RocketRushGamePage(grade: _gradeFrom(state)),
       ),
       GoRoute(
         path: '/settings',
