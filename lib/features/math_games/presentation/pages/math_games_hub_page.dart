@@ -1,46 +1,20 @@
-import 'package:eduself_study_app/features/math_ai/presentation/providers/math_ai_providers.dart';
-import 'package:eduself_study_app/features/math_games/domain/grade_question_bank.dart';
 import 'package:eduself_study_app/shared/widgets/glass_card.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-class MathGamesHubPage extends ConsumerStatefulWidget {
+class MathGamesHubPage extends StatelessWidget {
   const MathGamesHubPage({super.key});
-
-  @override
-  ConsumerState<MathGamesHubPage> createState() => _MathGamesHubPageState();
-}
-
-class _MathGamesHubPageState extends ConsumerState<MathGamesHubPage> {
-  int _grade = 5;
-  var _didInitGrade = false;
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted || _didInitGrade) return;
-      final fromProfile =
-          ref.read(mathProfileProvider).valueOrNull?.gradeLevel;
-      setState(() {
-        _grade = (fromProfile ?? 5).clamp(1, 12);
-        _didInitGrade = true;
-      });
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final band = GradeBandX.fromGrade(_grade);
 
     return AtmosphericBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
-          title: const Text('Giải trí Toán học'),
+          title: const Text('Giải trí Toán 8'),
         ),
         body: ListView(
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
@@ -51,7 +25,7 @@ class _MathGamesHubPageState extends ConsumerState<MathGamesHubPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Chọn lớp · chọn nhiệm vụ',
+                    'Thế giới Toán lớp 8',
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                           fontWeight: FontWeight.w800,
                           letterSpacing: -0.4,
@@ -59,7 +33,7 @@ class _MathGamesHubPageState extends ConsumerState<MathGamesHubPage> {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    'Câu hỏi đổi theo lớp ${band.labelVi}: ${band.blurb}. Không cần API key.',
+                    'Căn bậc hai · đa thức · phương trình · hàm số bậc nhất · Pythagore · hình học. Không cần API key.',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: scheme.onSurfaceVariant,
                           height: 1.4,
@@ -68,37 +42,9 @@ class _MathGamesHubPageState extends ConsumerState<MathGamesHubPage> {
                 ],
               ),
             ),
-            const SizedBox(height: 16),
-            Text(
-              'Lớp đang chơi',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
-            ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                for (var g = 1; g <= 12; g++)
-                  ChoiceChip(
-                    label: Text('L$g'),
-                    selected: _grade == g,
-                    onSelected: (_) => setState(() => _grade = g),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              band.labelVi,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: scheme.primary,
-                    fontWeight: FontWeight.w700,
-                  ),
-            ),
             const SizedBox(height: 18),
             Text(
-              'Nhiệm vụ hấp dẫn',
+              'Chọn nhiệm vụ',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w700,
                   ),
@@ -107,28 +53,25 @@ class _MathGamesHubPageState extends ConsumerState<MathGamesHubPage> {
             _MissionTile(
               emoji: '🏝️',
               title: 'Hành trình Kho báu',
-              subtitle:
-                  'Phiêu lưu 8 trạm · trái tim · ngôi sao — độ khó lớp $_grade',
+              subtitle: '8 trạm phiêu lưu với thử thách kiến thức Toán 8',
               accent: const Color(0xFFD4A373),
-              onTap: () => context.push('/games/treasure?grade=$_grade'),
+              onTap: () => context.push('/games/treasure'),
             ),
             const SizedBox(height: 10),
             _MissionTile(
               emoji: '⚔️',
-              title: 'Đại chiến Boss Toán',
-              subtitle:
-                  'Đánh boss theo cấp lớp · combo sát thương · thanh máu',
+              title: 'Đại chiến Boss Toán 8',
+              subtitle: 'Hạ Phù thủy Phương trình · combo sát thương · thanh máu',
               accent: const Color(0xFFE76F51),
-              onTap: () => context.push('/games/boss?grade=$_grade'),
+              onTap: () => context.push('/games/boss'),
             ),
             const SizedBox(height: 10),
             _MissionTile(
               emoji: '🚀',
               title: 'Phóng Tên Lửa',
-              subtitle:
-                  'Đua 50 giây nạp nhiên liệu · streak càng dài phóng càng nhanh',
+              subtitle: '50 giây nạp nhiên liệu bằng bài Toán 8 · streak tăng tốc',
               accent: const Color(0xFF4CC9F0),
-              onTap: () => context.push('/games/rocket?grade=$_grade'),
+              onTap: () => context.push('/games/rocket'),
             ),
           ],
         ),

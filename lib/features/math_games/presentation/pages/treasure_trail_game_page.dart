@@ -5,11 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// Story adventure: move along a treasure map by answering grade-level questions.
+/// Story adventure: move along a treasure map by answering grade-8 questions.
 class TreasureTrailGamePage extends ConsumerStatefulWidget {
-  const TreasureTrailGamePage({super.key, required this.grade});
-
-  final int grade;
+  const TreasureTrailGamePage({super.key});
 
   @override
   ConsumerState<TreasureTrailGamePage> createState() =>
@@ -63,7 +61,7 @@ class _TreasureTrailGamePageState extends ConsumerState<TreasureTrailGamePage>
       _playing = true;
       _won = false;
       _lost = false;
-      _q = GradeQuestionBank.next(widget.grade);
+      _q = GradeQuestionBank.nextGrade8();
     });
     _bounce.forward(from: 0);
   }
@@ -81,7 +79,7 @@ class _TreasureTrailGamePageState extends ConsumerState<TreasureTrailGamePage>
           _won = true;
           _q = null;
         } else {
-          _q = GradeQuestionBank.next(widget.grade);
+          _q = GradeQuestionBank.nextGrade8();
         }
       });
       _bounce.forward(from: 0);
@@ -89,7 +87,7 @@ class _TreasureTrailGamePageState extends ConsumerState<TreasureTrailGamePage>
         await logMathGameResult(
           ref,
           topic: 'Hành trình Kho báu',
-          detail: 'Lớp ${widget.grade} · thắng · $_stars sao',
+          detail: 'Toán 8 · thắng · $_stars sao',
           success: true,
         );
       }
@@ -102,14 +100,14 @@ class _TreasureTrailGamePageState extends ConsumerState<TreasureTrailGamePage>
           _lost = true;
           _q = null;
         } else {
-          _q = GradeQuestionBank.next(widget.grade);
+          _q = GradeQuestionBank.nextGrade8();
         }
       });
       if (_lost) {
         await logMathGameResult(
           ref,
           topic: 'Hành trình Kho báu',
-          detail: 'Lớp ${widget.grade} · thua ở trạm $_step',
+          detail: 'Toán 8 · thua ở trạm $_step',
           success: false,
         );
       }
@@ -126,7 +124,7 @@ class _TreasureTrailGamePageState extends ConsumerState<TreasureTrailGamePage>
         backgroundColor: Colors.transparent,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
-          title: Text('Hành trình Kho báu · Lớp ${widget.grade}'),
+          title: const Text('Hành trình Kho báu · Toán 8'),
         ),
         body: SafeArea(
           child: Padding(
@@ -161,7 +159,7 @@ class _TreasureTrailGamePageState extends ConsumerState<TreasureTrailGamePage>
                               ? _EndPanel(
                                   key: const ValueKey('w'),
                                   title: 'Mở được rương kho báu!',
-                                  subtitle: '$_stars ngôi sao · Lớp ${widget.grade}',
+                                  subtitle: '$_stars ngôi sao · Toán 8',
                                   emoji: '🏆',
                                   onAgain: _start,
                                 )

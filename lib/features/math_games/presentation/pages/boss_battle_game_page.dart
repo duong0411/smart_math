@@ -9,9 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// RPG-style boss fight: correct answers deal damage, wrong answers hurt the player.
 class BossBattleGamePage extends ConsumerStatefulWidget {
-  const BossBattleGamePage({super.key, required this.grade});
-
-  final int grade;
+  const BossBattleGamePage({super.key});
 
   @override
   ConsumerState<BossBattleGamePage> createState() => _BossBattleGamePageState();
@@ -31,7 +29,7 @@ class _BossBattleGamePageState extends ConsumerState<BossBattleGamePage> {
   @override
   void initState() {
     super.initState();
-    _boss = _Boss.forGrade(widget.grade);
+    _boss = _Boss.grade8;
     _bossHp = _boss.maxHp;
   }
 
@@ -49,7 +47,7 @@ class _BossBattleGamePageState extends ConsumerState<BossBattleGamePage> {
       _won = false;
       _lost = false;
       _shake = 0;
-      _q = GradeQuestionBank.next(widget.grade);
+      _q = GradeQuestionBank.nextGrade8();
     });
   }
 
@@ -68,7 +66,7 @@ class _BossBattleGamePageState extends ConsumerState<BossBattleGamePage> {
           _won = true;
           _q = null;
         } else {
-          _q = GradeQuestionBank.next(widget.grade);
+          _q = GradeQuestionBank.nextGrade8();
         }
       });
       await Future<void>.delayed(const Duration(milliseconds: 120));
@@ -77,7 +75,7 @@ class _BossBattleGamePageState extends ConsumerState<BossBattleGamePage> {
         await logMathGameResult(
           ref,
           topic: 'Đại chiến Boss Toán',
-          detail: 'Lớp ${widget.grade} · hạ ${_boss.name}',
+          detail: 'Toán 8 · hạ ${_boss.name}',
           success: true,
         );
       }
@@ -93,7 +91,7 @@ class _BossBattleGamePageState extends ConsumerState<BossBattleGamePage> {
           _lost = true;
           _q = null;
         } else {
-          _q = GradeQuestionBank.next(widget.grade);
+          _q = GradeQuestionBank.nextGrade8();
         }
       });
       await Future<void>.delayed(const Duration(milliseconds: 120));
@@ -102,7 +100,7 @@ class _BossBattleGamePageState extends ConsumerState<BossBattleGamePage> {
         await logMathGameResult(
           ref,
           topic: 'Đại chiến Boss Toán',
-          detail: 'Lớp ${widget.grade} · thua ${_boss.name}',
+          detail: 'Toán 8 · thua ${_boss.name}',
           success: false,
         );
       }
@@ -116,7 +114,7 @@ class _BossBattleGamePageState extends ConsumerState<BossBattleGamePage> {
         backgroundColor: Colors.transparent,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
-          title: Text('Đại chiến Boss · Lớp ${widget.grade}'),
+          title: const Text('Đại chiến Boss · Toán 8'),
         ),
         body: SafeArea(
           child: Padding(
@@ -228,35 +226,12 @@ class _Boss {
   final String taunt;
   final int maxHp;
 
-  factory _Boss.forGrade(int grade) {
-    final band = GradeBandX.fromGrade(grade);
-    return switch (band) {
-      GradeBand.primaryEarly => const _Boss(
-          name: 'Quái Vật Số 0',
-          emoji: '👾',
-          taunt: 'Cộng trừ sai là ta nuốt hết kẹo!',
-          maxHp: 80,
-        ),
-      GradeBand.primaryLate => const _Boss(
-          name: 'Rồng Phân Số',
-          emoji: '🐉',
-          taunt: 'Nhân chia yếu thì lửa ta nóng lắm!',
-          maxHp: 100,
-        ),
-      GradeBand.secondary => const _Boss(
-          name: 'Phù Thủy Phương Trình',
-          emoji: '🧙',
-          taunt: 'Giải sai x là bị lời nguyền!',
-          maxHp: 120,
-        ),
-      GradeBand.high => const _Boss(
-          name: 'Titan Hàm Số',
-          emoji: '🤖',
-          taunt: 'Suy luận chậm = hết máu!',
-          maxHp: 140,
-        ),
-    };
-  }
+  static const grade8 = _Boss(
+    name: 'Phù Thủy Phương Trình',
+    emoji: '🧙',
+    taunt: 'Căn · đa thức · PT bậc nhất — giải sai là bị lời nguyền!',
+    maxHp: 120,
+  );
 }
 
 class _HpBar extends StatelessWidget {
