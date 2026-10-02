@@ -105,25 +105,31 @@ class GeminiClient {
 
     for (final model in chain) {
       tried.add(model);
-      final uri = Uri.parse(
-        '$_base/$model:generateContent?key=${Uri.encodeQueryComponent(key)}',
-      );
+      // Prefer header auth — more reliable than query key on some networks.
+      final uri = Uri.parse('$_base/$model:generateContent');
 
       try {
         final response = await _http
             .post(
               uri,
-              headers: {'Content-Type': 'application/json'},
+              headers: {
+                'Content-Type': 'application/json',
+                'x-goog-api-key': key,
+              },
               body: body,
             )
             .timeout(timeout);
 
         if (response.statusCode == 401 || response.statusCode == 403) {
+          final detail = _errorDetail(response.body);
           // Auth errors won't be fixed by switching models.
-          return const FailureResult(
+          return FailureResult(
             ApiFailure(
-              'API key không hợp lệ hoặc bị từ chối. Kiểm tra lại key Gemini.',
-              statusCode: 401,
+              detail == null || detail.isEmpty
+                  ? 'API key bị từ chối (HTTP ${response.statusCode}). '
+                      'Kiểm tra key còn hạn, đã bật Gemini API, và không bị giới hạn IP/ứng dụng.'
+                  : 'API key bị từ chối: $detail',
+              statusCode: response.statusCode,
             ),
           );
         }
@@ -243,11 +249,24 @@ class GeminiClient {
     if (parts is! List) return null;
     final buffer = StringBuffer();
     for (final part in parts) {
-      if (part is Map && part['text'] is String) {
-        buffer.write(part['text'] as String);
+      if (part is! Map) continue;
+      // Skip Gemini "thinking" parts when present.
+      if (part['thought'] == true) continue;
+      final text = part['text'];
+      if (text is String && text.isNotEmpty) {
+        buffer.write(text);
       }
     }
-    return buffer.toString();
+    final out = buffer.toString();
+    if (out.trim().isNotEmpty) return out;
+    // Fallback: some responses only expose text without thought flags.
+    final fallback = StringBuffer();
+    for (final part in parts) {
+      if (part is Map && part['text'] is String) {
+        fallback.write(part['text'] as String);
+      }
+    }
+    return fallback.toString();
   }
 
   String? _errorDetail(String body) {

@@ -1,4 +1,4 @@
-name: Build APK & iOS
+name: Build APK, iOS & Windows
 
 on:
   push:
@@ -87,6 +87,51 @@ jobs:
           name: iOS IPA v1.0.${{ github.run_number }}
           body: Automated unsigned iOS IPA (no Apple signing). Install via developer tools / sideload only.
           files: build/ios/ipa/SmartMath.ipa
+          fail_on_unmatched_files: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-windows:
+    name: Windows EXE
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - run: flutter config --enable-windows-desktop
+
+      - run: flutter pub get
+
+      - run: flutter build windows --release
+
+      - name: Zip Windows Release folder
+        shell: pwsh
+        run: |
+          $src = "build\windows\x64\runner\Release"
+          if (-not (Test-Path $src)) { throw "Missing $src" }
+          Compress-Archive -Path "$src\*" -DestinationPath "SmartMath-windows.zip" -Force
+
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: smart-math-windows
+          path: SmartMath-windows.zip
+          if-no-files-found: error
+
+      - name: Publish Windows zip to GitHub Release
+        if: github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: windows-v1.0.${{ github.run_number }}
+          name: Windows EXE v1.0.${{ github.run_number }}
+          body: |
+            Windows desktop build (unzip and run `eduself_study_app.exe`).
+            Keep the whole extracted folder together (DLL + data).
+          files: SmartMath-windows.zip
           fail_on_unmatched_files: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

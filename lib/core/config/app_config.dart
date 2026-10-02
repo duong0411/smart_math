@@ -7,23 +7,18 @@ abstract final class AppConfig {
   static const appTagline =
       'Ứng dụng AI giám sát và hỗ trợ học sinh học tập môn Toán';
   static const storageMode = 'Local + Gemini API';
-  static const aiGatewayTimeout = Duration(seconds: 70);
+  static const aiGatewayTimeout = Duration(seconds: 45);
   static const _apiBaseUrlKey = 'API_BASE_URL';
   static const _apiAccessTokenKey = 'API_ACCESS_TOKEN';
   static const _geminiApiKeyKey = 'GEMINI_API_KEY';
 
-  /// Accuracy-first model chain. Each model has separate free-tier quota;
-  /// when one is rate-limited / overloaded the client fails over to the next.
-  ///
-  /// 1. gemini-2.5-pro — mạnh nhất về suy luận / toán
-  /// 2. gemini-2.5-flash — cân bằng độ chính xác & hạn mức
-  /// 3. gemini-2.0-flash — dự phòng ổn định
-  /// 4. gemini-2.5-flash-lite — hạn mức cao nhất (fallback cuối)
+  /// Reliability-first chain for desktop/free-tier, then stronger models.
+  /// Each model has separate quota; failover on rate-limit / overload / 404.
   static const geminiModelChain = <String>[
-    'gemini-2.5-pro',
     'gemini-2.5-flash',
     'gemini-2.0-flash',
     'gemini-2.5-flash-lite',
+    'gemini-2.5-pro',
   ];
 
   /// Default Cloudflare Workers API (legacy / optional).

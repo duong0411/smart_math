@@ -28,14 +28,14 @@ class _TreasureTrailGamePageState extends ConsumerState<TreasureTrailGamePage>
   late final AnimationController _bounce;
 
   static const _story = [
-    'Rời làng bắt đầu tìm kho báu…',
-    'Qua cầu gỗ — tính đúng để qua sông!',
-    'Gặp thương nhân bí ẩn…',
-    'Leo đèo đá — cần sức mạnh Toán!',
-    'Rừng sương mù hiện ra lối đi',
-    'Hang động phát sáng kỳ lạ',
-    'Người canh cổng thử thách cuối',
-    'Rương kho báu ngay trước mắt!',
+    'Chương 1 — Cổng Đa thức mở ra…',
+    'Chương 2 — Hằng đẳng thức canh cầu!',
+    'Chương 3 — Mê cung Tứ giác',
+    'Chương 4 — Đường trung bình / Thalès',
+    'Chương 5 — Biểu đồ dữ liệu bí ẩn',
+    'Chương 6–7 — Phân thức & phương trình',
+    'Chương 8–9 — Xác suất · đồng dạng · Pythagore',
+    'Chương 10 — Đỉnh hình chóp: mở rương kho báu!',
   ];
 
   @override

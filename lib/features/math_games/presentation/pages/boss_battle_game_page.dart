@@ -227,9 +227,9 @@ class _Boss {
   final int maxHp;
 
   static const grade8 = _Boss(
-    name: 'Phù Thủy Phương Trình',
+    name: 'Pháp Sư Hằng Đẳng Thức',
     emoji: '🧙',
-    taunt: 'Căn · đa thức · PT bậc nhất — giải sai là bị lời nguyền!',
+    taunt: 'Đa thức · PT · Pythagore theo SGK KNTT — giải sai là bị lời nguyền!',
     maxHp: 120,
   );
 }

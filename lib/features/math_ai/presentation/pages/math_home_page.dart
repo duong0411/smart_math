@@ -131,7 +131,7 @@ class MathHomePage extends ConsumerWidget {
               _FeatureTile(
                 icon: Icons.sports_esports_rounded,
                 title: 'Giải trí Toán 8',
-                subtitle: 'Kho báu · boss · tên lửa · kiến thức lớp 8',
+                subtitle: 'SGK Kết nối tri thức · kho báu · boss · tên lửa',
                 onTap: () => context.push('/games'),
               ),
               const SizedBox(height: 10),

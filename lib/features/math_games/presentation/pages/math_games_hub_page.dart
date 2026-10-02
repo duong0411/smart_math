@@ -25,7 +25,7 @@ class MathGamesHubPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Thế giới Toán lớp 8',
+                    'Theo SGK Kết nối tri thức',
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                           fontWeight: FontWeight.w800,
                           letterSpacing: -0.4,
@@ -33,7 +33,9 @@ class MathGamesHubPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    'Căn bậc hai · đa thức · phương trình · hàm số bậc nhất · Pythagore · hình học. Không cần API key.',
+                    'Câu hỏi bám Toán 8 tập 1 & 2: đa thức, hằng đẳng thức, tứ giác, '
+                    'Thalès, thống kê, phân thức, PT & hàm số bậc nhất, xác suất, '
+                    'đồng dạng · Pythagore, hình khối. Không cần API key.',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: scheme.onSurfaceVariant,
                           height: 1.4,
@@ -53,7 +55,7 @@ class MathGamesHubPage extends StatelessWidget {
             _MissionTile(
               emoji: '🏝️',
               title: 'Hành trình Kho báu',
-              subtitle: '8 trạm phiêu lưu với thử thách kiến thức Toán 8',
+              subtitle: '8 trạm xuyên các chương SGK Toán 8 KNTT',
               accent: const Color(0xFFD4A373),
               onTap: () => context.push('/games/treasure'),
             ),
@@ -61,7 +63,7 @@ class MathGamesHubPage extends StatelessWidget {
             _MissionTile(
               emoji: '⚔️',
               title: 'Đại chiến Boss Toán 8',
-              subtitle: 'Hạ Phù thủy Phương trình · combo sát thương · thanh máu',
+              subtitle: 'Hạ “Pháp sư Hằng đẳng thức” bằng kiến thức SGK',
               accent: const Color(0xFFE76F51),
               onTap: () => context.push('/games/boss'),
             ),
@@ -69,7 +71,7 @@ class MathGamesHubPage extends StatelessWidget {
             _MissionTile(
               emoji: '🚀',
               title: 'Phóng Tên Lửa',
-              subtitle: '50 giây nạp nhiên liệu bằng bài Toán 8 · streak tăng tốc',
+              subtitle: 'Nạp nhiên liệu bằng bài tập từng chương Toán 8',
               accent: const Color(0xFF4CC9F0),
               onTap: () => context.push('/games/rocket'),
             ),

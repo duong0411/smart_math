@@ -1,6 +1,7 @@
 import 'package:eduself_study_app/core/ai/gemini_client.dart';
 import 'package:eduself_study_app/core/config/app_config.dart';
 import 'package:eduself_study_app/core/error/result.dart';
+import 'package:eduself_study_app/core/settings/app_settings_store.dart';
 import 'package:eduself_study_app/features/math_ai/infrastructure/math_local_store.dart';
 import 'package:eduself_study_app/features/settings/presentation/providers/settings_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -34,7 +35,7 @@ class GeminiApiKeyNotifier extends AsyncNotifier<String?> {
   }
 
   Future<void> save(String key) async {
-    final trimmed = key.trim();
+    final trimmed = AppSettingsStore.sanitizeSecret(key);
     if (trimmed.isEmpty) {
       await clear();
       return;
@@ -42,8 +43,14 @@ class GeminiApiKeyNotifier extends AsyncNotifier<String?> {
     state = AsyncData(trimmed);
     try {
       await ref.read(appSettingsStoreProvider).writeGeminiApiKey(trimmed);
+      // Confirm round-trip so desktop file / prefs failures surface early.
+      final stored =
+          await ref.read(appSettingsStoreProvider).readGeminiApiKey();
+      if (stored == null || stored.trim().isEmpty) {
+        throw StateError('Không lưu được API key trên máy.');
+      }
     } on Object {
-      // Memory value still works this session.
+      // Keep in-memory value for this session even if disk write failed.
     }
   }
 
@@ -107,11 +114,23 @@ Future<Result<String>> askMathAi(
   String? extraSystemContext,
   GeminiImage? image,
 }) async {
-  final apiKey = ref.read(geminiApiKeyProvider).valueOrNull;
-  if (apiKey == null || apiKey.trim().isEmpty) {
+  // Always await — valueOrNull is null while the key is still loading.
+  final apiKeyRaw = await ref.read(geminiApiKeyProvider.future);
+  final apiKey = apiKeyRaw == null
+      ? ''
+      : AppSettingsStore.sanitizeSecret(apiKeyRaw);
+  if (apiKey.isEmpty) {
     return const FailureResult(
       ValidationFailure(
-        'Chưa có Gemini API key. Vào Cài đặt → dán API key rồi thử lại.',
+        'Chưa có Gemini API key. Vào Cài đặt → dán API key rồi bấm Lưu.',
+      ),
+    );
+  }
+  if (!AppSettingsStore.looksLikeGeminiApiKey(apiKey)) {
+    return const FailureResult(
+      ValidationFailure(
+        'API key đang lưu không hợp lệ (Gemini key thường bắt đầu bằng AIza… hoặc AQ.…). '
+        'Vào Cài đặt → lấy key mới từ Google AI Studio → Lưu lại.',
       ),
     );
   }

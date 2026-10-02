@@ -1,4 +1,5 @@
 import 'package:eduself_study_app/core/config/app_config.dart';
+import 'package:eduself_study_app/core/settings/app_settings_store.dart';
 import 'package:eduself_study_app/features/math_ai/infrastructure/math_local_store.dart';
 import 'package:eduself_study_app/features/math_ai/presentation/providers/math_ai_providers.dart';
 import 'package:eduself_study_app/features/settings/presentation/providers/settings_providers.dart';
@@ -38,11 +39,37 @@ class _MathSettingsPageState extends ConsumerState<MathSettingsPage> {
   }
 
   Future<void> _saveKey() async {
-    final key = _keyController.text.trim();
-    await ref.read(geminiApiKeyProvider.notifier).save(key);
-    AppToast.success(
-      key.isEmpty ? 'Đã xoá API key' : 'Đã lưu Gemini API key',
-    );
+    final raw = _keyController.text.trim();
+    if (raw.isEmpty) {
+      await ref.read(geminiApiKeyProvider.notifier).save('');
+      AppToast.success('Đã xoá API key');
+      setState(() {});
+      return;
+    }
+
+    final normalized = AppSettingsStore.sanitizeSecret(raw);
+    if (!AppSettingsStore.looksLikeGeminiApiKey(normalized)) {
+      AppToast.error(
+        'Key không hợp lệ. Hãy lấy key từ Google AI Studio '
+        '(bắt đầu bằng AIza… hoặc AQ.…).',
+      );
+      return;
+    }
+
+    await ref.read(geminiApiKeyProvider.notifier).save(normalized);
+    final saved = ref.read(geminiApiKeyProvider).valueOrNull?.trim() ?? '';
+    if (saved.isEmpty) {
+      AppToast.error('Lưu API key thất bại. Thử dán lại key rồi Lưu.');
+    } else {
+      _keyController.text = saved;
+      final fixedPrefix = !raw.trim().startsWith('AQ.') && saved.startsWith('AQ.');
+      AppToast.success(
+        fixedPrefix
+            ? 'Đã tự thêm AQ. và lưu Gemini API key'
+            : 'Đã lưu Gemini API key',
+      );
+    }
+    setState(() {});
   }
 
   Future<void> _saveProfile() async {
@@ -117,7 +144,7 @@ class _MathSettingsPageState extends ConsumerState<MathSettingsPage> {
                     controller: _keyController,
                     obscureText: _obscureKey,
                     decoration: InputDecoration(
-                      hintText: 'AIza…',
+                      hintText: 'AQ.… hoặc AIza…',
                       border: const OutlineInputBorder(),
                       suffixIcon: IconButton(
                         onPressed: () =>
