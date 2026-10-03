@@ -113,6 +113,8 @@ Future<Result<String>> askMathAi(
   List<GeminiTurn> history = const [],
   String? extraSystemContext,
   GeminiImage? image,
+  String? documentText,
+  String? documentName,
 }) async {
   // Always await — valueOrNull is null while the key is still loading.
   final apiKeyRaw = await ref.read(geminiApiKeyProvider.future);
@@ -164,12 +166,43 @@ Future<Result<String>> askMathAi(
       '- Ưu tiên đúng kiến thức Toán; tự kiểm tra phép tính trước khi trả lời.\n'
       '- Trả lời bằng tiếng Việt, rõ ràng, dùng LaTeX cho biểu thức.';
 
+  final message = _composeUserMessage(
+    userMessage: userMessage,
+    documentText: documentText,
+    documentName: documentName,
+    hasImage: image != null,
+  );
+
   return ref.read(geminiClientProvider).generate(
         apiKey: apiKey,
         systemPrompt: reinforced,
         history: history,
-        userMessage: userMessage,
+        userMessage: message,
         image: image,
         timeout: AppConfig.aiGatewayTimeout,
       );
+}
+
+String _composeUserMessage({
+  required String userMessage,
+  String? documentText,
+  String? documentName,
+  required bool hasImage,
+}) {
+  final text = userMessage.trim();
+  final doc = documentText?.trim() ?? '';
+  if (doc.isEmpty) return text;
+
+  final name = (documentName == null || documentName.trim().isEmpty)
+      ? 'tài liệu'
+      : documentName.trim();
+  final block = '\n\n--- Nội dung tệp đính kèm ($name) ---\n$doc\n--- Hết nội dung tệp ---';
+
+  if (text.isNotEmpty) return '$text$block';
+  if (hasImage) {
+    return 'Em kèm ảnh và tệp "$name". Hãy đọc cả hai rồi hướng dẫn giải từng bước.$block';
+  }
+  return 'Em gửi tệp "$name" chứa đề / bài Toán. '
+      'Hãy đọc kỹ nội dung tệp, nêu lại đề ngắn gọn nếu cần, '
+      'rồi hướng dẫn giải từng bước (chưa đưa đáp án ngay trừ khi em yêu cầu).$block';
 }

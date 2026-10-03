@@ -5,7 +5,9 @@ import 'package:eduself_study_app/core/ai/gemini_client.dart';
 import 'package:eduself_study_app/core/error/result.dart';
 import 'package:eduself_study_app/features/math_ai/infrastructure/math_local_store.dart';
 import 'package:eduself_study_app/features/math_ai/presentation/providers/math_ai_providers.dart';
+import 'package:eduself_study_app/shared/utils/extract_study_document_text.dart';
 import 'package:eduself_study_app/shared/utils/image_picker_errors.dart';
+import 'package:eduself_study_app/shared/utils/pick_study_document.dart';
 import 'package:eduself_study_app/shared/widgets/app_toast.dart';
 import 'package:eduself_study_app/shared/widgets/glass_card.dart';
 import 'package:flutter/material.dart';
@@ -30,6 +32,8 @@ class _MathTutorChatPageState extends ConsumerState<MathTutorChatPage> {
   var _sending = false;
   Uint8List? _pendingImageBytes;
   String? _pendingImageMime;
+  String? _pendingDocumentName;
+  String? _pendingDocumentText;
 
   @override
   void initState() {
@@ -80,6 +84,12 @@ class _MathTutorChatPageState extends ConsumerState<MathTutorChatPage> {
                 subtitle: const Text('Lấy từ thư viện ảnh'),
                 onTap: () => Navigator.pop(ctx, 'gallery'),
               ),
+              ListTile(
+                leading: const Icon(Icons.picture_as_pdf_outlined),
+                title: const Text('PDF / Word'),
+                subtitle: const Text('Đọc chữ trong tệp rồi hỏi AI'),
+                onTap: () => Navigator.pop(ctx, 'document'),
+              ),
             ],
           ),
         ),
@@ -89,6 +99,32 @@ class _MathTutorChatPageState extends ConsumerState<MathTutorChatPage> {
       await _pickImage(ImageSource.camera);
     } else if (choice == 'gallery') {
       await _pickImage(ImageSource.gallery);
+    } else if (choice == 'document') {
+      await _pickDocument();
+    }
+  }
+
+  Future<void> _pickDocument() async {
+    final picked = await pickMathAiDocument(context);
+    if (picked == null) return;
+    try {
+      final extracted = await extractStudyDocumentText(
+        filename: picked.name,
+        bytes: picked.bytes,
+      );
+      if (!mounted) return;
+      setState(() {
+        _pendingDocumentName = extracted.filename;
+        _pendingDocumentText = extracted.text;
+        // Prefer one attachment type at a time for clearer prompts.
+        _pendingImageBytes = null;
+        _pendingImageMime = null;
+      });
+      if (extracted.truncated) {
+        AppToast.info('Tệp khá dài — đã lấy phần đầu để gửi AI.');
+      }
+    } on Object catch (e) {
+      AppToast.error('$e');
     }
   }
 
@@ -119,6 +155,8 @@ class _MathTutorChatPageState extends ConsumerState<MathTutorChatPage> {
       setState(() {
         _pendingImageBytes = bytes;
         _pendingImageMime = mime;
+        _pendingDocumentName = null;
+        _pendingDocumentText = null;
       });
     } on Object catch (e) {
       AppToast.error(imagePickerErrorMessage(e));
@@ -128,18 +166,30 @@ class _MathTutorChatPageState extends ConsumerState<MathTutorChatPage> {
   Future<void> _send() async {
     final text = _controller.text.trim();
     final hasImage = _pendingImageBytes != null;
-    if ((text.isEmpty && !hasImage) || _sending || _session == null) return;
+    final hasDocument = _pendingDocumentText != null &&
+        _pendingDocumentText!.trim().isNotEmpty;
+    if ((text.isEmpty && !hasImage && !hasDocument) ||
+        _sending ||
+        _session == null) {
+      return;
+    }
 
     final imageBytes = _pendingImageBytes;
     final imageMime = _pendingImageMime ?? 'image/jpeg';
-    final displayContent = text.isEmpty
-        ? (hasImage ? '📷 Ảnh bài tập' : '')
-        : text;
+    final documentName = _pendingDocumentName;
+    final documentText = _pendingDocumentText;
+    final displayContent = text.isNotEmpty
+        ? text
+        : (hasDocument
+            ? '📄 ${documentName ?? 'Tài liệu'}'
+            : (hasImage ? '📷 Ảnh bài tập' : ''));
 
     setState(() {
       _sending = true;
       _pendingImageBytes = null;
       _pendingImageMime = null;
+      _pendingDocumentName = null;
+      _pendingDocumentText = null;
     });
     _controller.clear();
 
@@ -185,6 +235,8 @@ class _MathTutorChatPageState extends ConsumerState<MathTutorChatPage> {
                 base64: base64Encode(imageBytes),
                 mimeType: imageMime,
               ),
+        documentText: documentText,
+        documentName: documentName,
       );
 
       switch (result) {
@@ -199,14 +251,17 @@ class _MathTutorChatPageState extends ConsumerState<MathTutorChatPage> {
             sessionId: widget.sessionId,
             message: reply,
           );
+          final attachNote = hasDocument
+              ? 'Chat kèm tệp · ${session.title}'
+              : (hasImage
+                  ? 'Chat kèm ảnh · ${session.title}'
+                  : 'Buổi chat · ${session.title}');
           await store.addEvent(
             MathStudyEvent(
               id: reply.id,
               type: MathStudyEventType.tutor,
               topic: session.topic ?? 'Gia sư Toán',
-              detail: hasImage
-                  ? 'Chat kèm ảnh · ${session.title}'
-                  : 'Buổi chat · ${session.title}',
+              detail: attachNote,
               at: reply.at,
             ),
           );
@@ -379,12 +434,41 @@ class _MathTutorChatPageState extends ConsumerState<MathTutorChatPage> {
                             ],
                           ),
                         ),
+                      if (_pendingDocumentText != null)
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
+                          child: Material(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .secondaryContainer
+                                .withValues(alpha: 0.7),
+                            borderRadius: BorderRadius.circular(12),
+                            child: ListTile(
+                              dense: true,
+                              leading: const Icon(Icons.description_outlined),
+                              title: Text(
+                                _pendingDocumentName ?? 'Tài liệu',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              subtitle: const Text('Sẽ gửi nội dung chữ cho AI'),
+                              trailing: IconButton(
+                                tooltip: 'Bỏ tệp',
+                                onPressed: () => setState(() {
+                                  _pendingDocumentName = null;
+                                  _pendingDocumentText = null;
+                                }),
+                                icon: const Icon(Icons.close),
+                              ),
+                            ),
+                          ),
+                        ),
                       Row(
                         children: [
                           IconButton(
-                            tooltip: 'Chụp / chọn ảnh',
+                            tooltip: 'Ảnh / PDF / Word',
                             onPressed: _sending ? null : _showAttachMenu,
-                            icon: const Icon(Icons.add_a_photo_outlined),
+                            icon: const Icon(Icons.attach_file_rounded),
                           ),
                           Expanded(
                             child: TextField(
@@ -394,7 +478,7 @@ class _MathTutorChatPageState extends ConsumerState<MathTutorChatPage> {
                               textInputAction: TextInputAction.send,
                               onSubmitted: (_) => _send(),
                               decoration: const InputDecoration(
-                                hintText: 'Gõ câu hỏi hoặc gửi ảnh đề…',
+                                hintText: 'Gõ câu hỏi, gửi ảnh hoặc PDF/Word…',
                                 border: InputBorder.none,
                               ),
                             ),

@@ -5,7 +5,9 @@ import 'package:eduself_study_app/core/ai/gemini_client.dart';
 import 'package:eduself_study_app/core/error/result.dart';
 import 'package:eduself_study_app/features/math_ai/infrastructure/math_local_store.dart';
 import 'package:eduself_study_app/features/math_ai/presentation/providers/math_ai_providers.dart';
+import 'package:eduself_study_app/shared/utils/extract_study_document_text.dart';
 import 'package:eduself_study_app/shared/utils/image_picker_errors.dart';
+import 'package:eduself_study_app/shared/utils/pick_study_document.dart';
 import 'package:eduself_study_app/shared/widgets/app_toast.dart';
 import 'package:eduself_study_app/shared/widgets/glass_card.dart';
 import 'package:flutter/material.dart';
@@ -33,6 +35,8 @@ class _MathPracticePageState extends ConsumerState<MathPracticePage> {
   var _busy = false;
   Uint8List? _answerImageBytes;
   String? _answerImageMime;
+  String? _answerDocumentName;
+  String? _answerDocumentText;
 
   @override
   void dispose() {
@@ -57,6 +61,8 @@ class _MathPracticePageState extends ConsumerState<MathPracticePage> {
       _question = null;
       _answerImageBytes = null;
       _answerImageMime = null;
+      _answerDocumentName = null;
+      _answerDocumentText = null;
     });
     _answerController.clear();
 
@@ -125,6 +131,12 @@ Trả lời CHỈ bằng JSON thuần (không markdown, không code fence):
                 title: const Text('Chọn ảnh có sẵn'),
                 onTap: () => Navigator.pop(ctx, 'gallery'),
               ),
+              ListTile(
+                leading: const Icon(Icons.picture_as_pdf_outlined),
+                title: const Text('PDF / Word bài làm'),
+                subtitle: const Text('Đọc chữ trong tệp để chấm'),
+                onTap: () => Navigator.pop(ctx, 'document'),
+              ),
             ],
           ),
         ),
@@ -134,6 +146,33 @@ Trả lời CHỈ bằng JSON thuần (không markdown, không code fence):
       await _pickAnswerImage(ImageSource.camera);
     } else if (choice == 'gallery') {
       await _pickAnswerImage(ImageSource.gallery);
+    } else if (choice == 'document') {
+      await _pickAnswerDocument();
+    }
+  }
+
+  Future<void> _pickAnswerDocument() async {
+    final picked = await pickMathAiDocument(context);
+    if (picked == null) return;
+    try {
+      final extracted = await extractStudyDocumentText(
+        filename: picked.name,
+        bytes: picked.bytes,
+      );
+      if (!mounted) return;
+      setState(() {
+        _answerDocumentName = extracted.filename;
+        _answerDocumentText = extracted.text;
+        _answerImageBytes = null;
+        _answerImageMime = null;
+        _feedback = null;
+        _correct = null;
+      });
+      if (extracted.truncated) {
+        AppToast.info('Tệp khá dài — đã lấy phần đầu để chấm.');
+      }
+    } on Object catch (e) {
+      AppToast.error('$e');
     }
   }
 
@@ -164,6 +203,8 @@ Trả lời CHỈ bằng JSON thuần (không markdown, không code fence):
       setState(() {
         _answerImageBytes = bytes;
         _answerImageMime = mime;
+        _answerDocumentName = null;
+        _answerDocumentText = null;
         _feedback = null;
         _correct = null;
       });
@@ -175,18 +216,29 @@ Trả lời CHỈ bằng JSON thuần (không markdown, không code fence):
   Future<void> _submit() async {
     final answer = _answerController.text.trim();
     final hasImage = _answerImageBytes != null;
-    if ((answer.isEmpty && !hasImage) || _question == null || _busy) {
-      AppToast.info('Em gõ bài làm hoặc gửi ảnh bài làm trước khi nộp.');
+    final hasDocument = _answerDocumentText != null &&
+        _answerDocumentText!.trim().isNotEmpty;
+    if ((answer.isEmpty && !hasImage && !hasDocument) ||
+        _question == null ||
+        _busy) {
+      AppToast.info(
+        'Em gõ bài làm, gửi ảnh hoặc PDF/Word bài làm trước khi nộp.',
+      );
       return;
     }
 
     setState(() => _busy = true);
 
     final answerLabel = answer.isEmpty
-        ? '(Bài làm gửi bằng ảnh)'
+        ? (hasDocument
+            ? '(Bài làm gửi bằng tệp ${_answerDocumentName ?? 'tài liệu'})'
+            : '(Bài làm gửi bằng ảnh)')
         : answer;
     final imageNote = hasImage
         ? '\n(Học sinh kèm ảnh bài làm — hãy đọc chữ/phép tính trên ảnh.)'
+        : '';
+    final documentNote = hasDocument
+        ? '\n(Học sinh kèm tệp bài làm — nội dung chữ nằm trong phần tệp đính kèm.)'
         : '';
 
     final result = await askMathAi(
@@ -195,11 +247,11 @@ Trả lời CHỈ bằng JSON thuần (không markdown, không code fence):
 Chấm bài luyện tập Toán — ưu tiên độ chính xác toán học.
 
 Đề: $_question
-Bài làm học sinh (text): $answerLabel$imageNote
+Bài làm học sinh (text): $answerLabel$imageNote$documentNote
 
 Quy trình chấm:
 1. Tự giải đúng đề (không hiện hết cho học sinh nếu sai).
-2. So sánh với bài làm (text và/hoặc ảnh); đọc kỹ phép tính trên ảnh nếu có.
+2. So sánh với bài làm (text, ảnh và/hoặc tệp); đọc kỹ phép tính trên ảnh/tệp nếu có.
 3. correct=true chỉ khi kết quả cuối cùng đúng (chấp nhận dạng tương đương hợp lệ).
 4. Nếu sai: chỉ ra bước/lỗi cụ thể + gợi ý bước tiếp theo — chưa đưa đáp án đầy đủ trừ khi gần đúng.
 5. Dùng LaTeX trong feedback khi cần.
@@ -213,6 +265,8 @@ Trả lời CHỈ bằng JSON thuần (không markdown, không code fence):
               mimeType: _answerImageMime ?? 'image/jpeg',
             )
           : null,
+      documentText: _answerDocumentText,
+      documentName: _answerDocumentName,
       extraSystemContext:
           'Chế độ chấm luyện tập: tự giải để đối chiếu trước khi kết luận đúng/sai. Không bịa.',
     );
@@ -224,13 +278,23 @@ Trả lời CHỈ bằng JSON thuần (không markdown, không code fence):
         final parsed = _parseJson(value);
         final correct = parsed?['correct'] == true;
         final feedback = (parsed?['feedback'] as String?) ?? value;
+        final storedAnswer = () {
+          if (answer.isNotEmpty) {
+            final extras = <String>[
+              if (hasImage) '📷 (kèm ảnh)',
+              if (hasDocument) '📄 (${_answerDocumentName ?? 'tệp'})',
+            ];
+            return extras.isEmpty ? answer : '$answer\n${extras.join(' ')}';
+          }
+          if (hasDocument) return '📄 ${_answerDocumentName ?? 'Tệp bài làm'}';
+          if (hasImage) return '📷 Ảnh bài làm';
+          return answer;
+        }();
         final attempt = MathPracticeAttempt(
           id: DateTime.now().millisecondsSinceEpoch.toString(),
           topic: _topic ?? 'Toán',
           question: _question!,
-          studentAnswer: hasImage && answer.isEmpty
-              ? '📷 Ảnh bài làm'
-              : (hasImage ? '$answer\n📷 (kèm ảnh)' : answer),
+          studentAnswer: storedAnswer,
           feedback: feedback,
           correct: correct,
           at: DateTime.now().toUtc(),
@@ -345,7 +409,7 @@ Trả lời CHỈ bằng JSON thuần (không markdown, không code fence):
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Gõ text và/hoặc gửi ảnh bài làm (chụp / chọn từ thư viện).',
+                      'Gõ text, gửi ảnh, hoặc đính kèm PDF/Word bài làm.',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: scheme.onSurfaceVariant,
                           ),
@@ -403,16 +467,47 @@ Trả lời CHỈ bằng JSON thuần (không markdown, không code fence):
                           ],
                         ),
                       ),
+                    if (_answerDocumentText != null)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: Material(
+                          color: scheme.secondaryContainer.withValues(
+                            alpha: 0.7,
+                          ),
+                          borderRadius: BorderRadius.circular(12),
+                          child: ListTile(
+                            dense: true,
+                            leading: const Icon(Icons.description_outlined),
+                            title: Text(
+                              _answerDocumentName ?? 'Tài liệu',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            subtitle: const Text('Sẽ gửi nội dung chữ để chấm'),
+                            trailing: IconButton(
+                              tooltip: 'Bỏ tệp',
+                              onPressed: _busy
+                                  ? null
+                                  : () => setState(() {
+                                        _answerDocumentName = null;
+                                        _answerDocumentText = null;
+                                      }),
+                              icon: const Icon(Icons.close),
+                            ),
+                          ),
+                        ),
+                      ),
                     Row(
                       children: [
                         Expanded(
                           child: OutlinedButton.icon(
                             onPressed: _busy ? null : _showAttachMenu,
-                            icon: const Icon(Icons.add_a_photo_outlined),
+                            icon: const Icon(Icons.attach_file_rounded),
                             label: Text(
-                              _answerImageBytes == null
-                                  ? 'Ảnh bài làm'
-                                  : 'Đổi ảnh',
+                              (_answerImageBytes == null &&
+                                      _answerDocumentText == null)
+                                  ? 'Ảnh / tệp'
+                                  : 'Đổi đính kèm',
                             ),
                           ),
                         ),
