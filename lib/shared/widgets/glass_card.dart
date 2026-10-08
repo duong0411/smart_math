@@ -84,14 +84,14 @@ class AtmosphericBackground extends StatelessWidget {
           end: Alignment.bottomRight,
           colors: isDark
               ? [
-                  const Color(0xFF071214),
+                  const Color(0xFF0F172A),
                   scheme.surface,
-                  const Color(0xFF10262A),
+                  const Color(0xFF1E1B4B),
                 ]
               : [
-                  const Color(0xFFE8F8F5),
-                  const Color(0xFFF7FBFF),
-                  const Color(0xFFEAF4FF),
+                  const Color(0xFFEEF2FF),
+                  const Color(0xFFFDF4FF),
+                  const Color(0xFFFFF1F2),
                 ],
         ),
       ),
@@ -101,16 +101,32 @@ class AtmosphericBackground extends StatelessWidget {
             top: -80,
             right: -40,
             child: _GlowOrb(
-              size: 220,
-              color: scheme.primary.withValues(alpha: isDark ? 0.18 : 0.22),
+              size: 280,
+              color: const Color(0xFFFACC15).withValues(alpha: isDark ? 0.15 : 0.25), // Golden yellow glow for VN star
             ),
           ),
           Positioned(
-            bottom: 80,
+            bottom: -40,
             left: -60,
             child: _GlowOrb(
-              size: 260,
-              color: scheme.secondary.withValues(alpha: isDark ? 0.14 : 0.16),
+              size: 320,
+              color: const Color(0xFFEF4444).withValues(alpha: isDark ? 0.1 : 0.2), // Red glow for VN flag vibe
+            ),
+          ),
+          Positioned(
+             top: MediaQuery.sizeOf(context).height * 0.3,
+             left: MediaQuery.sizeOf(context).width * 0.6,
+             child: _GlowOrb(
+               size: 220,
+               color: scheme.primary.withValues(alpha: isDark ? 0.15 : 0.25), // AI Cyan/Blue
+             ),
+          ),
+          // Tech Lotus Motif
+          Positioned.fill(
+            child: CustomPaint(
+              painter: _TechLotusPainter(
+                color: scheme.primary.withValues(alpha: 0.1),
+              ),
             ),
           ),
           Positioned.fill(child: child),
@@ -118,6 +134,58 @@ class AtmosphericBackground extends StatelessWidget {
       ),
     );
   }
+}
+
+class _TechLotusPainter extends CustomPainter {
+  _TechLotusPainter({required this.color});
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 1.0
+      ..style = PaintingStyle.stroke;
+
+    final center = Offset(size.width / 2, size.height * 0.65);
+    final maxRadius = size.width * 0.6;
+
+    // Draw abstract tech lotus petals using overlapping bezier curves
+    for (int i = 0; i < 5; i++) {
+      final path = Path();
+      final widthOffset = (i - 2) * 50.0;
+      final heightOffset = 100.0 - (i - 2).abs() * 30.0;
+
+      path.moveTo(center.dx, center.dy);
+      path.quadraticBezierTo(
+        center.dx + widthOffset * 1.5,
+        center.dy - heightOffset * 1.5,
+        center.dx + widthOffset,
+        center.dy - heightOffset * 3,
+      );
+      path.quadraticBezierTo(
+        center.dx - widthOffset * 1.5,
+        center.dy - heightOffset * 1.5,
+        center.dx,
+        center.dy,
+      );
+      canvas.drawPath(path, paint);
+    }
+
+    // Draw tech grid dots at intersections
+    final dotPaint = Paint()
+      ..color = color.withValues(alpha: 0.3)
+      ..style = PaintingStyle.fill;
+    
+    canvas.drawCircle(Offset(center.dx, center.dy - 300), 3, dotPaint);
+    canvas.drawCircle(Offset(center.dx - 50, center.dy - 240), 3, dotPaint);
+    canvas.drawCircle(Offset(center.dx + 50, center.dy - 240), 3, dotPaint);
+    canvas.drawCircle(Offset(center.dx - 100, center.dy - 120), 3, dotPaint);
+    canvas.drawCircle(Offset(center.dx + 100, center.dy - 120), 3, dotPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 class _GlowOrb extends StatelessWidget {
@@ -228,7 +296,7 @@ class ChatBubble extends StatelessWidget {
     // Keep all corners equally rounded to avoid sharp corner artifacts.
     final radius = BorderRadius.circular(20);
     final fill = isUser
-        ? null
+        ? const Color(0xFFF3F4F6)
         : scheme.surfaceContainerLowest.withValues(alpha: 0.96);
 
     return Align(
@@ -261,20 +329,6 @@ class ChatBubble extends StatelessWidget {
                 child: Ink(
                   decoration: BoxDecoration(
                     borderRadius: radius,
-                    gradient: isUser
-                        ? LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [
-                              scheme.primary,
-                              Color.lerp(
-                                scheme.primary,
-                                scheme.secondary,
-                                0.35,
-                              )!,
-                            ],
-                          )
-                        : null,
                     border: isUser
                         ? null
                         : Border.all(
@@ -290,26 +344,26 @@ class ChatBubble extends StatelessWidget {
                       gptThemeData: GptMarkdownThemeData(
                         brightness: Theme.of(context).brightness,
                         hrLineColor: (isUser
-                                ? scheme.onPrimary
+                                ? Colors.black26
                                 : scheme.outlineVariant)
                             .withValues(alpha: 0.45),
                         linkColor:
-                            isUser ? scheme.onPrimary : scheme.primary,
+                            isUser ? scheme.primary : scheme.primary,
                         h1: Theme.of(context).textTheme.titleLarge?.copyWith(
                               color: isUser
-                                  ? scheme.onPrimary
+                                  ? Colors.black87
                                   : scheme.onSurface,
                               fontWeight: FontWeight.w800,
                             ),
                         h2: Theme.of(context).textTheme.titleMedium?.copyWith(
                               color: isUser
-                                  ? scheme.onPrimary
+                                  ? Colors.black87
                                   : scheme.onSurface,
                               fontWeight: FontWeight.w700,
                             ),
                         h3: Theme.of(context).textTheme.titleSmall?.copyWith(
                               color: isUser
-                                  ? scheme.onPrimary
+                                  ? Colors.black87
                                   : scheme.onSurface,
                               fontWeight: FontWeight.w700,
                             ),
@@ -319,7 +373,7 @@ class ChatBubble extends StatelessWidget {
                         style:
                             Theme.of(context).textTheme.bodyLarge?.copyWith(
                                   color: isUser
-                                      ? scheme.onPrimary
+                                      ? Colors.black87
                                       : scheme.onSurface,
                                   height: 1.45,
                                 ),

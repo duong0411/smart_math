@@ -28,7 +28,27 @@ class MathHomePage extends ConsumerWidget {
         backgroundColor: Colors.transparent,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
-          title: const Text(AppConfig.appName),
+          title: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: scheme.primary,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: const Text(
+                  'AI',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w900,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              const Text('EduSelf Toán AI'),
+            ],
+          ),
           actions: [
             IconButton(
               tooltip: 'Cài đặt',
@@ -43,109 +63,118 @@ class MathHomePage extends ConsumerWidget {
         ),
         body: SafeArea(
           child: ListView(
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
             children: [
-              GlassCard(
-                padding: const EdgeInsets.all(20),
+              // Top Greeting Section
+              const SizedBox(height: 10),
+              Center(
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      AppConfig.appName,
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: -0.5,
-                          ),
+                    const SizedBox(height: 10),
+                    // Central abstract glowing orb/graphic
+                    Image.asset(
+                      'assets/images/central_logo_glow_1791473954847.png',
+                      width: 140,
+                      height: 70,
+                      fit: BoxFit.contain,
                     ),
-                    const SizedBox(height: 6),
-                    Text(
-                      AppConfig.appTagline,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: scheme.onSurfaceVariant,
-                            height: 1.4,
-                          ),
-                    ),
-                    const SizedBox(height: 14),
+                    const SizedBox(height: 20),
                     Text(
                       profile?.displayName.trim().isNotEmpty == true
-                          ? 'Xin chào, ${profile!.displayName}'
-                              '${profile.gradeLevel != null ? ' · Lớp ${profile.gradeLevel}' : ''}'
-                          : 'Chưa có hồ sơ — vào Cài đặt để điền tên & lớp',
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w600,
+                          ? 'Hi, ${profile!.displayName}'
+                          : 'Hi, I\'m here to help',
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                            fontWeight: FontWeight.w800,
+                            color: Colors.white,
+                          ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Hôm nay bạn muốn học gì?',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: scheme.onSurfaceVariant,
                           ),
                     ),
-                    if (!hasKey) ...[
-                      const SizedBox(height: 12),
+                    const SizedBox(height: 24),
+                    if (!hasKey)
                       FilledButton.tonalIcon(
                         onPressed: () => context.push('/settings'),
                         icon: const Icon(Icons.key_rounded),
                         label: const Text('Dán Gemini API key để bắt đầu'),
                       ),
-                    ],
                   ],
                 ),
               ),
-              const SizedBox(height: 16),
-              Row(
+              const SizedBox(height: 32),
+
+              // 2x2 Grid Features
+              GridView.count(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                crossAxisCount: 2,
+                mainAxisSpacing: 16,
+                crossAxisSpacing: 16,
+                childAspectRatio: 1.15,
                 children: [
-                  Expanded(
-                    child: _StatChip(
-                      label: 'Hoạt động 7 ngày',
-                      value: '$weekEvents',
-                      icon: Icons.timeline_rounded,
-                    ),
+                  _FeatureGridItem(
+                    icon: Icons.hub_outlined,
+                    title: 'Gia sư Toán AI',
+                    subtitle: 'Hỏi đáp từng bước',
+                    iconColor: scheme.primary,
+                    onTap: () => context.push('/tutor'),
                   ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: _StatChip(
-                      label: 'Độ chính xác',
-                      value: accuracy == null ? '—' : '$accuracy%',
-                      icon: Icons.analytics_outlined,
-                    ),
+                  _FeatureGridItem(
+                    icon: Icons.memory_outlined,
+                    title: 'Luyện tập Toán',
+                    subtitle: 'Sinh bài & chấm điểm',
+                    iconColor: scheme.secondary,
+                    onTap: () => context.push('/practice'),
+                  ),
+                  _FeatureGridItem(
+                    icon: Icons.blur_on_rounded,
+                    title: 'Giải trí Toán 8',
+                    subtitle: 'Học qua trò chơi',
+                    iconColor: scheme.primary,
+                    onTap: () => context.push('/games'),
+                  ),
+                  _FeatureGridItem(
+                    icon: Icons.network_node_rounded,
+                    title: 'Giám sát học',
+                    subtitle: 'Tiến độ & báo cáo',
+                    iconColor: scheme.secondary,
+                    onTap: () => context.push('/monitor'),
                   ),
                 ],
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 24),
+              // Recent Activities / Stats
               Text(
-                'Chức năng',
+                'Recent Activities',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w700,
+                      color: Colors.white,
                     ),
               ),
-              const SizedBox(height: 10),
-              _FeatureTile(
-                icon: Icons.smart_toy_rounded,
-                title: 'Gia sư Toán AI',
-                subtitle: 'Hỏi đáp từng bước, không làm hộ bài',
-                onTap: () => context.push('/tutor'),
+              const SizedBox(height: 12),
+              _RecentActivityTile(
+                icon: Icons.timeline_rounded,
+                title: 'Hoạt động 7 ngày qua',
+                subtitle: '$weekEvents lượt tương tác',
               ),
-              const SizedBox(height: 10),
-              _FeatureTile(
-                icon: Icons.fitness_center_rounded,
-                title: 'Luyện tập Toán',
-                subtitle: 'AI tạo bài · chấm · giải thích lỗi',
-                onTap: () => context.push('/practice'),
+              const SizedBox(height: 8),
+              _RecentActivityTile(
+                icon: Icons.analytics_outlined,
+                title: 'Độ chính xác luyện tập',
+                subtitle: accuracy == null ? 'Chưa có dữ liệu' : '$accuracy% chính xác',
               ),
-              const SizedBox(height: 10),
-              _FeatureTile(
-                icon: Icons.sports_esports_rounded,
-                title: 'Giải trí Toán 8',
-                subtitle: 'SGK Kết nối tri thức · kho báu · boss · tên lửa',
-                onTap: () => context.push('/games'),
-              ),
-              const SizedBox(height: 10),
-              _FeatureTile(
-                icon: Icons.monitor_heart_outlined,
-                title: 'Giám sát học tập',
-                subtitle: 'Tiến độ, điểm yếu, kế hoạch ôn AI',
-                onTap: () => context.push('/monitor'),
-              ),
-              const SizedBox(height: 10),
-              _FeatureTile(
+              const SizedBox(height: 8),
+              _RecentActivityTile(
                 icon: Icons.person_outline_rounded,
-                title: 'Hồ sơ & API key',
-                subtitle: 'Tên, lớp, Gemini API key',
+                title: 'Hồ sơ học tập',
+                subtitle: profile?.gradeLevel != null
+                    ? 'Lớp ${profile!.gradeLevel}'
+                    : 'Cập nhật tên & lớp',
                 onTap: () => context.push('/settings'),
               ),
             ],
@@ -156,80 +185,109 @@ class MathHomePage extends ConsumerWidget {
   }
 }
 
-class _StatChip extends StatelessWidget {
-  const _StatChip({
-    required this.label,
-    required this.value,
-    required this.icon,
-  });
-
-  final String label;
-  final String value;
-  final IconData icon;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return GlassCard(
-      padding: const EdgeInsets.all(16),
-      child: Row(
-        children: [
-          Icon(icon, color: scheme.primary),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  value,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w800,
-                      ),
-                ),
-                Text(
-                  label,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: scheme.onSurfaceVariant,
-                      ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _FeatureTile extends StatelessWidget {
-  const _FeatureTile({
+class _FeatureGridItem extends StatelessWidget {
+  const _FeatureGridItem({
     required this.icon,
     required this.title,
     required this.subtitle,
+    required this.iconColor,
     required this.onTap,
   });
 
   final IconData icon;
   final String title;
   final String subtitle;
+  final Color iconColor;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return GlassCard(
-      padding: EdgeInsets.zero,
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-        leading: CircleAvatar(
-          backgroundColor: scheme.primaryContainer,
-          child: Icon(icon, color: scheme.onPrimaryContainer),
-        ),
-        title: Text(title, style: const TextStyle(fontWeight: FontWeight.w700)),
-        subtitle: Text(subtitle),
-        trailing: const Icon(Icons.chevron_right_rounded),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
         onTap: onTap,
+        borderRadius: BorderRadius.circular(24),
+        child: GlassCard(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: iconColor.withValues(alpha: 0.15),
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: iconColor.withValues(alpha: 0.3),
+                      blurRadius: 12,
+                      spreadRadius: 2,
+                    ),
+                  ],
+                  border: Border.all(
+                    color: iconColor.withValues(alpha: 0.5),
+                    width: 1.5,
+                  ),
+                ),
+                child: Icon(icon, color: Colors.white, size: 24),
+              ),
+              const Spacer(),
+              Text(
+                title,
+                style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14, color: Colors.white),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                subtitle,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: scheme.onSurfaceVariant,
+                      fontSize: 11,
+                    ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ),
       ),
+    );
+  }
+}
+
+class _RecentActivityTile extends StatelessWidget {
+  const _RecentActivityTile({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    this.onTap,
+  });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return ListTile(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
+      leading: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.transparent,
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: scheme.outlineVariant.withValues(alpha: 0.3),
+            width: 1.5,
+          ),
+        ),
+        child: Icon(icon, color: Colors.white70, size: 20),
+      ),
+      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: Colors.white)),
+      subtitle: Text(subtitle, style: TextStyle(fontSize: 12, color: Colors.white.withValues(alpha: 0.6))),
+      trailing: Icon(Icons.chevron_right_rounded, size: 20, color: Colors.white.withValues(alpha: 0.5)),
+      onTap: onTap,
     );
   }
 }

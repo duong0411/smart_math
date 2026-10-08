@@ -17,17 +17,17 @@ class GlassTheme extends ThemeExtension<GlassTheme> {
   final double borderRadius;
 
   static const light = GlassTheme(
-    blurSigma: 16,
-    fillOpacity: 0.78,
-    borderOpacity: 0.22,
-    borderRadius: 28,
+    blurSigma: 24,
+    fillOpacity: 0.65,
+    borderOpacity: 0.35,
+    borderRadius: 24,
   );
 
   static const dark = GlassTheme(
-    blurSigma: 18,
-    fillOpacity: 0.42,
-    borderOpacity: 0.24,
-    borderRadius: 28,
+    blurSigma: 24,
+    fillOpacity: 0.15,
+    borderOpacity: 0.15,
+    borderRadius: 24,
   );
 
   @override
@@ -58,16 +58,16 @@ class GlassTheme extends ThemeExtension<GlassTheme> {
 }
 
 abstract final class AppTheme {
-  // Calm education palette: deep teal + soft sky
-  static const _seed = Color(0xFF0D9488);
-  static const _secondary = Color(0xFF0284C7);
+  // Template palette: Neon Blue + Cyan
+  static const _seed = Color(0xFF2563EB); // Blue
+  static const _secondary = Color(0xFF00E5FF); // Cyan
 
   static ThemeData light() {
     final scheme = ColorScheme.fromSeed(
       seedColor: _seed,
       secondary: _secondary,
       brightness: Brightness.light,
-      surface: const Color(0xFFF4FBFA),
+      surface: const Color(0xFFF8FAFC),
     );
     return _base(scheme, GlassTheme.light);
   }
@@ -77,7 +77,7 @@ abstract final class AppTheme {
       seedColor: _seed,
       secondary: _secondary,
       brightness: Brightness.dark,
-      surface: const Color(0xFF0B1618),
+      surface: const Color(0xFF090E17), // Very dark template background
     );
     return _base(scheme, GlassTheme.dark);
   }
@@ -111,7 +111,7 @@ abstract final class AppTheme {
       ),
       cardTheme: CardThemeData(
         elevation: 0,
-        color: scheme.surface.withValues(alpha: 0.8),
+        color: scheme.surface.withValues(alpha: 0.6),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(glass.borderRadius),
         ),
@@ -122,7 +122,7 @@ abstract final class AppTheme {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: scheme.surface.withValues(alpha: 0.72),
+        fillColor: scheme.surface.withValues(alpha: 0.5),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
