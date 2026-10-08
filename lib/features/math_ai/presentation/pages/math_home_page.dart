@@ -139,7 +139,7 @@ class MathHomePage extends ConsumerWidget {
                     onTap: () => context.push('/games'),
                   ),
                   _FeatureGridItem(
-                    icon: Icons.network_node_rounded,
+                    icon: Icons.account_tree_rounded,
                     title: 'Giám sát học',
                     subtitle: 'Tiến độ & báo cáo',
                     iconColor: scheme.secondary,
@@ -202,6 +202,7 @@ class _FeatureGridItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return Material(
       color: Colors.transparent,
       child: InkWell(
