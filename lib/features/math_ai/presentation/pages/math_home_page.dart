@@ -129,6 +129,7 @@ class MathHomePage extends ConsumerWidget {
                     subtitle: 'Hỏi đáp từng bước',
                     iconColor: scheme.primary,
                     gradientColors: [scheme.primary.withValues(alpha: 0.8), scheme.primary.withValues(alpha: 0.2)],
+                    imagePath: 'assets/images/icon_tutor_1791473992645.png',
                     onTap: () => context.push('/tutor'),
                   ),
                   _FeatureGridItem(
@@ -137,6 +138,7 @@ class MathHomePage extends ConsumerWidget {
                     subtitle: 'Sinh bài & chấm điểm',
                     iconColor: scheme.secondary,
                     gradientColors: [scheme.secondary.withValues(alpha: 0.7), scheme.secondary.withValues(alpha: 0.1)],
+                    imagePath: 'assets/images/icon_practice_1791474080286.png',
                     onTap: () => context.push('/practice'),
                   ),
                   _FeatureGridItem(
@@ -145,6 +147,7 @@ class MathHomePage extends ConsumerWidget {
                     subtitle: 'Học qua trò chơi',
                     iconColor: const Color(0xFFF59E0B),
                     gradientColors: [const Color(0xFFF59E0B).withValues(alpha: 0.7), const Color(0xFFF59E0B).withValues(alpha: 0.1)],
+                    imagePath: 'assets/images/icon_games_1791474095200.png',
                     onTap: () => context.push('/games'),
                   ),
                   _FeatureGridItem(
@@ -153,6 +156,7 @@ class MathHomePage extends ConsumerWidget {
                     subtitle: 'Tiến độ & báo cáo',
                     iconColor: const Color(0xFF10B981),
                     gradientColors: [const Color(0xFF10B981).withValues(alpha: 0.7), const Color(0xFF10B981).withValues(alpha: 0.1)],
+                    imagePath: 'assets/images/icon_monitor_1791474108487.png',
                     onTap: () => context.push('/monitor'),
                   ),
                 ],
@@ -203,6 +207,7 @@ class _FeatureGridItem extends StatelessWidget {
     required this.iconColor,
     required this.gradientColors,
     required this.onTap,
+    this.imagePath,
   });
 
   final IconData icon;
@@ -211,6 +216,7 @@ class _FeatureGridItem extends StatelessWidget {
   final Color iconColor;
   final List<Color> gradientColors;
   final VoidCallback onTap;
+  final String? imagePath;
 
   @override
   Widget build(BuildContext context) {
@@ -239,16 +245,41 @@ class _FeatureGridItem extends StatelessWidget {
           clipBehavior: Clip.antiAlias,
           child: Stack(
             children: [
-              // Huge watermark icon illustration
-              Positioned(
-                right: -20,
-                bottom: -20,
-                child: Icon(
-                  icon,
-                  size: 110,
-                  color: iconColor.withValues(alpha: 0.15),
+              // Image illustration if provided, blended smoothly
+              if (imagePath != null)
+                Positioned(
+                  right: 0,
+                  bottom: 0,
+                  top: 0,
+                  child: ShaderMask(
+                    shaderCallback: (bounds) => const LinearGradient(
+                      begin: Alignment.centerRight,
+                      end: Alignment.centerLeft,
+                      colors: [Colors.black, Colors.transparent],
+                      stops: [0.3, 1.0],
+                    ).createShader(bounds),
+                    blendMode: BlendMode.dstIn,
+                    child: Opacity(
+                      opacity: 0.6,
+                      child: Image.asset(
+                        imagePath!,
+                        fit: BoxFit.cover,
+                        alignment: Alignment.centerRight,
+                      ),
+                    ),
+                  ),
                 ),
-              ),
+              // Huge watermark icon illustration as fallback or addition
+              if (imagePath == null)
+                Positioned(
+                  right: -20,
+                  bottom: -20,
+                  child: Icon(
+                    icon,
+                    size: 110,
+                    color: iconColor.withValues(alpha: 0.15),
+                  ),
+                ),
               // Foreground content
               Padding(
                 padding: const EdgeInsets.all(16),
