@@ -161,6 +161,12 @@ class AtmosphericBackground extends StatelessWidget {
               ),
             ),
           ),
+          // Flowing Data Stream Effect
+          Positioned.fill(
+            child: _DataStreamEffect(
+              color: scheme.primary.withValues(alpha: 0.5),
+            ),
+          ),
           Positioned.fill(child: child),
         ],
       ),
@@ -219,6 +225,88 @@ class _TechLotusPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class _DataStreamEffect extends StatefulWidget {
+  final Color color;
+  const _DataStreamEffect({required this.color});
+
+  @override
+  State<_DataStreamEffect> createState() => _DataStreamEffectState();
+}
+
+class _DataStreamEffectState extends State<_DataStreamEffect> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this, duration: const Duration(seconds: 4))..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return CustomPaint(
+          painter: _DataStreamPainter(
+            color: widget.color,
+            progress: _controller.value,
+          ),
+          size: Size.infinite,
+        );
+      }
+    );
+  }
+}
+
+class _DataStreamPainter extends CustomPainter {
+  final Color color;
+  final double progress;
+
+  _DataStreamPainter({required this.color, required this.progress});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0;
+
+    for (int i = 0; i < 30; i++) {
+      final x = (i * 123.456) % size.width;
+      final speed = 0.5 + ((i * 7) % 10) / 10.0;
+      final length = 60.0 + ((i * 11) % 100);
+      
+      double y = (progress * size.height * speed + (i * 543.21)) % (size.height + length);
+      y -= length;
+
+      final rect = Rect.fromLTRB(x, y, x, y + length);
+      final gradient = LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [color.withValues(alpha: 0), color.withValues(alpha: 0.8), color],
+        stops: const [0.0, 0.7, 1.0],
+      );
+
+      paint.shader = gradient.createShader(rect);
+      canvas.drawLine(Offset(x, y), Offset(x, y + length), paint);
+      
+      final headPaint = Paint()..color = color..style = PaintingStyle.fill;
+      canvas.drawCircle(Offset(x, y + length), 1.5, headPaint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _DataStreamPainter oldDelegate) {
+    return oldDelegate.progress != progress;
+  }
 }
 
 class _GlowOrb extends StatelessWidget {
