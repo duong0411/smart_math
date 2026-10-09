@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:eduself_study_app/core/theme/app_theme.dart';
