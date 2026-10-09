@@ -71,12 +71,18 @@ class MathHomePage extends ConsumerWidget {
                 child: Column(
                   children: [
                     const SizedBox(height: 10),
-                    // Central abstract glowing orb/graphic
-                    Image.asset(
-                      'assets/images/central_logo_glow_1791473954847.png',
-                      width: 140,
-                      height: 70,
-                      fit: BoxFit.contain,
+                    // Large glowing abstract logo instead of small image
+                    ShaderMask(
+                      shaderCallback: (bounds) => LinearGradient(
+                        colors: [scheme.secondary, scheme.primary],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ).createShader(bounds),
+                      child: const Icon(
+                        Icons.all_inclusive_rounded,
+                        size: 90,
+                        color: Colors.white,
+                      ),
                     ),
                     const SizedBox(height: 20),
                     Text(
@@ -108,20 +114,21 @@ class MathHomePage extends ConsumerWidget {
               ),
               const SizedBox(height: 32),
 
-              // 2x2 Grid Features
-              GridView.count(
+              // Responsive Grid Features
+              GridView.extent(
+                maxCrossAxisExtent: 320,
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                crossAxisCount: 2,
                 mainAxisSpacing: 16,
                 crossAxisSpacing: 16,
-                childAspectRatio: 1.15,
+                childAspectRatio: 1.4,
                 children: [
                   _FeatureGridItem(
                     icon: Icons.hub_outlined,
                     title: 'Gia sư Toán AI',
                     subtitle: 'Hỏi đáp từng bước',
                     iconColor: scheme.primary,
+                    gradientColors: [scheme.primary.withValues(alpha: 0.8), scheme.primary.withValues(alpha: 0.2)],
                     onTap: () => context.push('/tutor'),
                   ),
                   _FeatureGridItem(
@@ -129,20 +136,23 @@ class MathHomePage extends ConsumerWidget {
                     title: 'Luyện tập Toán',
                     subtitle: 'Sinh bài & chấm điểm',
                     iconColor: scheme.secondary,
+                    gradientColors: [scheme.secondary.withValues(alpha: 0.7), scheme.secondary.withValues(alpha: 0.1)],
                     onTap: () => context.push('/practice'),
                   ),
                   _FeatureGridItem(
                     icon: Icons.blur_on_rounded,
                     title: 'Giải trí Toán 8',
                     subtitle: 'Học qua trò chơi',
-                    iconColor: scheme.primary,
+                    iconColor: const Color(0xFFF59E0B),
+                    gradientColors: [const Color(0xFFF59E0B).withValues(alpha: 0.7), const Color(0xFFF59E0B).withValues(alpha: 0.1)],
                     onTap: () => context.push('/games'),
                   ),
                   _FeatureGridItem(
                     icon: Icons.account_tree_rounded,
                     title: 'Giám sát học',
                     subtitle: 'Tiến độ & báo cáo',
-                    iconColor: scheme.secondary,
+                    iconColor: const Color(0xFF10B981),
+                    gradientColors: [const Color(0xFF10B981).withValues(alpha: 0.7), const Color(0xFF10B981).withValues(alpha: 0.1)],
                     onTap: () => context.push('/monitor'),
                   ),
                 ],
@@ -191,6 +201,7 @@ class _FeatureGridItem extends StatelessWidget {
     required this.title,
     required this.subtitle,
     required this.iconColor,
+    required this.gradientColors,
     required this.onTap,
   });
 
@@ -198,6 +209,7 @@ class _FeatureGridItem extends StatelessWidget {
   final String title;
   final String subtitle;
   final Color iconColor;
+  final List<Color> gradientColors;
   final VoidCallback onTap;
 
   @override
@@ -208,44 +220,77 @@ class _FeatureGridItem extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(24),
-        child: GlassCard(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(24),
+            gradient: LinearGradient(
+              colors: [
+                gradientColors[0].withValues(alpha: 0.2),
+                gradientColors[1].withValues(alpha: 0.05),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            border: Border.all(
+              color: iconColor.withValues(alpha: 0.3),
+              width: 1,
+            ),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: Stack(
             children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
+              // Huge watermark icon illustration
+              Positioned(
+                right: -20,
+                bottom: -20,
+                child: Icon(
+                  icon,
+                  size: 110,
                   color: iconColor.withValues(alpha: 0.15),
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: iconColor.withValues(alpha: 0.3),
-                      blurRadius: 12,
-                      spreadRadius: 2,
+                ),
+              ),
+              // Foreground content
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: iconColor.withValues(alpha: 0.15),
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: iconColor.withValues(alpha: 0.3),
+                            blurRadius: 12,
+                            spreadRadius: 2,
+                          ),
+                        ],
+                        border: Border.all(
+                          color: iconColor.withValues(alpha: 0.5),
+                          width: 1.5,
+                        ),
+                      ),
+                      child: Icon(icon, color: Colors.white, size: 24),
+                    ),
+                    const Spacer(),
+                    Text(
+                      title,
+                      style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16, color: Colors.white),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      subtitle,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: scheme.onSurfaceVariant,
+                            fontSize: 12,
+                          ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
-                  border: Border.all(
-                    color: iconColor.withValues(alpha: 0.5),
-                    width: 1.5,
-                  ),
                 ),
-                child: Icon(icon, color: Colors.white, size: 24),
-              ),
-              const Spacer(),
-              Text(
-                title,
-                style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14, color: Colors.white),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                subtitle,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: scheme.onSurfaceVariant,
-                      fontSize: 11,
-                    ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
               ),
             ],
           ),

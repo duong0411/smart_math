@@ -97,35 +97,66 @@ class AtmosphericBackground extends StatelessWidget {
       ),
       child: Stack(
         children: [
+          // Animated Glow Orbs for dynamic feel
           Positioned(
-            top: -80,
-            right: -40,
-            child: _GlowOrb(
-              size: 280,
-              color: const Color(0xFFFACC15).withValues(alpha: isDark ? 0.15 : 0.25), // Golden yellow glow for VN star
+            top: -150,
+            right: -100,
+            child: TweenAnimationBuilder<double>(
+              tween: Tween<double>(begin: 0, end: 1),
+              duration: const Duration(seconds: 10),
+              curve: Curves.easeInOutSine,
+              builder: (context, value, child) {
+                return Transform.translate(
+                  offset: Offset(math.sin(value * math.pi * 2) * 30, math.cos(value * math.pi * 2) * 30),
+                  child: _GlowOrb(
+                    size: 600,
+                    color: const Color(0xFFFACC15).withValues(alpha: isDark ? 0.35 : 0.45), // Golden VN star
+                  ),
+                );
+              },
             ),
           ),
           Positioned(
-            bottom: -40,
-            left: -60,
-            child: _GlowOrb(
-              size: 320,
-              color: const Color(0xFFEF4444).withValues(alpha: isDark ? 0.1 : 0.2), // Red glow for VN flag vibe
+            bottom: -200,
+            left: -150,
+            child: TweenAnimationBuilder<double>(
+              tween: Tween<double>(begin: 1, end: 0),
+              duration: const Duration(seconds: 12),
+              curve: Curves.easeInOutSine,
+              builder: (context, value, child) {
+                return Transform.translate(
+                  offset: Offset(math.cos(value * math.pi * 2) * -40, math.sin(value * math.pi * 2) * 40),
+                  child: _GlowOrb(
+                    size: 800,
+                    color: const Color(0xFFEF4444).withValues(alpha: isDark ? 0.25 : 0.4), // Red VN flag
+                  ),
+                );
+              },
             ),
           ),
           Positioned(
-             top: MediaQuery.sizeOf(context).height * 0.3,
-             left: MediaQuery.sizeOf(context).width * 0.6,
-             child: _GlowOrb(
-               size: 220,
-               color: scheme.primary.withValues(alpha: isDark ? 0.15 : 0.25), // AI Cyan/Blue
+             top: MediaQuery.sizeOf(context).height * 0.2,
+             left: MediaQuery.sizeOf(context).width * 0.4,
+             child: TweenAnimationBuilder<double>(
+               tween: Tween<double>(begin: 0, end: 1),
+               duration: const Duration(seconds: 8),
+               curve: Curves.easeInOutSine,
+               builder: (context, value, child) {
+                 return Transform.scale(
+                   scale: 1.0 + math.sin(value * math.pi * 2) * 0.1,
+                   child: _GlowOrb(
+                     size: 500,
+                     color: scheme.primary.withValues(alpha: isDark ? 0.3 : 0.4), // AI Cyan/Blue
+                   ),
+                 );
+               }
              ),
           ),
-          // Tech Lotus Motif
+          // Tech Lotus Motif - Made much more visible
           Positioned.fill(
             child: CustomPaint(
               painter: _TechLotusPainter(
-                color: scheme.primary.withValues(alpha: 0.1),
+                color: scheme.primary.withValues(alpha: 0.4),
               ),
             ),
           ),
@@ -144,8 +175,9 @@ class _TechLotusPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
       ..color = color
-      ..strokeWidth = 1.0
-      ..style = PaintingStyle.stroke;
+      ..strokeWidth = 2.5 // Thicker line
+      ..style = PaintingStyle.stroke
+      ..maskFilter = const MaskFilter.blur(BlurStyle.solid, 3); // Glow effect
 
     final center = Offset(size.width / 2, size.height * 0.65);
     final maxRadius = size.width * 0.6;
