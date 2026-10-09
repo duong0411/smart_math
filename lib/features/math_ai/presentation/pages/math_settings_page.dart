@@ -210,7 +210,9 @@ class _MathSettingsPageState extends ConsumerState<MathSettingsPage> {
                       border: OutlineInputBorder(),
                     ),
                     items: [
-                      for (var g = 1; g <= 12; g++)
+                      for (var g = 6; g <= 9; g++)
+                        DropdownMenuItem(value: g, child: Text('Lớp $g (THCS)')),
+                      for (var g in [1, 2, 3, 4, 5, 10, 11, 12])
                         DropdownMenuItem(value: g, child: Text('Lớp $g')),
                     ],
                     onChanged: (v) => setState(() => _grade = v),

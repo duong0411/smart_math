@@ -163,8 +163,8 @@ Future<Result<String>> askMathAi(
 
   final reinforced = '$systemPrompt\n\n'
       '## Nhắc ngắn cho lượt này\n'
-      '- Ưu tiên đúng kiến thức Toán; tự kiểm tra phép tính trước khi trả lời.\n'
-      '- Trả lời bằng tiếng Việt, rõ ràng, dùng LaTeX cho biểu thức.';
+      '- Ưu tiên đúng kiến thức Địa lí; bám sát chương trình GDPT cấp THCS (Lớp 6, 7, 8, 9).\n'
+      '- Trả lời bằng tiếng Việt, rõ ràng, phân tích khoa học, giải thích hiện tượng và số liệu địa lý.';
 
   final message = _composeUserMessage(
     userMessage: userMessage,
@@ -202,7 +202,7 @@ String _composeUserMessage({
   if (hasImage) {
     return 'Em kèm ảnh và tệp "$name". Hãy đọc cả hai rồi hướng dẫn giải từng bước.$block';
   }
-  return 'Em gửi tệp "$name" chứa đề / bài Toán. '
-      'Hãy đọc kỹ nội dung tệp, nêu lại đề ngắn gọn nếu cần, '
-      'rồi hướng dẫn giải từng bước (chưa đưa đáp án ngay trừ khi em yêu cầu).$block';
+  return 'Em gửi tệp "$name" chứa nội dung / câu hỏi môn Địa lí. '
+      'Hãy đọc kỹ nội dung tệp, nêu lại yêu cầu ngắn gọn nếu cần, '
+      'rồi hướng dẫn em tìm hiểu và trả lời từng bước (chưa đưa đáp án ngay trừ khi em yêu cầu).$block';
 }

@@ -78,13 +78,13 @@ class _RocketRushGamePageState extends ConsumerState<RocketRushGamePage>
     });
     await logMathGameResult(
       ref,
-      topic: 'Phóng Tên Lửa',
-      detail: 'Toán 8 · hết giờ · nhiên liệu $_fuel%',
+      topic: 'Vệ tinh Địa lý',
+      detail: 'Địa lí THCS · hết giờ · nhiên liệu $_fuel%',
       success: false,
     );
   }
 
-  Future<void> _answer(int value) async {
+  Future<void> _answer(String value) async {
     if (!_playing || _q == null) return;
     final ok = value == _q!.answer;
     if (ok) {
@@ -106,8 +106,8 @@ class _RocketRushGamePageState extends ConsumerState<RocketRushGamePage>
         _lift.forward(from: 0);
         await logMathGameResult(
           ref,
-          topic: 'Phóng Tên Lửa',
-          detail: 'Toán 8 · phóng thành công · ${_seconds - _secondsLeft}s',
+          topic: 'Vệ tinh Địa lý',
+          detail: 'Địa lí THCS · phóng thành công · ${_seconds - _secondsLeft}s',
           success: true,
         );
       }
@@ -131,7 +131,7 @@ class _RocketRushGamePageState extends ConsumerState<RocketRushGamePage>
         backgroundColor: Colors.transparent,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
-          title: const Text('Phóng Tên Lửa · Toán 8'),
+          title: const Text('Vệ tinh Địa lý · THCS'),
         ),
         body: SafeArea(
           child: Padding(
@@ -213,7 +213,7 @@ class _RocketRushGamePageState extends ConsumerState<RocketRushGamePage>
                                   key: const ValueKey('rw'),
                                   title: 'Phóng thành công!',
                                   subtitle:
-                                      'Tên lửa Toán 8 đã lên quỹ đạo. Tuyệt vời!',
+                                      'Vệ tinh Địa lý THCS đã lên quỹ đạo thành công! Tuyệt vời!',
                                   emoji: '🌌',
                                   onAgain: _start,
                                 )
@@ -283,14 +283,14 @@ class _RocketIntro extends StatelessWidget {
 class _RocketAsk extends StatelessWidget {
   const _RocketAsk({super.key, required this.question, required this.onPick});
   final GradeQuestion question;
-  final ValueChanged<int> onPick;
+  final ValueChanged<String> onPick;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         Text(
-          'Tính nhanh để nạp nhiên liệu',
+          'Trả lời nhanh để nạp năng lượng',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w800,
                 color: const Color(0xFF4CC9F0),
@@ -321,20 +321,20 @@ class _RocketAsk extends StatelessWidget {
           alignment: WrapAlignment.center,
           children: [
             for (final c in question.choices)
-              SizedBox(
-                width: 148,
-                height: 52,
+              ConstrainedBox(
+                constraints: const BoxConstraints(minWidth: 140, maxWidth: 320),
                 child: FilledButton(
                   style: FilledButton.styleFrom(
                     backgroundColor: const Color(0xFF4CC9F0),
                     foregroundColor: const Color(0xFF0B132B),
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                     textStyle: const TextStyle(
-                      fontSize: 20,
+                      fontSize: 16,
                       fontWeight: FontWeight.w800,
                     ),
                   ),
                   onPressed: () => onPick(c),
-                  child: Text('$c'),
+                  child: Text(c, textAlign: TextAlign.center),
                 ),
               ),
           ],

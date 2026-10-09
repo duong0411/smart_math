@@ -46,7 +46,7 @@ class MathHomePage extends ConsumerWidget {
                 ),
               ),
               const SizedBox(width: 10),
-              const Text('EduSelf Toán AI'),
+              const Text('EduSelf Địa lí AI'),
             ],
           ),
           actions: [
@@ -125,7 +125,7 @@ class MathHomePage extends ConsumerWidget {
                 children: [
                   _FeatureGridItem(
                     icon: Icons.hub_outlined,
-                    title: 'Gia sư Toán AI',
+                    title: 'Gia sư Địa lí AI',
                     subtitle: 'Hỏi đáp từng bước',
                     iconColor: scheme.primary,
                     gradientColors: [scheme.primary.withValues(alpha: 0.8), scheme.primary.withValues(alpha: 0.2)],
@@ -134,7 +134,7 @@ class MathHomePage extends ConsumerWidget {
                   ),
                   _FeatureGridItem(
                     icon: Icons.memory_outlined,
-                    title: 'Luyện tập Toán',
+                    title: 'Luyện tập Địa lí',
                     subtitle: 'Sinh bài & chấm điểm',
                     iconColor: scheme.secondary,
                     gradientColors: [scheme.secondary.withValues(alpha: 0.7), scheme.secondary.withValues(alpha: 0.1)],
@@ -142,9 +142,9 @@ class MathHomePage extends ConsumerWidget {
                     onTap: () => context.push('/practice'),
                   ),
                   _FeatureGridItem(
-                    icon: Icons.blur_on_rounded,
-                    title: 'Giải trí Toán 8',
-                    subtitle: 'Học qua trò chơi',
+                    icon: Icons.public_rounded,
+                    title: 'Khám phá Địa lí',
+                    subtitle: 'Trò chơi Địa lí THCS',
                     iconColor: const Color(0xFFF59E0B),
                     gradientColors: [const Color(0xFFF59E0B).withValues(alpha: 0.7), const Color(0xFFF59E0B).withValues(alpha: 0.1)],
                     imagePath: 'assets/images/icon_games_1791474095200.png',

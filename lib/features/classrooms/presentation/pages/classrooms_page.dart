@@ -206,7 +206,7 @@ class _CreateClassroomDialogState extends State<_CreateClassroomDialog> {
         controller: _controller,
         decoration: const InputDecoration(
           labelText: 'Tên lớp',
-          hintText: 'Ví dụ: Toán 6A',
+          hintText: 'Ví dụ: Địa lí 6A',
         ),
         autofocus: true,
         onSubmitted: (value) => Navigator.pop(context, value.trim()),

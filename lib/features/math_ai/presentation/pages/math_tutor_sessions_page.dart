@@ -17,7 +17,7 @@ class MathTutorSessionsPage extends ConsumerWidget {
         backgroundColor: Colors.transparent,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
-          title: const Text('Gia sư Toán AI'),
+          title: const Text('Gia sư Địa lí AI'),
         ),
         floatingActionButton: FloatingActionButton.extended(
           onPressed: () async {
@@ -50,7 +50,7 @@ class MathTutorSessionsPage extends ConsumerWidget {
                   child: Padding(
                     padding: EdgeInsets.all(32),
                     child: Text(
-                      'Chưa có buổi học.\nNhấn “Buổi học mới” để hỏi AI Toán.',
+                      'Chưa có buổi học.\nNhấn “Buổi học mới” để hỏi AI Địa lí.',
                       textAlign: TextAlign.center,
                     ),
                   ),

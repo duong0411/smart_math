@@ -14,7 +14,7 @@ class MathGamesHubPage extends StatelessWidget {
         backgroundColor: Colors.transparent,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
-          title: const Text('Giải trí Toán 8'),
+          title: const Text('Khám phá Địa lí THCS'),
         ),
         body: ListView(
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
@@ -25,7 +25,7 @@ class MathGamesHubPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Theo SGK Kết nối tri thức',
+                    'Chương trình Địa lí THCS (Lớp 6–9)',
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                           fontWeight: FontWeight.w800,
                           letterSpacing: -0.4,
@@ -33,9 +33,9 @@ class MathGamesHubPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    'Câu hỏi bám Toán 8 tập 1 & 2: đa thức, hằng đẳng thức, tứ giác, '
-                    'Thalès, thống kê, phân thức, PT & hàm số bậc nhất, xác suất, '
-                    'đồng dạng · Pythagore, hình khối. Không cần API key.',
+                    'Bộ câu hỏi phong phú bám sát chương trình GDPT 2018 (Lớp 6, 7, 8, 9): '
+                    'Trái Đất, bản đồ, các châu lục trên thế giới, địa lí tự nhiên & '
+                    'kinh tế - xã hội Việt Nam. Học vui, không cần API key.',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: scheme.onSurfaceVariant,
                           height: 1.4,
@@ -46,32 +46,32 @@ class MathGamesHubPage extends StatelessWidget {
             ),
             const SizedBox(height: 18),
             Text(
-              'Chọn nhiệm vụ',
+              'Chọn nhiệm vụ thám hiểm',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w700,
                   ),
             ),
             const SizedBox(height: 10),
             _MissionTile(
-              emoji: '🏝️',
-              title: 'Hành trình Kho báu',
-              subtitle: '8 trạm xuyên các chương SGK Toán 8 KNTT',
+              emoji: '🧭',
+              title: 'Hành trình Khám phá Địa Cầu',
+              subtitle: '8 trạm thám hiểm các châu lục và non sông Việt Nam',
               accent: const Color(0xFFD4A373),
               onTap: () => context.push('/games/treasure'),
             ),
             const SizedBox(height: 10),
             _MissionTile(
-              emoji: '⚔️',
-              title: 'Đại chiến Boss Toán 8',
-              subtitle: 'Hạ “Pháp sư Hằng đẳng thức” bằng kiến thức SGK',
+              emoji: '🌋',
+              title: 'Chinh phục Đỉnh Địa lí',
+              subtitle: 'Vượt thử thách Thần Núi Lửa bằng kiến thức Địa lí THCS',
               accent: const Color(0xFFE76F51),
               onTap: () => context.push('/games/boss'),
             ),
             const SizedBox(height: 10),
             _MissionTile(
-              emoji: '🚀',
-              title: 'Phóng Tên Lửa',
-              subtitle: 'Nạp nhiên liệu bằng bài tập từng chương Toán 8',
+              emoji: '🛰️',
+              title: 'Vệ tinh Địa lý',
+              subtitle: 'Nạp năng lượng bay qua các vùng miền và kinh tuyến',
               accent: const Color(0xFF4CC9F0),
               onTap: () => context.push('/games/rocket'),
             ),

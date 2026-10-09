@@ -1,6 +1,6 @@
-# Smart Math (EduSelf Toán AI)
+# EduSelf Địa lí AI (Smart Geo)
 
-Ứng dụng AI giám sát và hỗ trợ học sinh học tập môn **Toán**.
+Ứng dụng AI giám sát và hỗ trợ học sinh học tập môn **Địa lí cấp THCS (Lớp 6, 7, 8, 9)** theo chương trình GDPT Việt Nam.
 
 Repo: [duong0411/smart_math](https://github.com/duong0411/smart_math)
 
@@ -9,12 +9,12 @@ Repo: [duong0411/smart_math](https://github.com/duong0411/smart_math)
 1. Lấy Gemini API key tại [Google AI Studio](https://aistudio.google.com/apikey)
 2. Chạy app: `flutter run`
 3. Vào **Cài đặt** → dán API key → Lưu
-4. Điền tên & lớp học sinh
+4. Điền tên & chọn lớp học sinh (Lớp 6, 7, 8, 9)
 5. Dùng:
-   - **Gia sư Toán AI** — hỏi đáp từng bước
-   - **Luyện tập Toán** — AI tạo bài & chấm
-   - **Giải trí Toán 8** — kho báu, boss, tên lửa theo SGK *Kết nối tri thức* tập 1+2 (không cần API)
-   - **Giám sát học tập** — tiến độ, điểm yếu, kế hoạch ôn AI
+   - **Gia sư Địa lí AI** — hỏi đáp hiện tượng tự nhiên, dân cư, kinh tế, phân tích Atlat & biểu đồ
+   - **Luyện tập Địa lí** — AI tạo câu hỏi theo chuyên đề THCS & chấm điểm
+   - **Khám phá Địa lí** — thám hiểm Trái Đất, vượt ải châu lục, chinh phục đỉnh núi qua mini games (không cần API)
+   - **Giám sát học tập** — tiến độ, điểm yếu, kế hoạch ôn tập AI bám sát chương trình THCS
 
 API key được lưu trên thiết bị (secure storage), gọi thẳng Gemini — không cần backend.
 

@@ -65,7 +65,7 @@ class GeminiClient {
       {
         'text': userMessage.trim().isEmpty
             ? (image != null
-                ? 'Em gửi ảnh bài tập Toán. Hãy đọc kỹ đề trên ảnh (OCR), nêu lại đề ngắn gọn, rồi hướng dẫn em giải từng bước (chưa đưa đáp án ngay trừ khi em yêu cầu).'
+                ? 'Em gửi ảnh câu hỏi / biểu đồ / bản đồ bài tập Địa lí. Hãy đọc kỹ nội dung trên ảnh (OCR), nêu lại yêu cầu ngắn gọn, rồi hướng dẫn em suy luận từng bước (chưa đưa đáp án ngay trừ khi em yêu cầu).'
                 : '')
             : userMessage.trim(),
       },

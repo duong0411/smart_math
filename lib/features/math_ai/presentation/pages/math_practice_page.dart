@@ -73,19 +73,19 @@ class _MathPracticePageState extends ConsumerState<MathPracticePage> {
     final result = await askMathAi(
       ref,
       userMessage: '''
-Hãy tạo ĐÚNG 1 bài tập Toán (chưa có đáp án trong phần hiển thị cho học sinh) phù hợp lớp hiện tại.
+Hãy tạo ĐÚNG 1 câu hỏi / bài tập Địa lí (kèm bảng số liệu hoặc yêu cầu giải thích hiện tượng/đọc bản đồ nếu cần, chưa có đáp án trong phần hiển thị cho học sinh) phù hợp chương trình Địa lí THCS (Lớp 6, 7, 8, 9) Việt Nam.
 Chủ đề: $topic
 
 Yêu cầu chất lượng:
-- Đề phải có nghiệm / đáp án xác định, không mâu thuẫn, vừa sức lớp.
-- Nêu rõ đơn vị / điều kiện nếu cần.
-- Dùng LaTeX \$...\$ hoặc \$\$...\$\$ cho biểu thức.
+- Bám sát kiến thức SGK GDPT 2018 cấp THCS (phân môn Địa lí).
+- Đặt câu hỏi rõ ràng, kích thích tư duy, phân tích nguyên nhân - kết quả hoặc tính toán địa lý cơ bản.
+- Nếu có bảng số liệu hay công thức (mật độ, tỉ lệ %), dùng bảng Markdown hoặc LaTeX \$...\$.
 
 Trả lời CHỈ bằng JSON thuần (không markdown, không code fence):
 {"topic":"...","question":"..."}
 ''',
       extraSystemContext:
-          'Chế độ luyện tập: chỉ tạo 1 bài đúng kiến thức, phù hợp lớp, vừa sức. Ưu tiên độ chính xác đề bài.',
+          'Chế độ luyện tập: chỉ tạo 1 bài đúng kiến thức Địa lí THCS, phù hợp lớp, vừa sức.',
     );
 
     if (!mounted) return;
@@ -244,17 +244,17 @@ Trả lời CHỈ bằng JSON thuần (không markdown, không code fence):
     final result = await askMathAi(
       ref,
       userMessage: '''
-Chấm bài luyện tập Toán — ưu tiên độ chính xác toán học.
+Chấm bài luyện tập Địa lí — đánh giá độ chuẩn xác kiến thức địa lý và khả năng giải thích/tính toán.
 
 Đề: $_question
 Bài làm học sinh (text): $answerLabel$imageNote$documentNote
 
 Quy trình chấm:
-1. Tự giải đúng đề (không hiện hết cho học sinh nếu sai).
-2. So sánh với bài làm (text, ảnh và/hoặc tệp); đọc kỹ phép tính trên ảnh/tệp nếu có.
-3. correct=true chỉ khi kết quả cuối cùng đúng (chấp nhận dạng tương đương hợp lệ).
-4. Nếu sai: chỉ ra bước/lỗi cụ thể + gợi ý bước tiếp theo — chưa đưa đáp án đầy đủ trừ khi gần đúng.
-5. Dùng LaTeX trong feedback khi cần.
+1. Đối chiếu với kiến thức chuẩn SGK Địa lí THCS và Atlat.
+2. So sánh với bài làm (text, ảnh và/hoặc tệp); xem xét ý đúng, từ khóa địa lý, số liệu tính toán.
+3. correct=true nếu học sinh trả lời đúng trọng tâm hoặc tính đúng kết quả.
+4. Nếu sai hoặc thiếu ý: chỉ ra điểm còn thiếu/chưa chính xác + gợi ý hướng suy luận.
+5. Giải thích ngắn gọn, dễ hiểu.
 
 Trả lời CHỈ bằng JSON thuần (không markdown, không code fence):
 {"correct":true/false,"feedback":"..."}
@@ -268,7 +268,7 @@ Trả lời CHỈ bằng JSON thuần (không markdown, không code fence):
       documentText: _answerDocumentText,
       documentName: _answerDocumentName,
       extraSystemContext:
-          'Chế độ chấm luyện tập: tự giải để đối chiếu trước khi kết luận đúng/sai. Không bịa.',
+          'Chế độ chấm luyện tập Địa lí: đánh giá khoa học, khích lệ tư duy địa lý. Không bịa.',
     );
 
     if (!mounted) return;
@@ -292,7 +292,7 @@ Trả lời CHỈ bằng JSON thuần (không markdown, không code fence):
         }();
         final attempt = MathPracticeAttempt(
           id: DateTime.now().millisecondsSinceEpoch.toString(),
-          topic: _topic ?? 'Toán',
+          topic: _topic ?? 'Địa lí',
           question: _question!,
           studentAnswer: storedAnswer,
           feedback: feedback,
@@ -340,7 +340,7 @@ Trả lời CHỈ bằng JSON thuần (không markdown, không code fence):
         backgroundColor: Colors.transparent,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
-          title: const Text('Luyện tập Toán'),
+          title: const Text('Luyện tập Địa lí'),
         ),
         body: ListView(
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
@@ -359,7 +359,7 @@ Trả lời CHỈ bằng JSON thuần (không markdown, không code fence):
                   TextField(
                     controller: _topicController,
                     decoration: const InputDecoration(
-                      hintText: 'VD: phương trình bậc nhất, phân số…',
+                      hintText: 'VD: Khí hậu Việt Nam, Vùng Đông Nam Bộ, Trái Đất…',
                       border: OutlineInputBorder(),
                     ),
                   ),

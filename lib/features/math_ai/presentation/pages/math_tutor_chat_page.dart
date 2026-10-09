@@ -260,7 +260,7 @@ class _MathTutorChatPageState extends ConsumerState<MathTutorChatPage> {
             MathStudyEvent(
               id: reply.id,
               type: MathStudyEventType.tutor,
-              topic: session.topic ?? 'Gia sư Toán',
+              topic: session.topic ?? 'Gia sư Địa lí',
               detail: attachNote,
               at: reply.at,
             ),

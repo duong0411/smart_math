@@ -183,7 +183,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                           controller: _subjectsController,
                           decoration: const InputDecoration(
                             labelText: 'Môn học quan tâm',
-                            hintText: 'Toán, Tiếng Anh, ...',
+                            hintText: 'Địa lí, Lịch sử, ...',
                             helperText: 'Cách nhau bằng dấu phẩy',
                           ),
                         ),

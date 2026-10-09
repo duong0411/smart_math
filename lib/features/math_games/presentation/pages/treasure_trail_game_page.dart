@@ -28,14 +28,14 @@ class _TreasureTrailGamePageState extends ConsumerState<TreasureTrailGamePage>
   late final AnimationController _bounce;
 
   static const _story = [
-    'Chương 1 — Cổng Đa thức mở ra…',
-    'Chương 2 — Hằng đẳng thức canh cầu!',
-    'Chương 3 — Mê cung Tứ giác',
-    'Chương 4 — Đường trung bình / Thalès',
-    'Chương 5 — Biểu đồ dữ liệu bí ẩn',
-    'Chương 6–7 — Phân thức & phương trình',
-    'Chương 8–9 — Xác suất · đồng dạng · Pythagore',
-    'Chương 10 — Đỉnh hình chóp: mở rương kho báu!',
+    'Trạm 1 — Khám phá Trái Đất & Vũ trụ kỳ vĩ',
+    'Trạm 2 — Giải mã Tọa độ & Bản đồ thế giới',
+    'Trạm 3 — Thám hiểm Lục địa Châu Á rộng lớn',
+    'Trạm 4 — Băng qua Sa mạc & Rừng rậm Amazon',
+    'Trạm 5 — Chạm đến Lãnh thổ & Vị trí Việt Nam',
+    'Trạm 6 — Vượt Dãy Hoàng Liên Sơn & Sông ngòi',
+    'Trạm 7 — Hướng ra Biển Đảo thiêng liêng',
+    'Trạm 8 — Khám phá Vùng kinh tế: Mở rương địa cầu!',
   ];
 
   @override
@@ -66,7 +66,7 @@ class _TreasureTrailGamePageState extends ConsumerState<TreasureTrailGamePage>
     _bounce.forward(from: 0);
   }
 
-  Future<void> _answer(int value) async {
+  Future<void> _answer(String value) async {
     if (!_playing || _q == null) return;
     final ok = value == _q!.answer;
     if (ok) {
@@ -86,8 +86,8 @@ class _TreasureTrailGamePageState extends ConsumerState<TreasureTrailGamePage>
       if (_won) {
         await logMathGameResult(
           ref,
-          topic: 'Hành trình Kho báu',
-          detail: 'Toán 8 · thắng · $_stars sao',
+          topic: 'Khám phá Địa Cầu',
+          detail: 'Địa lí THCS · thắng · $_stars sao',
           success: true,
         );
       }
@@ -106,8 +106,8 @@ class _TreasureTrailGamePageState extends ConsumerState<TreasureTrailGamePage>
       if (_lost) {
         await logMathGameResult(
           ref,
-          topic: 'Hành trình Kho báu',
-          detail: 'Toán 8 · thua ở trạm $_step',
+          topic: 'Khám phá Địa Cầu',
+          detail: 'Địa lí THCS · dừng ở trạm $_step',
           success: false,
         );
       }
@@ -124,7 +124,7 @@ class _TreasureTrailGamePageState extends ConsumerState<TreasureTrailGamePage>
         backgroundColor: Colors.transparent,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
-          title: const Text('Hành trình Kho báu · Toán 8'),
+          title: const Text('Khám phá Địa Cầu · THCS'),
         ),
         body: SafeArea(
           child: Padding(
@@ -159,7 +159,7 @@ class _TreasureTrailGamePageState extends ConsumerState<TreasureTrailGamePage>
                               ? _EndPanel(
                                   key: const ValueKey('w'),
                                   title: 'Mở được rương kho báu!',
-                                  subtitle: '$_stars ngôi sao · Toán 8',
+                                  subtitle: '$_stars ngôi sao · Địa lí THCS',
                                   emoji: '🏆',
                                   onAgain: _start,
                                 )
@@ -275,7 +275,7 @@ class _PlayPanel extends StatelessWidget {
   final String story;
   final GradeQuestion question;
   final AnimationController bounce;
-  final ValueChanged<int> onPick;
+  final ValueChanged<String> onPick;
 
   @override
   Widget build(BuildContext context) {
@@ -339,20 +339,20 @@ class _PlayPanel extends StatelessWidget {
           alignment: WrapAlignment.center,
           children: [
             for (final c in question.choices)
-              SizedBox(
-                width: 148,
-                height: 52,
+              ConstrainedBox(
+                constraints: const BoxConstraints(minWidth: 140, maxWidth: 320),
                 child: FilledButton(
                   style: FilledButton.styleFrom(
                     backgroundColor: const Color(0xFFD4A373),
                     foregroundColor: const Color(0xFF3D2B1F),
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                     textStyle: const TextStyle(
-                      fontSize: 20,
+                      fontSize: 16,
                       fontWeight: FontWeight.w800,
                     ),
                   ),
                   onPressed: () => onPick(c),
-                  child: Text('$c'),
+                  child: Text(c, textAlign: TextAlign.center),
                 ),
               ),
           ],

@@ -14,6 +14,6 @@ void main() {
     await tester.pumpWidget(const ProviderScope(child: EduSelfApp()));
     await tester.pumpAndSettle();
     expect(find.textContaining('EduSelf'), findsWidgets);
-    expect(find.textContaining('Toán'), findsWidgets);
+    expect(find.textContaining('Địa lí'), findsWidgets);
   });
 }

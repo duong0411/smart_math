@@ -34,7 +34,7 @@ class _MathMonitorPageState extends ConsumerState<MathMonitorPage> {
     setState(() => _loadingInsight = true);
 
     final summary = StringBuffer();
-    summary.writeln('=== Nhật ký học Toán (gần đây) ===');
+    summary.writeln('=== Nhật ký học Địa lí (gần đây) ===');
     for (final e in events.take(30)) {
       summary.writeln(
         '- [${e.type.name}] ${e.topic}: ${e.detail}'

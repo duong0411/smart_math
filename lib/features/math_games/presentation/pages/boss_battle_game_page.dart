@@ -51,7 +51,7 @@ class _BossBattleGamePageState extends ConsumerState<BossBattleGamePage> {
     });
   }
 
-  Future<void> _answer(int value) async {
+  Future<void> _answer(String value) async {
     if (!_playing || _q == null) return;
     final ok = value == _q!.answer;
     if (ok) {
@@ -74,8 +74,8 @@ class _BossBattleGamePageState extends ConsumerState<BossBattleGamePage> {
       if (_won) {
         await logMathGameResult(
           ref,
-          topic: 'Đại chiến Boss Toán',
-          detail: 'Toán 8 · hạ ${_boss.name}',
+          topic: 'Chinh phục Đỉnh Địa lí',
+          detail: 'Địa lí THCS · hạ ${_boss.name}',
           success: true,
         );
       }
@@ -99,8 +99,8 @@ class _BossBattleGamePageState extends ConsumerState<BossBattleGamePage> {
       if (_lost) {
         await logMathGameResult(
           ref,
-          topic: 'Đại chiến Boss Toán',
-          detail: 'Toán 8 · thua ${_boss.name}',
+          topic: 'Chinh phục Đỉnh Địa lí',
+          detail: 'Địa lí THCS · chịu thua ${_boss.name}',
           success: false,
         );
       }
@@ -114,7 +114,7 @@ class _BossBattleGamePageState extends ConsumerState<BossBattleGamePage> {
         backgroundColor: Colors.transparent,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
-          title: const Text('Đại chiến Boss · Toán 8'),
+          title: const Text('Chinh phục Đỉnh Địa lí'),
         ),
         body: SafeArea(
           child: Padding(
@@ -184,7 +184,7 @@ class _BossBattleGamePageState extends ConsumerState<BossBattleGamePage> {
                               ? _BattleEnd(
                                   key: const ValueKey('bw'),
                                   title: 'Chiến thắng!',
-                                  subtitle: 'Em đã hạ ${_boss.name} bằng trí tuệ Toán!',
+                                  subtitle: 'Em đã vượt qua ${_boss.name} bằng kiến thức Địa lí xuất sắc!',
                                   emoji: '⚔️',
                                   onAgain: _start,
                                 )
@@ -227,9 +227,9 @@ class _Boss {
   final int maxHp;
 
   static const grade8 = _Boss(
-    name: 'Pháp Sư Hằng Đẳng Thức',
-    emoji: '🧙',
-    taunt: 'Đa thức · PT · Pythagore theo SGK KNTT — giải sai là bị lời nguyền!',
+    name: 'Thần Bão Núi Lửa',
+    emoji: '🌋',
+    taunt: 'Kiến thức Địa lí THCS về Trái Đất, các châu lục và non sông Việt Nam — trả lời sai là chịu bão lửa!',
     maxHp: 120,
   );
 }
@@ -311,14 +311,14 @@ class _BattleIntro extends StatelessWidget {
 class _BattleAsk extends StatelessWidget {
   const _BattleAsk({super.key, required this.question, required this.onPick});
   final GradeQuestion question;
-  final ValueChanged<int> onPick;
+  final ValueChanged<String> onPick;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         Text(
-          'Đòn tấn Toán!',
+          'Đòn kiến thức Địa lí!',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w800,
                 color: const Color(0xFFE76F51),
@@ -349,20 +349,20 @@ class _BattleAsk extends StatelessWidget {
           alignment: WrapAlignment.center,
           children: [
             for (final c in question.choices)
-              SizedBox(
-                width: 148,
-                height: 52,
+              ConstrainedBox(
+                constraints: const BoxConstraints(minWidth: 140, maxWidth: 320),
                 child: FilledButton(
                   style: FilledButton.styleFrom(
                     backgroundColor: const Color(0xFFE76F51),
                     foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                     textStyle: const TextStyle(
-                      fontSize: 20,
+                      fontSize: 16,
                       fontWeight: FontWeight.w800,
                     ),
                   ),
                   onPressed: () => onPick(c),
-                  child: Text('$c'),
+                  child: Text(c, textAlign: TextAlign.center),
                 ),
               ),
           ],
