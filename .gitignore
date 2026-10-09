@@ -52,3 +52,5 @@ api
 .agent
 .claude
 .cursor
+dist-windows/
+*.zip
