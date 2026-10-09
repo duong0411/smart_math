@@ -241,7 +241,7 @@ class _DataStreamEffectState extends State<_DataStreamEffect> with SingleTickerP
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: const Duration(seconds: 4))..repeat();
+    _controller = AnimationController(vsync: this, duration: const Duration(seconds: 20))..repeat();
   }
 
   @override
@@ -275,31 +275,56 @@ class _DataStreamPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.0;
+    if (size.width == 0 || size.height == 0) return;
+    
+    final paint = Paint()..strokeWidth = 1.0;
+    final dotPaint = Paint()..style = PaintingStyle.fill;
+    
+    // Scale distance based on screen size, max 150
+    final double maxDistance = (size.width / 10).clamp(80.0, 150.0);
+    
+    // Determine number of points based on area
+    final int numPoints = ((size.width * size.height) / 12000).clamp(30, 100).toInt();
+    final List<Offset> points = [];
 
-    for (int i = 0; i < 30; i++) {
-      final x = (i * 123.456) % size.width;
-      final speed = 0.5 + ((i * 7) % 10) / 10.0;
-      final length = 60.0 + ((i * 11) % 100);
+    // Calculate seamlessly looping positions
+    for (int i = 0; i < numPoints; i++) {
+      final double baseX = (i * 873.123) % size.width;
+      final double baseY = (i * 2137.456) % size.height;
       
-      double y = (progress * size.height * speed + (i * 543.21)) % (size.height + length);
-      y -= length;
+      final double amplitudeX = 20.0 + (i * 13) % 40;
+      final double amplitudeY = 20.0 + (i * 17) % 40;
+      final double phaseX = (i * 0.5) % (math.pi * 2);
+      final double phaseY = (i * 0.7) % (math.pi * 2);
 
-      final rect = Rect.fromLTRB(x, y, x, y + length);
-      final gradient = LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [color.withValues(alpha: 0), color.withValues(alpha: 0.8), color],
-        stops: const [0.0, 0.7, 1.0],
-      );
-
-      paint.shader = gradient.createShader(rect);
-      canvas.drawLine(Offset(x, y), Offset(x, y + length), paint);
+      final currentPhase = progress * math.pi * 2;
       
-      final headPaint = Paint()..color = color..style = PaintingStyle.fill;
-      canvas.drawCircle(Offset(x, y + length), 1.5, headPaint);
+      final double x = baseX + math.sin(currentPhase + phaseX) * amplitudeX;
+      final double y = baseY + math.cos(currentPhase + phaseY) * amplitudeY;
+      
+      points.add(Offset(x, y));
+    }
+
+    // Draw lines and nodes
+    for (int i = 0; i < points.length; i++) {
+      final p1 = points[i];
+      
+      // Draw node
+      final bool isMajorNode = i % 7 == 0;
+      dotPaint.color = color.withValues(alpha: isMajorNode ? 0.8 : 0.4);
+      canvas.drawCircle(p1, isMajorNode ? 3.0 : 1.5, dotPaint);
+
+      // Draw connections
+      for (int j = i + 1; j < points.length; j++) {
+        final p2 = points[j];
+        final distance = (p1 - p2).distance;
+
+        if (distance < maxDistance) {
+          final opacity = 1.0 - (distance / maxDistance);
+          paint.color = color.withValues(alpha: opacity * 0.6);
+          canvas.drawLine(p1, p2, paint);
+        }
+      }
     }
   }
 
