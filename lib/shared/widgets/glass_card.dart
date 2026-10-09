@@ -111,7 +111,7 @@ class AtmosphericBackground extends StatelessWidget {
                   offset: Offset(math.sin(value * math.pi * 2) * 30, math.cos(value * math.pi * 2) * 30),
                   child: _GlowOrb(
                     size: 600,
-                    color: const Color(0xFFFACC15).withValues(alpha: isDark ? 0.35 : 0.45), // Golden VN star
+                    color: const Color(0xFFFACC15).withValues(alpha: isDark ? 0.35 : 0.65), // Golden VN star
                   ),
                 );
               },
@@ -129,7 +129,7 @@ class AtmosphericBackground extends StatelessWidget {
                   offset: Offset(math.cos(value * math.pi * 2) * -40, math.sin(value * math.pi * 2) * 40),
                   child: _GlowOrb(
                     size: 800,
-                    color: const Color(0xFFEF4444).withValues(alpha: isDark ? 0.25 : 0.4), // Red VN flag
+                    color: const Color(0xFFEF4444).withValues(alpha: isDark ? 0.25 : 0.55), // Red VN flag
                   ),
                 );
               },
@@ -147,7 +147,25 @@ class AtmosphericBackground extends StatelessWidget {
                    scale: 1.0 + math.sin(value * math.pi * 2) * 0.1,
                    child: _GlowOrb(
                      size: 500,
-                     color: scheme.primary.withValues(alpha: isDark ? 0.3 : 0.4), // AI Cyan/Blue
+                     color: scheme.primary.withValues(alpha: isDark ? 0.3 : 0.6), // AI Cyan/Blue
+                   ),
+                 );
+               }
+             ),
+          ),
+          Positioned(
+             bottom: MediaQuery.sizeOf(context).height * 0.1,
+             right: MediaQuery.sizeOf(context).width * 0.1,
+             child: TweenAnimationBuilder<double>(
+               tween: Tween<double>(begin: 1, end: 0),
+               duration: const Duration(seconds: 15),
+               curve: Curves.easeInOutSine,
+               builder: (context, value, child) {
+                 return Transform.translate(
+                   offset: Offset(math.sin(value * math.pi * 2) * -50, math.cos(value * math.pi * 2) * 50),
+                   child: _GlowOrb(
+                     size: 600,
+                     color: scheme.secondary.withValues(alpha: isDark ? 0.3 : 0.65), // Xanh nước biển
                    ),
                  );
                }
@@ -157,14 +175,14 @@ class AtmosphericBackground extends StatelessWidget {
           Positioned.fill(
             child: CustomPaint(
               painter: _TechLotusPainter(
-                color: scheme.primary.withValues(alpha: 0.4),
+                color: scheme.primary.withValues(alpha: isDark ? 0.4 : 0.7),
               ),
             ),
           ),
           // Flowing Data Stream Effect
           Positioned.fill(
             child: _DataStreamEffect(
-              color: scheme.primary.withValues(alpha: 0.5),
+              color: scheme.primary.withValues(alpha: isDark ? 0.5 : 0.8),
             ),
           ),
           Positioned.fill(child: child),

@@ -91,7 +91,7 @@ class MathHomePage extends ConsumerWidget {
                           : 'Hi, I\'m here to help',
                       style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                             fontWeight: FontWeight.w800,
-                            color: Colors.white,
+                            color: scheme.onSurface,
                           ),
                       textAlign: TextAlign.center,
                     ),
@@ -167,7 +167,7 @@ class MathHomePage extends ConsumerWidget {
                 'Recent Activities',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w700,
-                      color: Colors.white,
+                      color: scheme.onSurface,
                     ),
               ),
               const SizedBox(height: 12),
@@ -303,12 +303,12 @@ class _FeatureGridItem extends StatelessWidget {
                           width: 1.5,
                         ),
                       ),
-                      child: Icon(icon, color: Colors.white, size: 24),
+                      child: Icon(icon, color: iconColor, size: 24),
                     ),
                     const Spacer(),
                     Text(
                       title,
-                      style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16, color: Colors.white),
+                      style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16, color: scheme.onSurface),
                     ),
                     const SizedBox(height: 4),
                     Text(
@@ -359,11 +359,11 @@ class _RecentActivityTile extends StatelessWidget {
             width: 1.5,
           ),
         ),
-        child: Icon(icon, color: Colors.white70, size: 20),
+        child: Icon(icon, color: scheme.onSurfaceVariant, size: 20),
       ),
-      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: Colors.white)),
-      subtitle: Text(subtitle, style: TextStyle(fontSize: 12, color: Colors.white.withValues(alpha: 0.6))),
-      trailing: Icon(Icons.chevron_right_rounded, size: 20, color: Colors.white.withValues(alpha: 0.5)),
+      title: Text(title, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: scheme.onSurface)),
+      subtitle: Text(subtitle, style: TextStyle(fontSize: 12, color: scheme.onSurfaceVariant)),
+      trailing: Icon(Icons.chevron_right_rounded, size: 20, color: scheme.outline),
       onTap: onTap,
     );
   }
