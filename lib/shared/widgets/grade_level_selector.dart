@@ -1,7 +1,8 @@
 import 'package:eduself_study_app/core/theme/app_theme.dart';
+import 'package:eduself_study_app/shared/utils/supported_grades.dart';
 import 'package:flutter/material.dart';
 
-/// Rounded glass grade chips (1–12), grouped by VN school band.
+/// Rounded glass grade chips for supported THCS grades (6–9).
 class GradeLevelSelector extends StatelessWidget {
   const GradeLevelSelector({
     super.key,
@@ -12,12 +13,6 @@ class GradeLevelSelector extends StatelessWidget {
   final int? value;
   final ValueChanged<int> onChanged;
 
-  static const _bands = <({String label, List<int> grades})>[
-    (label: 'Tiểu học', grades: [1, 2, 3, 4, 5]),
-    (label: 'THCS', grades: [6, 7, 8, 9]),
-    (label: 'THPT', grades: [10, 11, 12]),
-  ];
-
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
@@ -27,37 +22,25 @@ class GradeLevelSelector extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          'Lớp',
+          'Lớp (THCS)',
           style: textTheme.bodyMedium?.copyWith(
             color: scheme.onSurfaceVariant,
             fontWeight: FontWeight.w600,
           ),
         ),
         const SizedBox(height: 10),
-        for (var i = 0; i < _bands.length; i++) ...[
-          if (i > 0) const SizedBox(height: 14),
-          Text(
-            _bands[i].label,
-            style: textTheme.labelMedium?.copyWith(
-              color: scheme.onSurfaceVariant,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 0.3,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              for (final grade in _bands[i].grades)
-                _GradeChip(
-                  grade: grade,
-                  selected: value == grade,
-                  onTap: () => onChanged(grade),
-                ),
-            ],
-          ),
-        ],
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (final grade in SupportedGrades.all)
+              _GradeChip(
+                grade: grade,
+                selected: value == grade,
+                onTap: () => onChanged(grade),
+              ),
+          ],
+        ),
       ],
     );
   }
@@ -79,7 +62,6 @@ class _GradeChip extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final glass = Theme.of(context).extension<GlassTheme>() ?? GlassTheme.light;
     final radius = BorderRadius.circular(glass.borderRadius * 0.55);
-    // Same pale mint wash as FilledButton.tonal / drawer selected item.
     final selectedBg = Color.alphaBlend(
       scheme.primary.withValues(alpha: 0.14),
       scheme.surface,

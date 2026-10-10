@@ -1,5 +1,6 @@
 import 'package:eduself_study_app/features/math_ai/presentation/providers/math_ai_providers.dart';
 import 'package:eduself_study_app/features/math_games/domain/grade_question_bank.dart';
+import 'package:eduself_study_app/shared/utils/supported_grades.dart';
 import 'package:eduself_study_app/shared/widgets/glass_card.dart';
 import 'package:eduself_study_app/shared/widgets/grade_level_selector.dart';
 import 'package:flutter/material.dart';
@@ -14,7 +15,7 @@ class MathGamesHubPage extends ConsumerStatefulWidget {
 }
 
 class _MathGamesHubPageState extends ConsumerState<MathGamesHubPage> {
-  int _grade = 8;
+  int _grade = SupportedGrades.fallback;
   var _synced = false;
 
   @override
@@ -24,7 +25,7 @@ class _MathGamesHubPageState extends ConsumerState<MathGamesHubPage> {
       if (!mounted || _synced) return;
       final profile = ref.read(mathProfileProvider).valueOrNull;
       setState(() {
-        _grade = (profile?.gradeLevel ?? 8).clamp(1, 12);
+        _grade = SupportedGrades.normalize(profile?.gradeLevel);
         _synced = true;
       });
     });
@@ -51,7 +52,7 @@ class _MathGamesHubPageState extends ConsumerState<MathGamesHubPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Toán các khối · lớp $grade',
+                    'Toán THCS · lớp $grade',
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                           fontWeight: FontWeight.w800,
                           letterSpacing: -0.4,

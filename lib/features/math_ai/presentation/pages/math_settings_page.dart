@@ -3,6 +3,7 @@ import 'package:eduself_study_app/core/settings/app_settings_store.dart';
 import 'package:eduself_study_app/features/math_ai/infrastructure/math_local_store.dart';
 import 'package:eduself_study_app/features/math_ai/presentation/providers/math_ai_providers.dart';
 import 'package:eduself_study_app/features/settings/presentation/providers/settings_providers.dart';
+import 'package:eduself_study_app/shared/utils/supported_grades.dart';
 import 'package:eduself_study_app/shared/widgets/app_toast.dart';
 import 'package:eduself_study_app/shared/widgets/glass_card.dart';
 import 'package:eduself_study_app/shared/widgets/grade_level_selector.dart';
@@ -74,11 +75,13 @@ class _MathSettingsPageState extends ConsumerState<MathSettingsPage> {
   }
 
   Future<void> _saveProfile() async {
+    final grade = _grade == null ? null : SupportedGrades.normalize(_grade);
     final profile = MathStudentProfile(
       displayName: _nameController.text.trim(),
-      gradeLevel: _grade,
+      gradeLevel: grade,
     );
     await ref.read(mathProfileProvider.notifier).save(profile);
+    setState(() => _grade = grade);
     AppToast.success('Đã lưu hồ sơ học sinh');
   }
 
@@ -95,7 +98,9 @@ class _MathSettingsPageState extends ConsumerState<MathSettingsPage> {
       final profile = profileAsync.valueOrNull;
       if (profile != null) {
         _nameController.text = profile.displayName;
-        _grade = profile.gradeLevel;
+        _grade = profile.gradeLevel == null
+            ? null
+            : SupportedGrades.normalize(profile.gradeLevel);
       }
       _profileSynced = true;
     }

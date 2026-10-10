@@ -8,14 +8,13 @@ import 'package:eduself_study_app/features/math_games/presentation/pages/boss_ba
 import 'package:eduself_study_app/features/math_games/presentation/pages/math_games_hub_page.dart';
 import 'package:eduself_study_app/features/math_games/presentation/pages/rocket_rush_game_page.dart';
 import 'package:eduself_study_app/features/math_games/presentation/pages/treasure_trail_game_page.dart';
+import 'package:eduself_study_app/shared/utils/supported_grades.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 int _gradeFromQuery(GoRouterState state) {
   final raw = state.uri.queryParameters['grade'];
-  final parsed = int.tryParse(raw ?? '');
-  if (parsed == null) return 8;
-  return parsed.clamp(1, 12);
+  return SupportedGrades.normalize(int.tryParse(raw ?? ''));
 }
 
 final appRouterProvider = Provider<GoRouter>((ref) {

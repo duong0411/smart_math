@@ -8,6 +8,7 @@ import 'package:eduself_study_app/features/math_ai/presentation/providers/math_a
 import 'package:eduself_study_app/shared/utils/extract_study_document_text.dart';
 import 'package:eduself_study_app/shared/utils/image_picker_errors.dart';
 import 'package:eduself_study_app/shared/utils/pick_study_document.dart';
+import 'package:eduself_study_app/shared/utils/supported_grades.dart';
 import 'package:eduself_study_app/shared/widgets/app_toast.dart';
 import 'package:eduself_study_app/shared/widgets/glass_card.dart';
 import 'package:eduself_study_app/shared/widgets/grade_level_selector.dart';
@@ -33,7 +34,7 @@ class _MathPracticePageState extends ConsumerState<MathPracticePage> {
   String? _topic;
   String? _feedback;
   bool? _correct;
-  int _grade = 8;
+  int _grade = SupportedGrades.fallback;
   var _gradeSynced = false;
   var _busy = false;
   Uint8List? _answerImageBytes;
@@ -48,7 +49,7 @@ class _MathPracticePageState extends ConsumerState<MathPracticePage> {
       if (!mounted || _gradeSynced) return;
       final profile = ref.read(mathProfileProvider).valueOrNull;
       setState(() {
-        _grade = (profile?.gradeLevel ?? 8).clamp(1, 12);
+        _grade = SupportedGrades.normalize(profile?.gradeLevel);
         _gradeSynced = true;
       });
     });

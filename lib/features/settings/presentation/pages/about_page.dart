@@ -34,7 +34,7 @@ class AboutPage extends StatelessWidget {
                   const SizedBox(height: 16),
                   const Text(
                     'EduSelf is an AI study companion for Vietnamese students '
-                    'from grade 1 to 12. It helps learners understand concepts, '
+                    'in grades 6–9 (THCS). It helps learners understand concepts, '
                     'practice step by step, and build self-study habits.',
                   ),
                   const SizedBox(height: 16),

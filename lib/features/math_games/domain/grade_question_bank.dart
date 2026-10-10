@@ -1,6 +1,8 @@
 import 'dart:math';
 
-/// Câu hỏi Toán theo chương trình GDPT Việt Nam (lớp 1–12).
+import 'package:eduself_study_app/shared/utils/supported_grades.dart';
+
+/// Câu hỏi Toán THCS (lớp 6–9).
 /// Chỉ dùng đáp án số nguyên để phù hợp chọn đáp án trong game.
 class GradeQuestion {
   const GradeQuestion({
@@ -21,9 +23,9 @@ class GradeQuestion {
 abstract final class GradeQuestionBank {
   static final _rng = Random();
 
-  /// Câu hỏi ngẫu nhiên theo lớp (1–12). Lớp ngoài khoảng được kẹp về 1–12.
+  /// Câu hỏi ngẫu nhiên theo lớp 6–9 (ngoài khoảng → lớp 8).
   static GradeQuestion next(int gradeLevel) {
-    final grade = gradeLevel.clamp(1, 12);
+    final grade = SupportedGrades.normalize(gradeLevel);
     final generators = _generatorsFor(grade);
     return generators[_rng.nextInt(generators.length)]();
   }
@@ -31,36 +33,20 @@ abstract final class GradeQuestionBank {
   @Deprecated('Dùng GradeQuestionBank.next(8)')
   static GradeQuestion nextGrade8() => next(8);
 
-  static String bandLabel(int gradeLevel) {
-    final g = gradeLevel.clamp(1, 12);
-    if (g <= 5) return 'Tiểu học';
-    if (g <= 9) return 'THCS';
-    return 'THPT';
-  }
+  static String bandLabel(int gradeLevel) => 'THCS';
 
   static String curriculumHint(int gradeLevel) {
-    final g = gradeLevel.clamp(1, 12);
+    final g = SupportedGrades.normalize(gradeLevel);
     return switch (g) {
-      1 || 2 => 'Cộng trừ trong phạm vi đã học, đếm số.',
-      3 || 4 => 'Nhân chia, chu vi, phân số đơn giản.',
-      5 => 'Phân số, diện tích, thể tích khối lập phương.',
       6 => 'Số nguyên, tỉ lệ, phần trăm, phương trình đơn giản.',
       7 => 'Biểu thức, tỉ lệ thức, góc trong tam giác, lũy thừa.',
       8 => 'Đa thức, hằng đẳng thức, PT bậc nhất, Pythagore…',
-      9 => 'Căn bậc hai, PT bậc hai, hệ PT, đường tròn.',
-      10 => 'Hàm số, phương trình, lượng giác giá trị đặc biệt.',
-      11 => 'Tổ hợp, cấp số, logarit cơ bản, xác suất.',
-      _ => 'Dãy số, tổ hợp, xác suất, hàm số nâng cao.',
+      _ => 'Căn bậc hai, PT bậc hai, hệ PT, đường tròn.',
     };
   }
 
   static List<GradeQuestion Function()> _generatorsFor(int grade) {
     return switch (grade) {
-      1 => [_addSmall, _subSmall, _countForward],
-      2 => [_addSmall, _subSmall, _addTens, _doubleNumber],
-      3 => [_mulSmall, _divExact, _rectPerimeter, _addThree],
-      4 => [_mulSmall, _divExact, _rectArea, _rectPerimeter, _fractionOf],
-      5 => [_rectArea, _cubeVolume, _fractionOf, _percentOf, _divExact],
       6 => [
           _intAdd,
           _intMul,
@@ -76,7 +62,6 @@ abstract final class GradeQuestionBank {
           _simpleLinear,
           _intMul,
         ],
-      8 => _grade8Generators,
       9 => [
           _sqrtPerfect,
           _quadraticRootSum,
@@ -86,31 +71,7 @@ abstract final class GradeQuestionBank {
           _pythagoreanLeg,
           _identityDiffSquares,
         ],
-      10 => [
-          _trigSpecial,
-          _linearFunctionValue,
-          _slopeOfLine,
-          _quadraticRootSum,
-          _arithmeticTerm,
-          _powerValue,
-        ],
-      11 => [
-          _combinationC,
-          _permutationP,
-          _arithmeticTerm,
-          _geometricTerm,
-          _logBasePower,
-          _probabilityFavorable,
-        ],
-      _ => [
-          _combinationC,
-          _permutationP,
-          _arithmeticTerm,
-          _geometricTerm,
-          _probabilityFavorable,
-          _limitSequenceSimple,
-          _trigSpecial,
-        ],
+      _ => _grade8Generators,
     };
   }
 
@@ -143,114 +104,7 @@ abstract final class GradeQuestionBank {
     _pyramidEdges,
   ];
 
-  // —— Lớp 1–2 ——
-  static GradeQuestion _addSmall() {
-    final a = 1 + _rng.nextInt(9);
-    final b = 1 + _rng.nextInt(10 - a);
-    return _q('$a + $b = ?', a + b, chapter: 'Cộng', hint: 'Cộng hai số.');
-  }
-
-  static GradeQuestion _subSmall() {
-    final a = 5 + _rng.nextInt(10);
-    final b = 1 + _rng.nextInt(a);
-    return _q('$a − $b = ?', a - b, chapter: 'Trừ', hint: 'Trừ số nhỏ hơn.');
-  }
-
-  static GradeQuestion _countForward() {
-    final a = 1 + _rng.nextInt(18);
-    return _q(
-      'Số liền sau của $a là?',
-      a + 1,
-      chapter: 'Đếm số',
-      hint: 'Số liền sau = số đó + 1.',
-    );
-  }
-
-  static GradeQuestion _addTens() {
-    final a = 10 * (1 + _rng.nextInt(5));
-    final b = 10 * (1 + _rng.nextInt(4));
-    return _q('$a + $b = ?', a + b, chapter: 'Cộng', hint: 'Cộng các chục.');
-  }
-
-  static GradeQuestion _doubleNumber() {
-    final a = 2 + _rng.nextInt(15);
-    return _q(
-      'Gấp đôi của $a là?',
-      a * 2,
-      chapter: 'Nhân 2',
-      hint: 'Gấp đôi = nhân 2.',
-    );
-  }
-
-  // —— Lớp 3–5 ——
-  static GradeQuestion _mulSmall() {
-    final a = 2 + _rng.nextInt(9);
-    final b = 2 + _rng.nextInt(9);
-    return _q('$a × $b = ?', a * b, chapter: 'Nhân', hint: 'Bảng nhân.');
-  }
-
-  static GradeQuestion _divExact() {
-    final b = 2 + _rng.nextInt(9);
-    final q = 2 + _rng.nextInt(10);
-    final a = b * q;
-    return _q('$a ÷ $b = ?', q, chapter: 'Chia', hint: 'Chia hết.');
-  }
-
-  static GradeQuestion _addThree() {
-    final a = 1 + _rng.nextInt(20);
-    final b = 1 + _rng.nextInt(20);
-    final c = 1 + _rng.nextInt(20);
-    return _q(
-      '$a + $b + $c = ?',
-      a + b + c,
-      chapter: 'Cộng',
-      hint: 'Cộng lần lượt.',
-    );
-  }
-
-  static GradeQuestion _rectPerimeter() {
-    final l = 4 + _rng.nextInt(12);
-    final w = 2 + _rng.nextInt(10);
-    return _q(
-      'Chu vi HCN $l × $w là?',
-      2 * (l + w),
-      chapter: 'Chu vi',
-      hint: 'P = 2(dài + rộng).',
-    );
-  }
-
-  static GradeQuestion _rectArea() {
-    final l = 3 + _rng.nextInt(12);
-    final w = 2 + _rng.nextInt(10);
-    return _q(
-      'Diện tích HCN $l × $w là?',
-      l * w,
-      chapter: 'Diện tích',
-      hint: 'S = dài × rộng.',
-    );
-  }
-
-  static GradeQuestion _fractionOf() {
-    final den = [2, 3, 4, 5][_rng.nextInt(4)];
-    final whole = den * (2 + _rng.nextInt(8));
-    return _q(
-      '1/$den của $whole là?',
-      whole ~/ den,
-      chapter: 'Phân số',
-      hint: 'Chia đều thành $den phần bằng nhau.',
-    );
-  }
-
-  static GradeQuestion _cubeVolume() {
-    final a = 2 + _rng.nextInt(8);
-    return _q(
-      'Thể tích lập phương cạnh $a là?',
-      a * a * a,
-      chapter: 'Thể tích',
-      hint: 'V = a³.',
-    );
-  }
-
+  // —— Lớp 6–7 ——
   static GradeQuestion _percentOf() {
     final p = [10, 20, 25, 50][_rng.nextInt(4)];
     final whole = [20, 40, 60, 80, 100][_rng.nextInt(5)];
@@ -262,7 +116,6 @@ abstract final class GradeQuestionBank {
     );
   }
 
-  // —— Lớp 6–7 ——
   static GradeQuestion _intAdd() {
     final a = -20 + _rng.nextInt(41);
     final b = -20 + _rng.nextInt(41);
@@ -751,125 +604,6 @@ abstract final class GradeQuestionBank {
       2 * r,
       chapter: 'Đường tròn',
       hint: 'C = 2πr.',
-    );
-  }
-
-  static GradeQuestion _trigSpecial() {
-    // sin/cos of special angles as integer percent? Better: sin30=1/2 → ask numerator
-    final cases = <(String, int)>[
-      ('sin 30° = a/2. a = ?', 1),
-      ('cos 60° = a/2. a = ?', 1),
-      ('tan 45° = ?', 1),
-      ('sin 90° = ?', 1),
-      ('cos 0° = ?', 1),
-    ];
-    final c = cases[_rng.nextInt(cases.length)];
-    return _q(c.$1, c.$2, chapter: 'Lượng giác', hint: 'Giá trị đặc biệt.');
-  }
-
-  static GradeQuestion _linearFunctionValue() {
-    final a = -5 + _rng.nextInt(11);
-    if (a == 0) return _linearFunctionValue();
-    final b = -8 + _rng.nextInt(17);
-    final x = -4 + _rng.nextInt(9);
-    final bStr = b >= 0 ? '+ $b' : '− ${-b}';
-    return _q(
-      'f(x) = ${a}x $bStr. f($x) = ?',
-      a * x + b,
-      chapter: 'Hàm số',
-      hint: 'Thay x vào f.',
-    );
-  }
-
-  static GradeQuestion _arithmeticTerm() {
-    final a1 = 1 + _rng.nextInt(10);
-    final d = 1 + _rng.nextInt(8);
-    final n = 3 + _rng.nextInt(8);
-    return _q(
-      'Cấp số cộng: u1 = $a1, d = $d. u$n = ?',
-      a1 + (n - 1) * d,
-      chapter: 'Cấp số cộng',
-      hint: 'un = u1 + (n−1)d.',
-    );
-  }
-
-  static GradeQuestion _geometricTerm() {
-    final a1 = 1 + _rng.nextInt(5);
-    final q = 2 + _rng.nextInt(3);
-    final n = 2 + _rng.nextInt(4);
-    var value = a1;
-    for (var i = 1; i < n; i++) {
-      value *= q;
-    }
-    return _q(
-      'Cấp số nhân: u1 = $a1, q = $q. u$n = ?',
-      value,
-      chapter: 'Cấp số nhân',
-      hint: 'un = u1 · q^(n−1).',
-    );
-  }
-
-  static GradeQuestion _combinationC() {
-    // C(n,k) for small n
-    final cases = <(int, int, int)>[
-      (5, 2, 10),
-      (6, 2, 15),
-      (6, 3, 20),
-      (7, 2, 21),
-      (8, 2, 28),
-      (5, 3, 10),
-      (4, 2, 6),
-    ];
-    final c = cases[_rng.nextInt(cases.length)];
-    return _q(
-      'C(${c.$1}, ${c.$2}) = ?',
-      c.$3,
-      chapter: 'Tổ hợp',
-      hint: 'C(n,k) = n! / (k!(n−k)!).',
-    );
-  }
-
-  static GradeQuestion _permutationP() {
-    final cases = <(int, int, int)>[
-      (5, 2, 20),
-      (6, 2, 30),
-      (4, 3, 24),
-      (5, 3, 60),
-      (7, 2, 42),
-    ];
-    final c = cases[_rng.nextInt(cases.length)];
-    return _q(
-      'P(${c.$1}, ${c.$2}) = ?',
-      c.$3,
-      chapter: 'Chỉnh hợp',
-      hint: 'P(n,k) = n! / (n−k)!.',
-    );
-  }
-
-  static GradeQuestion _logBasePower() {
-    final a = [2, 3, 5, 10][_rng.nextInt(4)];
-    final n = 1 + _rng.nextInt(4);
-    var value = 1;
-    for (var i = 0; i < n; i++) {
-      value *= a;
-    }
-    return _q(
-      'log_$a ($value) = ?',
-      n,
-      chapter: 'Logarit',
-      hint: 'log_a (a^n) = n.',
-    );
-  }
-
-  static GradeQuestion _limitSequenceSimple() {
-    // lim n→∞ of constant sequence? Ask u_n for arithmetic - or (n+3)/(n) → 1
-    // Integer: lim of a_n = 5 for all n
-    final c = 2 + _rng.nextInt(20);
-    return _q(
-      'Dãy u_n = $c (hằng số). lim(n→∞) u_n = ?',
-      c,
-      chapter: 'Giới hạn',
-      hint: 'Dãy hằng hội tụ về chính giá trị đó.',
     );
   }
 

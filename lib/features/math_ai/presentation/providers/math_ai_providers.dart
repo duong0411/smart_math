@@ -4,6 +4,7 @@ import 'package:eduself_study_app/core/error/result.dart';
 import 'package:eduself_study_app/core/settings/app_settings_store.dart';
 import 'package:eduself_study_app/features/math_ai/infrastructure/math_local_store.dart';
 import 'package:eduself_study_app/features/settings/presentation/providers/settings_providers.dart';
+import 'package:eduself_study_app/shared/utils/supported_grades.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final mathLocalStoreProvider = Provider<MathLocalStore>((ref) {
@@ -140,7 +141,9 @@ Future<Result<String>> askMathAi(
 
   final basePrompt = await ref.read(systemPromptProvider.future);
   final profile = ref.read(mathProfileProvider).valueOrNull;
-  final effectiveGrade = gradeLevel ?? profile?.gradeLevel;
+  final rawGrade = gradeLevel ?? profile?.gradeLevel;
+  final effectiveGrade =
+      rawGrade == null ? null : SupportedGrades.normalize(rawGrade);
   final profileBlock = StringBuffer();
   if (profile != null) {
     if (profile.displayName.trim().isNotEmpty) {
@@ -156,7 +159,7 @@ Future<Result<String>> askMathAi(
     profileBlock.writeln('Lớp: $effectiveGrade');
     profileBlock.writeln(
       'Chỉ dạy / ra đề / giải thích phù hợp chương trình Toán lớp $effectiveGrade '
-      '(GDPT Việt Nam). Điều chỉnh độ khó và thuật ngữ theo lớp này.',
+      '(THCS, GDPT Việt Nam). Điều chỉnh độ khó và thuật ngữ theo lớp này.',
     );
   }
   if (extraSystemContext != null && extraSystemContext.trim().isNotEmpty) {

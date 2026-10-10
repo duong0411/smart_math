@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:eduself_study_app/features/math_games/domain/grade_question_bank.dart';
 import 'package:eduself_study_app/features/math_games/presentation/widgets/game_result_logger.dart';
+import 'package:eduself_study_app/shared/utils/supported_grades.dart';
 import 'package:eduself_study_app/shared/widgets/glass_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -10,7 +11,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Fill the rocket fuel before countdown ends — grade-level questions.
 class RocketRushGamePage extends ConsumerStatefulWidget {
-  const RocketRushGamePage({super.key, this.gradeLevel = 8});
+  const RocketRushGamePage({
+    super.key,
+    this.gradeLevel = SupportedGrades.fallback,
+  });
 
   final int gradeLevel;
 
@@ -37,7 +41,7 @@ class _RocketRushGamePageState extends ConsumerState<RocketRushGamePage>
   @override
   void initState() {
     super.initState();
-    _grade = widget.gradeLevel.clamp(1, 12);
+    _grade = SupportedGrades.normalize(widget.gradeLevel);
     _lift = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 900),

@@ -1,6 +1,6 @@
 # Toán 8 — Kết nối tri thức với cuộc sống (nguồn tham chiếu lớp 8)
 
-App hỗ trợ Toán **lớp 1–12**. Tài liệu này giữ làm nguồn tham chiếu nội dung **lớp 8**.
+App hỗ trợ Toán **THCS lớp 6–9**. Tài liệu này giữ làm nguồn tham chiếu nội dung **lớp 8**.
 
 Nguồn lớp 8: SGK Toán 8 tập 1 & tập 2 (bộ Kết nối tri thức với cuộc sống).
 PDF scan không có lớp chữ OCR; nội dung trò chơi bám **mục lục chương trình**.

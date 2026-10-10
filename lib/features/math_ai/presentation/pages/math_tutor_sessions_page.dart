@@ -1,4 +1,5 @@
 import 'package:eduself_study_app/features/math_ai/presentation/providers/math_ai_providers.dart';
+import 'package:eduself_study_app/shared/utils/supported_grades.dart';
 import 'package:eduself_study_app/shared/widgets/app_toast.dart';
 import 'package:eduself_study_app/shared/widgets/glass_card.dart';
 import 'package:eduself_study_app/shared/widgets/grade_level_selector.dart';
@@ -26,7 +27,9 @@ class MathTutorSessionsPage extends ConsumerWidget {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      builder: (ctx) => _GradePickSheet(initialGrade: profileGrade ?? 8),
+      builder: (ctx) => _GradePickSheet(
+        initialGrade: SupportedGrades.normalize(profileGrade),
+      ),
     );
     if (grade == null || !context.mounted) return;
 
@@ -146,7 +149,7 @@ class _GradePickSheetState extends State<_GradePickSheet> {
   @override
   void initState() {
     super.initState();
-    _grade = widget.initialGrade.clamp(1, 12);
+    _grade = SupportedGrades.normalize(widget.initialGrade);
   }
 
   @override
@@ -171,7 +174,7 @@ class _GradePickSheetState extends State<_GradePickSheet> {
             ),
             const SizedBox(height: 4),
             Text(
-              'Gia sư AI sẽ dạy theo chương trình Toán lớp đã chọn (1–12).',
+              'Gia sư AI sẽ dạy theo chương trình Toán THCS (${SupportedGrades.labelShort}).',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),

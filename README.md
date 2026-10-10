@@ -13,7 +13,7 @@ Repo: [duong0411/smart_math](https://github.com/duong0411/smart_math)
 5. Dùng:
    - **Gia sư Toán AI** — hỏi đáp từng bước
    - **Luyện tập Toán** — AI tạo bài & chấm
-   - **Giải trí Toán** — chọn lớp 1–12 · kho báu, boss, tên lửa (không cần API)
+   - **Giải trí Toán** — chọn lớp 6–9 · kho báu, boss, tên lửa (không cần API)
    - **Giám sát học tập** — tiến độ, điểm yếu, kế hoạch ôn AI
 
 API key được lưu trên thiết bị (secure storage), gọi thẳng Gemini — không cần backend.

@@ -1,5 +1,6 @@
 import 'package:eduself_study_app/features/math_games/domain/grade_question_bank.dart';
 import 'package:eduself_study_app/features/math_games/presentation/widgets/game_result_logger.dart';
+import 'package:eduself_study_app/shared/utils/supported_grades.dart';
 import 'package:eduself_study_app/shared/widgets/glass_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -7,7 +8,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Story adventure: move along a treasure map by answering grade questions.
 class TreasureTrailGamePage extends ConsumerStatefulWidget {
-  const TreasureTrailGamePage({super.key, this.gradeLevel = 8});
+  const TreasureTrailGamePage({
+    super.key,
+    this.gradeLevel = SupportedGrades.fallback,
+  });
 
   final int gradeLevel;
 
@@ -32,46 +36,35 @@ class _TreasureTrailGamePageState extends ConsumerState<TreasureTrailGamePage>
   late final List<String> _story;
 
   static List<String> _storyFor(int grade) {
-    if (grade <= 5) {
+    final g = SupportedGrades.normalize(grade);
+    if (g <= 7) {
       return const [
-        'Trạm 1 — Cổng số học mở ra…',
-        'Trạm 2 — Cầu Cộng Trừ lung linh',
-        'Trạm 3 — Rừng Nhân Chia',
-        'Trạm 4 — Hồ Chu vi & Diện tích',
-        'Trạm 5 — Hang Phân số bí ẩn',
-        'Trạm 6 — Đồi Phần trăm',
-        'Trạm 7 — Thung lũng Hình học',
-        'Trạm 8 — Đỉnh kho báu tiểu học!',
-      ];
-    }
-    if (grade <= 9) {
-      return const [
-        'Trạm 1 — Cổng Đại số mở ra…',
-        'Trạm 2 — Hằng đẳng thức canh cầu!',
-        'Trạm 3 — Mê cung Hình học',
-        'Trạm 4 — Đường trung bình / tỉ lệ',
-        'Trạm 5 — Biểu đồ dữ liệu bí ẩn',
-        'Trạm 6 — Phân thức & phương trình',
-        'Trạm 7 — Xác suất · Pythagore',
-        'Trạm 8 — Đỉnh kho báu THCS!',
+        'Trạm 1 — Cổng Số nguyên mở ra…',
+        'Trạm 2 — Cầu Tỉ lệ & phần trăm',
+        'Trạm 3 — Rừng Biểu thức',
+        'Trạm 4 — Hồ Phương trình',
+        'Trạm 5 — Hang Hình học bí ẩn',
+        'Trạm 6 — Đồi Lũy thừa',
+        'Trạm 7 — Thung lũng Góc & tỉ lệ thức',
+        'Trạm 8 — Đỉnh kho báu lớp 6–7!',
       ];
     }
     return const [
-      'Trạm 1 — Cổng Hàm số mở ra…',
-      'Trạm 2 — Lượng giác canh cầu!',
-      'Trạm 3 — Mê cung Phương trình',
-      'Trạm 4 — Dãy số & cấp số',
-      'Trạm 5 — Hang Tổ hợp bí ẩn',
-      'Trạm 6 — Logarit & mũ',
-      'Trạm 7 — Xác suất nâng cao',
-      'Trạm 8 — Đỉnh kho báu THPT!',
+      'Trạm 1 — Cổng Đại số mở ra…',
+      'Trạm 2 — Hằng đẳng thức canh cầu!',
+      'Trạm 3 — Mê cung Hình học',
+      'Trạm 4 — Đường trung bình / tỉ lệ',
+      'Trạm 5 — Biểu đồ dữ liệu bí ẩn',
+      'Trạm 6 — Phân thức & phương trình',
+      'Trạm 7 — Xác suất · Pythagore',
+      'Trạm 8 — Đỉnh kho báu lớp 8–9!',
     ];
   }
 
   @override
   void initState() {
     super.initState();
-    _grade = widget.gradeLevel.clamp(1, 12);
+    _grade = SupportedGrades.normalize(widget.gradeLevel);
     _story = _storyFor(_grade);
     _bounce = AnimationController(
       vsync: this,

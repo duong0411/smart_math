@@ -1,4 +1,3 @@
-import 'package:eduself_study_app/core/config/app_config.dart';
 import 'package:eduself_study_app/features/math_ai/presentation/providers/math_ai_providers.dart';
 import 'package:eduself_study_app/shared/widgets/glass_card.dart';
 import 'package:flutter/material.dart';
@@ -144,7 +143,7 @@ class MathHomePage extends ConsumerWidget {
                   _FeatureGridItem(
                     icon: Icons.blur_on_rounded,
                     title: 'Giải trí Toán',
-                    subtitle: 'Chọn lớp 1–12 · trò chơi',
+                    subtitle: 'Chọn lớp 6–9 · trò chơi',
                     iconColor: const Color(0xFFF59E0B),
                     gradientColors: [const Color(0xFFF59E0B).withValues(alpha: 0.7), const Color(0xFFF59E0B).withValues(alpha: 0.1)],
                     imagePath: 'assets/images/icon_games_1791474095200.png',

@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:eduself_study_app/shared/utils/supported_grades.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Local-only persistence for Math AI tutoring & monitoring.
@@ -70,7 +71,8 @@ class MathLocalStore {
   }) async {
     final sessions = await listSessions();
     final now = DateTime.now().toUtc();
-    final grade = gradeLevel?.clamp(1, 12);
+    final grade =
+        gradeLevel == null ? null : SupportedGrades.normalize(gradeLevel);
     final session = MathTutorSession(
       id: now.millisecondsSinceEpoch.toString(),
       title: (title?.trim().isNotEmpty == true)
@@ -236,9 +238,11 @@ class MathStudentProfile {
 
   factory MathStudentProfile.fromJson(Map<String, dynamic> json) {
     final topics = json['focusTopics'];
+    final rawGrade = json['gradeLevel'] as int?;
     return MathStudentProfile(
       displayName: json['displayName'] as String? ?? '',
-      gradeLevel: json['gradeLevel'] as int?,
+      gradeLevel:
+          rawGrade == null ? null : SupportedGrades.normalize(rawGrade),
       focusTopics: [
         if (topics is List)
           for (final t in topics)
@@ -347,7 +351,10 @@ class MathTutorSession {
       id: json['id'] as String? ?? '',
       title: json['title'] as String? ?? 'Buổi học Toán',
       topic: json['topic'] as String?,
-      gradeLevel: json['gradeLevel'] as int?,
+      gradeLevel: () {
+        final raw = json['gradeLevel'] as int?;
+        return raw == null ? null : SupportedGrades.normalize(raw);
+      }(),
       messages: [
         if (msgs is List)
           for (final m in msgs)

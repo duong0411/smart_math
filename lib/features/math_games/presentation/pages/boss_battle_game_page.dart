@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:eduself_study_app/features/math_games/domain/grade_question_bank.dart';
 import 'package:eduself_study_app/features/math_games/presentation/widgets/game_result_logger.dart';
+import 'package:eduself_study_app/shared/utils/supported_grades.dart';
 import 'package:eduself_study_app/shared/widgets/glass_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -9,7 +10,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// RPG-style boss fight: correct answers deal damage, wrong answers hurt the player.
 class BossBattleGamePage extends ConsumerStatefulWidget {
-  const BossBattleGamePage({super.key, this.gradeLevel = 8});
+  const BossBattleGamePage({
+    super.key,
+    this.gradeLevel = SupportedGrades.fallback,
+  });
 
   final int gradeLevel;
 
@@ -32,7 +36,7 @@ class _BossBattleGamePageState extends ConsumerState<BossBattleGamePage> {
   @override
   void initState() {
     super.initState();
-    _grade = widget.gradeLevel.clamp(1, 12);
+    _grade = SupportedGrades.normalize(widget.gradeLevel);
     _boss = _Boss.forGrade(_grade);
     _bossHp = _boss.maxHp;
   }
@@ -230,27 +234,20 @@ class _Boss {
   final int maxHp;
 
   static _Boss forGrade(int grade) {
-    if (grade <= 5) {
+    final g = SupportedGrades.normalize(grade);
+    if (g <= 7) {
       return const _Boss(
-        name: 'Phù Thủy Phép Tính',
+        name: 'Phù Thủy Số Học',
         emoji: '🧚',
-        taunt: 'Cộng trừ nhân chia — sai một phép là biến mất!',
-        maxHp: 100,
-      );
-    }
-    if (grade <= 9) {
-      return const _Boss(
-        name: 'Pháp Sư Hằng Đẳng Thức',
-        emoji: '🧙',
-        taunt: 'Đại số · hình học THCS — giải sai là bị lời nguyền!',
-        maxHp: 120,
+        taunt: 'Số nguyên · tỉ lệ · biểu thức — sai một phép là biến mất!',
+        maxHp: 110,
       );
     }
     return const _Boss(
-      name: 'Ma Vương Giải Tích',
-      emoji: '🐉',
-      taunt: 'Hàm số · tổ hợp · xác suất THPT — chỉ trí tuệ mới hạ được!',
-      maxHp: 140,
+      name: 'Pháp Sư Hằng Đẳng Thức',
+      emoji: '🧙',
+      taunt: 'Đại số · hình học THCS — giải sai là bị lời nguyền!',
+      maxHp: 120,
     );
   }
 }

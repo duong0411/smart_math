@@ -21,9 +21,9 @@ const kDocumentExtensions = <String>[
 ];
 
 /// PDF / Word / text for Math AI (tutor + practice) local extraction.
+/// Note: old binary `.doc` is not supported (only `.docx`).
 const kMathAiDocumentExtensions = <String>[
   'pdf',
-  'doc',
   'docx',
   'txt',
   'md',
@@ -109,7 +109,8 @@ Future<({String name, List<int> bytes})?> pickMathAiDocument(
       title: const Text('Chọn PDF / Word'),
       content: const Text(
         'Sắp mở trình chọn tệp của hệ thống.\n\n'
-        '• Chọn PDF, Word (.docx) hoặc TXT chứa đề / bài làm\n'
+        '• Chọn PDF (có chữ chọn được), Word (.docx) hoặc TXT\n'
+        '• Không hỗ trợ Word cũ (.doc) — hãy lưu lại thành .docx\n'
         '• App sẽ đọc chữ trong tệp rồi gửi cho AI\n'
         '• Bấm Back / Hủy để quay lại app',
       ),
