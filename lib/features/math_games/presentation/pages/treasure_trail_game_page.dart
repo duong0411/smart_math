@@ -5,9 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// Story adventure: move along a treasure map by answering grade-8 questions.
+/// Story adventure: move along a treasure map by answering grade questions.
 class TreasureTrailGamePage extends ConsumerStatefulWidget {
-  const TreasureTrailGamePage({super.key});
+  const TreasureTrailGamePage({super.key, this.gradeLevel = 8});
+
+  final int gradeLevel;
 
   @override
   ConsumerState<TreasureTrailGamePage> createState() =>
@@ -18,6 +20,7 @@ class _TreasureTrailGamePageState extends ConsumerState<TreasureTrailGamePage>
     with SingleTickerProviderStateMixin {
   static const _stations = 8;
 
+  late final int _grade;
   var _step = 0;
   var _hearts = 3;
   var _stars = 0;
@@ -26,21 +29,50 @@ class _TreasureTrailGamePageState extends ConsumerState<TreasureTrailGamePage>
   var _lost = false;
   GradeQuestion? _q;
   late final AnimationController _bounce;
+  late final List<String> _story;
 
-  static const _story = [
-    'Chương 1 — Cổng Đa thức mở ra…',
-    'Chương 2 — Hằng đẳng thức canh cầu!',
-    'Chương 3 — Mê cung Tứ giác',
-    'Chương 4 — Đường trung bình / Thalès',
-    'Chương 5 — Biểu đồ dữ liệu bí ẩn',
-    'Chương 6–7 — Phân thức & phương trình',
-    'Chương 8–9 — Xác suất · đồng dạng · Pythagore',
-    'Chương 10 — Đỉnh hình chóp: mở rương kho báu!',
-  ];
+  static List<String> _storyFor(int grade) {
+    if (grade <= 5) {
+      return const [
+        'Trạm 1 — Cổng số học mở ra…',
+        'Trạm 2 — Cầu Cộng Trừ lung linh',
+        'Trạm 3 — Rừng Nhân Chia',
+        'Trạm 4 — Hồ Chu vi & Diện tích',
+        'Trạm 5 — Hang Phân số bí ẩn',
+        'Trạm 6 — Đồi Phần trăm',
+        'Trạm 7 — Thung lũng Hình học',
+        'Trạm 8 — Đỉnh kho báu tiểu học!',
+      ];
+    }
+    if (grade <= 9) {
+      return const [
+        'Trạm 1 — Cổng Đại số mở ra…',
+        'Trạm 2 — Hằng đẳng thức canh cầu!',
+        'Trạm 3 — Mê cung Hình học',
+        'Trạm 4 — Đường trung bình / tỉ lệ',
+        'Trạm 5 — Biểu đồ dữ liệu bí ẩn',
+        'Trạm 6 — Phân thức & phương trình',
+        'Trạm 7 — Xác suất · Pythagore',
+        'Trạm 8 — Đỉnh kho báu THCS!',
+      ];
+    }
+    return const [
+      'Trạm 1 — Cổng Hàm số mở ra…',
+      'Trạm 2 — Lượng giác canh cầu!',
+      'Trạm 3 — Mê cung Phương trình',
+      'Trạm 4 — Dãy số & cấp số',
+      'Trạm 5 — Hang Tổ hợp bí ẩn',
+      'Trạm 6 — Logarit & mũ',
+      'Trạm 7 — Xác suất nâng cao',
+      'Trạm 8 — Đỉnh kho báu THPT!',
+    ];
+  }
 
   @override
   void initState() {
     super.initState();
+    _grade = widget.gradeLevel.clamp(1, 12);
+    _story = _storyFor(_grade);
     _bounce = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 420),
@@ -53,6 +85,8 @@ class _TreasureTrailGamePageState extends ConsumerState<TreasureTrailGamePage>
     super.dispose();
   }
 
+  GradeQuestion _nextQ() => GradeQuestionBank.next(_grade);
+
   void _start() {
     setState(() {
       _step = 0;
@@ -61,7 +95,7 @@ class _TreasureTrailGamePageState extends ConsumerState<TreasureTrailGamePage>
       _playing = true;
       _won = false;
       _lost = false;
-      _q = GradeQuestionBank.nextGrade8();
+      _q = _nextQ();
     });
     _bounce.forward(from: 0);
   }
@@ -79,7 +113,7 @@ class _TreasureTrailGamePageState extends ConsumerState<TreasureTrailGamePage>
           _won = true;
           _q = null;
         } else {
-          _q = GradeQuestionBank.nextGrade8();
+          _q = _nextQ();
         }
       });
       _bounce.forward(from: 0);
@@ -87,7 +121,7 @@ class _TreasureTrailGamePageState extends ConsumerState<TreasureTrailGamePage>
         await logMathGameResult(
           ref,
           topic: 'Hành trình Kho báu',
-          detail: 'Toán 8 · thắng · $_stars sao',
+          detail: 'Toán $_grade · thắng · $_stars sao',
           success: true,
         );
       }
@@ -100,14 +134,14 @@ class _TreasureTrailGamePageState extends ConsumerState<TreasureTrailGamePage>
           _lost = true;
           _q = null;
         } else {
-          _q = GradeQuestionBank.nextGrade8();
+          _q = _nextQ();
         }
       });
       if (_lost) {
         await logMathGameResult(
           ref,
           topic: 'Hành trình Kho báu',
-          detail: 'Toán 8 · thua ở trạm $_step',
+          detail: 'Toán $_grade · thua ở trạm $_step',
           success: false,
         );
       }
@@ -124,7 +158,7 @@ class _TreasureTrailGamePageState extends ConsumerState<TreasureTrailGamePage>
         backgroundColor: Colors.transparent,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
-          title: const Text('Hành trình Kho báu · Toán 8'),
+          title: Text('Hành trình Kho báu · Lớp $_grade'),
         ),
         body: SafeArea(
           child: Padding(
@@ -159,7 +193,7 @@ class _TreasureTrailGamePageState extends ConsumerState<TreasureTrailGamePage>
                               ? _EndPanel(
                                   key: const ValueKey('w'),
                                   title: 'Mở được rương kho báu!',
-                                  subtitle: '$_stars ngôi sao · Toán 8',
+                                  subtitle: '$_stars ngôi sao · Toán lớp $_grade',
                                   emoji: '🏆',
                                   onAgain: _start,
                                 )

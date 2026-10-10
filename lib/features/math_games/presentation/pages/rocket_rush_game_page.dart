@@ -8,9 +8,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// Fill the rocket fuel before countdown ends — grade-8 questions.
+/// Fill the rocket fuel before countdown ends — grade-level questions.
 class RocketRushGamePage extends ConsumerStatefulWidget {
-  const RocketRushGamePage({super.key});
+  const RocketRushGamePage({super.key, this.gradeLevel = 8});
+
+  final int gradeLevel;
 
   @override
   ConsumerState<RocketRushGamePage> createState() => _RocketRushGamePageState();
@@ -21,6 +23,7 @@ class _RocketRushGamePageState extends ConsumerState<RocketRushGamePage>
   static const _fuelTarget = 100;
   static const _seconds = 50;
 
+  late final int _grade;
   var _fuel = 0;
   var _secondsLeft = _seconds;
   var _streak = 0;
@@ -34,6 +37,7 @@ class _RocketRushGamePageState extends ConsumerState<RocketRushGamePage>
   @override
   void initState() {
     super.initState();
+    _grade = widget.gradeLevel.clamp(1, 12);
     _lift = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 900),
@@ -47,6 +51,8 @@ class _RocketRushGamePageState extends ConsumerState<RocketRushGamePage>
     super.dispose();
   }
 
+  GradeQuestion _nextQ() => GradeQuestionBank.next(_grade);
+
   void _start() {
     _timer?.cancel();
     _lift.reset();
@@ -57,7 +63,7 @@ class _RocketRushGamePageState extends ConsumerState<RocketRushGamePage>
       _playing = true;
       _launched = false;
       _failed = false;
-      _q = GradeQuestionBank.nextGrade8();
+      _q = _nextQ();
     });
     _timer = Timer.periodic(const Duration(seconds: 1), (t) {
       if (!mounted || !_playing) return;
@@ -79,7 +85,7 @@ class _RocketRushGamePageState extends ConsumerState<RocketRushGamePage>
     await logMathGameResult(
       ref,
       topic: 'Phóng Tên Lửa',
-      detail: 'Toán 8 · hết giờ · nhiên liệu $_fuel%',
+      detail: 'Toán $_grade · hết giờ · nhiên liệu $_fuel%',
       success: false,
     );
   }
@@ -99,7 +105,7 @@ class _RocketRushGamePageState extends ConsumerState<RocketRushGamePage>
           _q = null;
           _timer?.cancel();
         } else {
-          _q = GradeQuestionBank.nextGrade8();
+          _q = _nextQ();
         }
       });
       if (_launched) {
@@ -107,7 +113,7 @@ class _RocketRushGamePageState extends ConsumerState<RocketRushGamePage>
         await logMathGameResult(
           ref,
           topic: 'Phóng Tên Lửa',
-          detail: 'Toán 8 · phóng thành công · ${_seconds - _secondsLeft}s',
+          detail: 'Toán $_grade · phóng thành công · ${_seconds - _secondsLeft}s',
           success: true,
         );
       }
@@ -116,7 +122,7 @@ class _RocketRushGamePageState extends ConsumerState<RocketRushGamePage>
       setState(() {
         _streak = 0;
         _fuel = (_fuel - 8).clamp(0, _fuelTarget);
-        _q = GradeQuestionBank.nextGrade8();
+        _q = _nextQ();
       });
     }
   }
@@ -131,7 +137,7 @@ class _RocketRushGamePageState extends ConsumerState<RocketRushGamePage>
         backgroundColor: Colors.transparent,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
-          title: const Text('Phóng Tên Lửa · Toán 8'),
+          title: Text('Phóng Tên Lửa · Lớp $_grade'),
         ),
         body: SafeArea(
           child: Padding(
@@ -213,7 +219,7 @@ class _RocketRushGamePageState extends ConsumerState<RocketRushGamePage>
                                   key: const ValueKey('rw'),
                                   title: 'Phóng thành công!',
                                   subtitle:
-                                      'Tên lửa Toán 8 đã lên quỹ đạo. Tuyệt vời!',
+                                      'Tên lửa Toán lớp $_grade đã lên quỹ đạo. Tuyệt vời!',
                                   emoji: '🌌',
                                   onAgain: _start,
                                 )

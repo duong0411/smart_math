@@ -112,6 +112,7 @@ Future<Result<String>> askMathAi(
   required String userMessage,
   List<GeminiTurn> history = const [],
   String? extraSystemContext,
+  int? gradeLevel,
   GeminiImage? image,
   String? documentText,
   String? documentName,
@@ -139,19 +140,24 @@ Future<Result<String>> askMathAi(
 
   final basePrompt = await ref.read(systemPromptProvider.future);
   final profile = ref.read(mathProfileProvider).valueOrNull;
+  final effectiveGrade = gradeLevel ?? profile?.gradeLevel;
   final profileBlock = StringBuffer();
   if (profile != null) {
     if (profile.displayName.trim().isNotEmpty) {
       profileBlock.writeln('Tên học sinh: ${profile.displayName.trim()}');
-    }
-    if (profile.gradeLevel != null) {
-      profileBlock.writeln('Lớp: ${profile.gradeLevel}');
     }
     if (profile.focusTopics.isNotEmpty) {
       profileBlock.writeln(
         'Chủ đề quan tâm: ${profile.focusTopics.join(', ')}',
       );
     }
+  }
+  if (effectiveGrade != null) {
+    profileBlock.writeln('Lớp: $effectiveGrade');
+    profileBlock.writeln(
+      'Chỉ dạy / ra đề / giải thích phù hợp chương trình Toán lớp $effectiveGrade '
+      '(GDPT Việt Nam). Điều chỉnh độ khó và thuật ngữ theo lớp này.',
+    );
   }
   if (extraSystemContext != null && extraSystemContext.trim().isNotEmpty) {
     profileBlock.writeln(extraSystemContext.trim());

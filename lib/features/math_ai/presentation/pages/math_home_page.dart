@@ -143,8 +143,8 @@ class MathHomePage extends ConsumerWidget {
                   ),
                   _FeatureGridItem(
                     icon: Icons.blur_on_rounded,
-                    title: 'Giải trí Toán 8',
-                    subtitle: 'Học qua trò chơi',
+                    title: 'Giải trí Toán',
+                    subtitle: 'Chọn lớp 1–12 · trò chơi',
                     iconColor: const Color(0xFFF59E0B),
                     gradientColors: [const Color(0xFFF59E0B).withValues(alpha: 0.7), const Color(0xFFF59E0B).withValues(alpha: 0.1)],
                     imagePath: 'assets/images/icon_games_1791474095200.png',

@@ -9,7 +9,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// RPG-style boss fight: correct answers deal damage, wrong answers hurt the player.
 class BossBattleGamePage extends ConsumerStatefulWidget {
-  const BossBattleGamePage({super.key});
+  const BossBattleGamePage({super.key, this.gradeLevel = 8});
+
+  final int gradeLevel;
 
   @override
   ConsumerState<BossBattleGamePage> createState() => _BossBattleGamePageState();
@@ -17,6 +19,7 @@ class BossBattleGamePage extends ConsumerStatefulWidget {
 
 class _BossBattleGamePageState extends ConsumerState<BossBattleGamePage> {
   late final _Boss _boss;
+  late final int _grade;
   var _playerHp = 100;
   var _bossHp = 100;
   var _combo = 0;
@@ -29,14 +32,12 @@ class _BossBattleGamePageState extends ConsumerState<BossBattleGamePage> {
   @override
   void initState() {
     super.initState();
-    _boss = _Boss.grade8;
+    _grade = widget.gradeLevel.clamp(1, 12);
+    _boss = _Boss.forGrade(_grade);
     _bossHp = _boss.maxHp;
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-  }
+  GradeQuestion _nextQ() => GradeQuestionBank.next(_grade);
 
   void _start() {
     setState(() {
@@ -47,7 +48,7 @@ class _BossBattleGamePageState extends ConsumerState<BossBattleGamePage> {
       _won = false;
       _lost = false;
       _shake = 0;
-      _q = GradeQuestionBank.nextGrade8();
+      _q = _nextQ();
     });
   }
 
@@ -66,7 +67,7 @@ class _BossBattleGamePageState extends ConsumerState<BossBattleGamePage> {
           _won = true;
           _q = null;
         } else {
-          _q = GradeQuestionBank.nextGrade8();
+          _q = _nextQ();
         }
       });
       await Future<void>.delayed(const Duration(milliseconds: 120));
@@ -75,7 +76,7 @@ class _BossBattleGamePageState extends ConsumerState<BossBattleGamePage> {
         await logMathGameResult(
           ref,
           topic: 'Đại chiến Boss Toán',
-          detail: 'Toán 8 · hạ ${_boss.name}',
+          detail: 'Toán $_grade · hạ ${_boss.name}',
           success: true,
         );
       }
@@ -91,7 +92,7 @@ class _BossBattleGamePageState extends ConsumerState<BossBattleGamePage> {
           _lost = true;
           _q = null;
         } else {
-          _q = GradeQuestionBank.nextGrade8();
+          _q = _nextQ();
         }
       });
       await Future<void>.delayed(const Duration(milliseconds: 120));
@@ -100,7 +101,7 @@ class _BossBattleGamePageState extends ConsumerState<BossBattleGamePage> {
         await logMathGameResult(
           ref,
           topic: 'Đại chiến Boss Toán',
-          detail: 'Toán 8 · thua ${_boss.name}',
+          detail: 'Toán $_grade · thua ${_boss.name}',
           success: false,
         );
       }
@@ -114,7 +115,7 @@ class _BossBattleGamePageState extends ConsumerState<BossBattleGamePage> {
         backgroundColor: Colors.transparent,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
-          title: const Text('Đại chiến Boss · Toán 8'),
+          title: Text('Đại chiến Boss · Lớp $_grade'),
         ),
         body: SafeArea(
           child: Padding(
@@ -184,7 +185,8 @@ class _BossBattleGamePageState extends ConsumerState<BossBattleGamePage> {
                               ? _BattleEnd(
                                   key: const ValueKey('bw'),
                                   title: 'Chiến thắng!',
-                                  subtitle: 'Em đã hạ ${_boss.name} bằng trí tuệ Toán!',
+                                  subtitle:
+                                      'Em đã hạ ${_boss.name} bằng trí tuệ Toán lớp $_grade!',
                                   emoji: '⚔️',
                                   onAgain: _start,
                                 )
@@ -192,7 +194,8 @@ class _BossBattleGamePageState extends ConsumerState<BossBattleGamePage> {
                                   ? _BattleEnd(
                                       key: const ValueKey('bl'),
                                       title: 'Hồi máu rồi thử lại!',
-                                      subtitle: '${_boss.name} còn mạnh — combo để đánh nhanh hơn.',
+                                      subtitle:
+                                          '${_boss.name} còn mạnh — combo để đánh nhanh hơn.',
                                       emoji: '🛡️',
                                       onAgain: _start,
                                     )
@@ -226,12 +229,30 @@ class _Boss {
   final String taunt;
   final int maxHp;
 
-  static const grade8 = _Boss(
-    name: 'Pháp Sư Hằng Đẳng Thức',
-    emoji: '🧙',
-    taunt: 'Đa thức · PT · Pythagore theo SGK KNTT — giải sai là bị lời nguyền!',
-    maxHp: 120,
-  );
+  static _Boss forGrade(int grade) {
+    if (grade <= 5) {
+      return const _Boss(
+        name: 'Phù Thủy Phép Tính',
+        emoji: '🧚',
+        taunt: 'Cộng trừ nhân chia — sai một phép là biến mất!',
+        maxHp: 100,
+      );
+    }
+    if (grade <= 9) {
+      return const _Boss(
+        name: 'Pháp Sư Hằng Đẳng Thức',
+        emoji: '🧙',
+        taunt: 'Đại số · hình học THCS — giải sai là bị lời nguyền!',
+        maxHp: 120,
+      );
+    }
+    return const _Boss(
+      name: 'Ma Vương Giải Tích',
+      emoji: '🐉',
+      taunt: 'Hàm số · tổ hợp · xác suất THPT — chỉ trí tuệ mới hạ được!',
+      maxHp: 140,
+    );
+  }
 }
 
 class _HpBar extends StatelessWidget {

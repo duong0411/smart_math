@@ -229,6 +229,7 @@ class _MathTutorChatPageState extends ConsumerState<MathTutorChatPage> {
         ref,
         userMessage: text,
         history: history,
+        gradeLevel: _session?.gradeLevel,
         image: imageBytes == null
             ? null
             : GeminiImage(
@@ -311,7 +312,9 @@ class _MathTutorChatPageState extends ConsumerState<MathTutorChatPage> {
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           title: Text(
-            session.title,
+            session.gradeLevel != null
+                ? '${session.title} · Lớp ${session.gradeLevel}'
+                : session.title,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),

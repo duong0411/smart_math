@@ -63,17 +63,25 @@ class MathLocalStore {
     );
   }
 
-  Future<MathTutorSession> createSession({String? title, String? topic}) async {
+  Future<MathTutorSession> createSession({
+    String? title,
+    String? topic,
+    int? gradeLevel,
+  }) async {
     final sessions = await listSessions();
     final now = DateTime.now().toUtc();
+    final grade = gradeLevel?.clamp(1, 12);
     final session = MathTutorSession(
       id: now.millisecondsSinceEpoch.toString(),
       title: (title?.trim().isNotEmpty == true)
           ? title!.trim()
           : (topic?.trim().isNotEmpty == true
               ? 'Toán: ${topic!.trim()}'
-              : 'Buổi học Toán'),
+              : (grade != null
+                  ? 'Buổi học Toán lớp $grade'
+                  : 'Buổi học Toán')),
       topic: topic?.trim(),
+      gradeLevel: grade,
       messages: const [],
       createdAt: now,
       updatedAt: now,
@@ -294,11 +302,13 @@ class MathTutorSession {
     required this.createdAt,
     required this.updatedAt,
     this.topic,
+    this.gradeLevel,
   });
 
   final String id;
   final String title;
   final String? topic;
+  final int? gradeLevel;
   final List<MathChatMessage> messages;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -306,6 +316,7 @@ class MathTutorSession {
   MathTutorSession copyWith({
     String? title,
     String? topic,
+    int? gradeLevel,
     List<MathChatMessage>? messages,
     DateTime? updatedAt,
   }) {
@@ -313,6 +324,7 @@ class MathTutorSession {
       id: id,
       title: title ?? this.title,
       topic: topic ?? this.topic,
+      gradeLevel: gradeLevel ?? this.gradeLevel,
       messages: messages ?? this.messages,
       createdAt: createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -323,6 +335,7 @@ class MathTutorSession {
         'id': id,
         'title': title,
         'topic': topic,
+        'gradeLevel': gradeLevel,
         'messages': [for (final m in messages) m.toJson()],
         'createdAt': createdAt.toIso8601String(),
         'updatedAt': updatedAt.toIso8601String(),
@@ -334,6 +347,7 @@ class MathTutorSession {
       id: json['id'] as String? ?? '',
       title: json['title'] as String? ?? 'Buổi học Toán',
       topic: json['topic'] as String?,
+      gradeLevel: json['gradeLevel'] as int?,
       messages: [
         if (msgs is List)
           for (final m in msgs)

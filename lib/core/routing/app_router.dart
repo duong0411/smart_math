@@ -11,6 +11,13 @@ import 'package:eduself_study_app/features/math_games/presentation/pages/treasur
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+int _gradeFromQuery(GoRouterState state) {
+  final raw = state.uri.queryParameters['grade'];
+  final parsed = int.tryParse(raw ?? '');
+  if (parsed == null) return 8;
+  return parsed.clamp(1, 12);
+}
+
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     initialLocation: '/home',
@@ -44,15 +51,21 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/games/treasure',
-        builder: (context, state) => const TreasureTrailGamePage(),
+        builder: (context, state) => TreasureTrailGamePage(
+          gradeLevel: _gradeFromQuery(state),
+        ),
       ),
       GoRoute(
         path: '/games/boss',
-        builder: (context, state) => const BossBattleGamePage(),
+        builder: (context, state) => BossBattleGamePage(
+          gradeLevel: _gradeFromQuery(state),
+        ),
       ),
       GoRoute(
         path: '/games/rocket',
-        builder: (context, state) => const RocketRushGamePage(),
+        builder: (context, state) => RocketRushGamePage(
+          gradeLevel: _gradeFromQuery(state),
+        ),
       ),
       GoRoute(
         path: '/settings',

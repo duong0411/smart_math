@@ -1,20 +1,46 @@
+import 'package:eduself_study_app/features/math_ai/presentation/providers/math_ai_providers.dart';
+import 'package:eduself_study_app/features/math_games/domain/grade_question_bank.dart';
 import 'package:eduself_study_app/shared/widgets/glass_card.dart';
+import 'package:eduself_study_app/shared/widgets/grade_level_selector.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-class MathGamesHubPage extends StatelessWidget {
+class MathGamesHubPage extends ConsumerStatefulWidget {
   const MathGamesHubPage({super.key});
+
+  @override
+  ConsumerState<MathGamesHubPage> createState() => _MathGamesHubPageState();
+}
+
+class _MathGamesHubPageState extends ConsumerState<MathGamesHubPage> {
+  int _grade = 8;
+  var _synced = false;
+
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      if (!mounted || _synced) return;
+      final profile = ref.read(mathProfileProvider).valueOrNull;
+      setState(() {
+        _grade = (profile?.gradeLevel ?? 8).clamp(1, 12);
+        _synced = true;
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final grade = _grade;
 
     return AtmosphericBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
-          title: const Text('Giải trí Toán 8'),
+          title: const Text('Giải trí Toán'),
         ),
         body: ListView(
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
@@ -25,7 +51,7 @@ class MathGamesHubPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Theo SGK Kết nối tri thức',
+                    'Toán các khối · lớp $grade',
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                           fontWeight: FontWeight.w800,
                           letterSpacing: -0.4,
@@ -33,15 +59,23 @@ class MathGamesHubPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    'Câu hỏi bám Toán 8 tập 1 & 2: đa thức, hằng đẳng thức, tứ giác, '
-                    'Thalès, thống kê, phân thức, PT & hàm số bậc nhất, xác suất, '
-                    'đồng dạng · Pythagore, hình khối. Không cần API key.',
+                    '${GradeQuestionBank.bandLabel(grade)} · '
+                    '${GradeQuestionBank.curriculumHint(grade)} '
+                    'Không cần API key.',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: scheme.onSurfaceVariant,
                           height: 1.4,
                         ),
                   ),
                 ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            GlassCard(
+              padding: const EdgeInsets.all(16),
+              child: GradeLevelSelector(
+                value: grade,
+                onChanged: (g) => setState(() => _grade = g),
               ),
             ),
             const SizedBox(height: 18),
@@ -55,25 +89,25 @@ class MathGamesHubPage extends StatelessWidget {
             _MissionTile(
               emoji: '🏝️',
               title: 'Hành trình Kho báu',
-              subtitle: '8 trạm xuyên các chương SGK Toán 8 KNTT',
+              subtitle: '8 trạm · câu hỏi Toán lớp $grade',
               accent: const Color(0xFFD4A373),
-              onTap: () => context.push('/games/treasure'),
+              onTap: () => context.push('/games/treasure?grade=$grade'),
             ),
             const SizedBox(height: 10),
             _MissionTile(
               emoji: '⚔️',
-              title: 'Đại chiến Boss Toán 8',
-              subtitle: 'Hạ “Pháp sư Hằng đẳng thức” bằng kiến thức SGK',
+              title: 'Đại chiến Boss Toán',
+              subtitle: 'Hạ boss bằng kiến thức lớp $grade',
               accent: const Color(0xFFE76F51),
-              onTap: () => context.push('/games/boss'),
+              onTap: () => context.push('/games/boss?grade=$grade'),
             ),
             const SizedBox(height: 10),
             _MissionTile(
               emoji: '🚀',
               title: 'Phóng Tên Lửa',
-              subtitle: 'Nạp nhiên liệu bằng bài tập từng chương Toán 8',
+              subtitle: 'Nạp nhiên liệu bằng bài tập lớp $grade',
               accent: const Color(0xFF4CC9F0),
-              onTap: () => context.push('/games/rocket'),
+              onTap: () => context.push('/games/rocket?grade=$grade'),
             ),
           ],
         ),

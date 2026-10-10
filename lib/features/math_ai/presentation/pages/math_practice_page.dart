@@ -10,6 +10,7 @@ import 'package:eduself_study_app/shared/utils/image_picker_errors.dart';
 import 'package:eduself_study_app/shared/utils/pick_study_document.dart';
 import 'package:eduself_study_app/shared/widgets/app_toast.dart';
 import 'package:eduself_study_app/shared/widgets/glass_card.dart';
+import 'package:eduself_study_app/shared/widgets/grade_level_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -32,6 +33,8 @@ class _MathPracticePageState extends ConsumerState<MathPracticePage> {
   String? _topic;
   String? _feedback;
   bool? _correct;
+  int _grade = 8;
+  var _gradeSynced = false;
   var _busy = false;
   Uint8List? _answerImageBytes;
   String? _answerImageMime;
@@ -39,10 +42,33 @@ class _MathPracticePageState extends ConsumerState<MathPracticePage> {
   String? _answerDocumentText;
 
   @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      if (!mounted || _gradeSynced) return;
+      final profile = ref.read(mathProfileProvider).valueOrNull;
+      setState(() {
+        _grade = (profile?.gradeLevel ?? 8).clamp(1, 12);
+        _gradeSynced = true;
+      });
+    });
+  }
+
+  @override
   void dispose() {
     _answerController.dispose();
     _topicController.dispose();
     super.dispose();
+  }
+
+  Future<void> _setGrade(int grade) async {
+    setState(() => _grade = grade);
+    final profile = ref.read(mathProfileProvider).valueOrNull;
+    if (profile != null && profile.gradeLevel != grade) {
+      await ref.read(mathProfileProvider.notifier).save(
+            profile.copyWith(gradeLevel: grade),
+          );
+    }
   }
 
   Future<void> _generate() async {
@@ -53,6 +79,8 @@ class _MathPracticePageState extends ConsumerState<MathPracticePage> {
       if (mounted) context.push('/settings');
       return;
     }
+
+    final grade = _grade;
 
     setState(() {
       _busy = true;
@@ -67,17 +95,18 @@ class _MathPracticePageState extends ConsumerState<MathPracticePage> {
     _answerController.clear();
 
     final topic = _topicController.text.trim().isEmpty
-        ? 'theo chương trình lớp hiện tại'
+        ? 'theo chương trình Toán lớp $grade'
         : _topicController.text.trim();
 
     final result = await askMathAi(
       ref,
+      gradeLevel: grade,
       userMessage: '''
-Hãy tạo ĐÚNG 1 bài tập Toán (chưa có đáp án trong phần hiển thị cho học sinh) phù hợp lớp hiện tại.
+Hãy tạo ĐÚNG 1 bài tập Toán lớp $grade (chưa có đáp án trong phần hiển thị cho học sinh).
 Chủ đề: $topic
 
 Yêu cầu chất lượng:
-- Đề phải có nghiệm / đáp án xác định, không mâu thuẫn, vừa sức lớp.
+- Đề phải có nghiệm / đáp án xác định, không mâu thuẫn, vừa sức lớp $grade.
 - Nêu rõ đơn vị / điều kiện nếu cần.
 - Dùng LaTeX \$...\$ hoặc \$\$...\$\$ cho biểu thức.
 
@@ -85,7 +114,7 @@ Trả lời CHỈ bằng JSON thuần (không markdown, không code fence):
 {"topic":"...","question":"..."}
 ''',
       extraSystemContext:
-          'Chế độ luyện tập: chỉ tạo 1 bài đúng kiến thức, phù hợp lớp, vừa sức. Ưu tiên độ chính xác đề bài.',
+          'Chế độ luyện tập: chỉ tạo 1 bài đúng kiến thức Toán lớp $grade, vừa sức. Ưu tiên độ chính xác đề bài.',
     );
 
     if (!mounted) return;
@@ -243,8 +272,9 @@ Trả lời CHỈ bằng JSON thuần (không markdown, không code fence):
 
     final result = await askMathAi(
       ref,
+      gradeLevel: _grade,
       userMessage: '''
-Chấm bài luyện tập Toán — ưu tiên độ chính xác toán học.
+Chấm bài luyện tập Toán lớp $_grade — ưu tiên độ chính xác toán học.
 
 Đề: $_question
 Bài làm học sinh (text): $answerLabel$imageNote$documentNote
@@ -340,11 +370,21 @@ Trả lời CHỈ bằng JSON thuần (không markdown, không code fence):
         backgroundColor: Colors.transparent,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
-          title: const Text('Luyện tập Toán'),
+          title: Text('Luyện tập Toán · Lớp $_grade'),
         ),
         body: ListView(
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
           children: [
+            GlassCard(
+              child: GradeLevelSelector(
+                value: _grade,
+                onChanged: (g) {
+                  if (_busy) return;
+                  _setGrade(g);
+                },
+              ),
+            ),
+            const SizedBox(height: 16),
             GlassCard(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,

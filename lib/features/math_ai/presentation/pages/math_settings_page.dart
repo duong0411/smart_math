@@ -5,6 +5,7 @@ import 'package:eduself_study_app/features/math_ai/presentation/providers/math_a
 import 'package:eduself_study_app/features/settings/presentation/providers/settings_providers.dart';
 import 'package:eduself_study_app/shared/widgets/app_toast.dart';
 import 'package:eduself_study_app/shared/widgets/glass_card.dart';
+import 'package:eduself_study_app/shared/widgets/grade_level_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -201,18 +202,9 @@ class _MathSettingsPageState extends ConsumerState<MathSettingsPage> {
                       border: OutlineInputBorder(),
                     ),
                   ),
-                  const SizedBox(height: 12),
-                  DropdownButtonFormField<int>(
-                    // ignore: deprecated_member_use
+                  const SizedBox(height: 16),
+                  GradeLevelSelector(
                     value: _grade,
-                    decoration: const InputDecoration(
-                      labelText: 'Lớp',
-                      border: OutlineInputBorder(),
-                    ),
-                    items: [
-                      for (var g = 1; g <= 12; g++)
-                        DropdownMenuItem(value: g, child: Text('Lớp $g')),
-                    ],
                     onChanged: (v) => setState(() => _grade = v),
                   ),
                   const SizedBox(height: 12),
