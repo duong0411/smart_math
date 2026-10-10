@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/engine_service.dart';
 import 'dart:typed_data';
+import 'dart:convert';
 
 class MonitoringPage extends StatelessWidget {
   const MonitoringPage({super.key});
@@ -42,13 +43,14 @@ class MonitoringPage extends StatelessWidget {
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  if (engine.isEngineReady)
-                    Image.network(
-                      'http://127.0.0.1:8000/preview',
+                  if (engine.isEngineReady && engine.latestEvent.containsKey('frame'))
+                    Image.memory(
+                      base64Decode(engine.latestEvent['frame']),
                       fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) =>
-                          const Center(child: Icon(Icons.videocam_off, size: 64, color: Colors.grey)),
+                      gaplessPlayback: true, // Tránh chớp nháy khi load frame mới
                     )
+                  else if (engine.isEngineReady)
+                    const Center(child: CircularProgressIndicator())
                   else
                     const Center(
                       child: Column(
