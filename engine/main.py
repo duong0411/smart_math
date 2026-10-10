@@ -9,6 +9,7 @@ from contextlib import asynccontextmanager
 import onnxruntime as ort
 import asyncio
 import json
+import base64
 
 from database import FaceDatabase
 from frame_buffer import FrameBuffer
@@ -70,6 +71,11 @@ def ai_worker_loop(app: FastAPI):
         except Exception as e:
             event = {"engine_status": "error", "message": str(e)}
             
+        # Thêm ảnh base64 vào event để gửi qua websocket
+        ret, jpg_buffer = cv2.imencode('.jpg', frame, [int(cv2.IMWRITE_JPEG_QUALITY), 60])
+        if ret:
+            event["frame"] = base64.b64encode(jpg_buffer).decode('utf-8')
+
         AppState.latest_event = event
         
         with AppState.frame_lock:
