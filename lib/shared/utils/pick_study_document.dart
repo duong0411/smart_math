@@ -1,3 +1,4 @@
+import 'package:cross_file/cross_file.dart';
 import 'package:eduself_study_app/shared/widgets/app_toast.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -91,7 +92,7 @@ Future<({String name, List<int> bytes})?> pickStudyDocument(
     return null;
   }
 
-  final bytes = file.bytes;
+  final bytes = await _readPickedBytes(file);
   if (bytes == null || bytes.isEmpty) {
     AppToast.error('Không đọc được tệp. Em thử lại nhé.');
     return null;
@@ -154,7 +155,7 @@ Future<({String name, List<int> bytes})?> pickMathAiDocument(
     return null;
   }
 
-  final bytes = file.bytes;
+  final bytes = await _readPickedBytes(file);
   if (bytes == null || bytes.isEmpty) {
     AppToast.error('Không đọc được tệp. Em thử lại nhé.');
     return null;
@@ -164,4 +165,17 @@ Future<({String name, List<int> bytes})?> pickMathAiDocument(
     return null;
   }
   return (name: name, bytes: bytes);
+}
+
+/// `withData: true` sometimes returns null bytes on desktop — fall back to path.
+Future<List<int>?> _readPickedBytes(PlatformFile file) async {
+  final inMemory = file.bytes;
+  if (inMemory != null && inMemory.isNotEmpty) return inMemory;
+  final path = file.path;
+  if (path == null || path.isEmpty) return null;
+  try {
+    return await XFile(path).readAsBytes();
+  } on Object {
+    return null;
+  }
 }

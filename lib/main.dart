@@ -5,9 +5,12 @@ import 'package:eduself_study_app/features/settings/presentation/providers/setti
 import 'package:eduself_study_app/shared/widgets/app_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pdfrx/pdfrx.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Required before PdfDocument.openData (tutor/practice PDF upload).
+  await pdfrxFlutterInitialize();
   await AppConfig.load();
   runApp(const ProviderScope(child: EduSelfApp()));
 }

@@ -73,7 +73,16 @@ Future<ExtractedStudyDocument> extractStudyDocumentText({
 }
 
 Future<String> _extractPdf(List<int> bytes) async {
-  final doc = await PdfDocument.openData(Uint8List.fromList(bytes));
+  // Safe even if main() already initialized — pdfrx no-ops when ready.
+  await pdfrxFlutterInitialize();
+  final PdfDocument doc;
+  try {
+    doc = await PdfDocument.openData(Uint8List.fromList(bytes));
+  } on Object catch (e) {
+    throw StateError(
+      'Không mở được PDF. Em thử file khác hoặc xuất lại PDF. ($e)',
+    );
+  }
   try {
     final pageCount = doc.pages.length;
     if (pageCount == 0) {
