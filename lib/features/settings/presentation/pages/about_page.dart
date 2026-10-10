@@ -33,15 +33,16 @@ class AboutPage extends StatelessWidget {
                   Text('Version ${AppConfig.appVersion}'),
                   const SizedBox(height: 16),
                   const Text(
-                    'EduSelf is an AI study companion for Vietnamese students '
-                    'from grade 1 to 12. It helps learners understand concepts, '
-                    'practice step by step, and build self-study habits.',
+                    'EduSelf Địa lí AI là ứng dụng AI giám sát và đồng hành học tập môn Địa lí '
+                    'dành cho học sinh THCS (Lớp 6–9 theo chương trình GDPT 2018). Ứng dụng giúp học sinh '
+                    'hiểu sâu kiến thức địa lí tự nhiên và kinh tế - xã hội, rèn luyện kỹ năng đọc bản đồ, '
+                    'phân tích bảng số liệu, và hình thành thói quen tự học chủ động.',
                   ),
                   const SizedBox(height: 16),
                   const Text(
-                    'Teaching style follows the EduSelf Study AI Pro guide: '
-                    'patient, encouraging, and focused on understanding — '
-                    'not giving answers immediately.',
+                    'Phương pháp sư phạm bám sát định hướng GDPT 2018: '
+                    'kiên nhẫn, gợi mở từng bước, khuyến khích tư duy phản biện và liên hệ thực tiễn — '
+                    'tuyệt đối không đưa ra đáp án sẵn.',
                   ),
                 ],
               ),

@@ -171,11 +171,66 @@ class AtmosphericBackground extends StatelessWidget {
                }
              ),
           ),
-          // Tech Lotus Motif - Made much more visible
+          // Circular Geography Globe Map (Background Hero)
+          Positioned(
+            top: -40,
+            right: -60,
+            child: IgnorePointer(
+              child: Opacity(
+                opacity: isDark ? 0.34 : 0.22,
+                child: Container(
+                  width: 580,
+                  height: 580,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF38BDF8).withValues(alpha: isDark ? 0.38 : 0.20),
+                        blurRadius: 80,
+                        spreadRadius: 10,
+                      ),
+                    ],
+                  ),
+                  child: ClipOval(
+                    child: Image.asset(
+                      'assets/images/circular_geo_map.jpg',
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          // Secondary subtle globe watermark at bottom-left
+          Positioned(
+            bottom: -150,
+            left: -120,
+            child: IgnorePointer(
+              child: Opacity(
+                opacity: isDark ? 0.20 : 0.12,
+                child: Container(
+                  width: 460,
+                  height: 460,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                  ),
+                  child: ClipOval(
+                    child: Image.asset(
+                      'assets/images/circular_geo_map.jpg',
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          // Circular Geo Coordinate Grid overlay (lat/lon, degree ticks, compass)
           Positioned.fill(
-            child: CustomPaint(
-              painter: _TechLotusPainter(
-                color: scheme.primary.withValues(alpha: isDark ? 0.4 : 0.7),
+            child: IgnorePointer(
+              child: CustomPaint(
+                painter: _GeoCoordinateGridPainter(
+                  color: scheme.primary.withValues(alpha: isDark ? 0.45 : 0.65),
+                ),
               ),
             ),
           ),
@@ -192,53 +247,68 @@ class AtmosphericBackground extends StatelessWidget {
   }
 }
 
-class _TechLotusPainter extends CustomPainter {
-  _TechLotusPainter({required this.color});
+class _GeoCoordinateGridPainter extends CustomPainter {
+  _GeoCoordinateGridPainter({required this.color});
   final Color color;
 
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = color
-      ..strokeWidth = 2.5 // Thicker line
-      ..style = PaintingStyle.stroke
-      ..maskFilter = const MaskFilter.blur(BlurStyle.solid, 3); // Glow effect
+      ..color = color.withValues(alpha: 0.16)
+      ..strokeWidth = 1.0
+      ..style = PaintingStyle.stroke;
 
-    final center = Offset(size.width / 2, size.height * 0.65);
-    final maxRadius = size.width * 0.6;
+    final dashPaint = Paint()
+      ..color = color.withValues(alpha: 0.26)
+      ..strokeWidth = 1.2
+      ..style = PaintingStyle.stroke;
 
-    // Draw abstract tech lotus petals using overlapping bezier curves
-    for (int i = 0; i < 5; i++) {
-      final path = Path();
-      final widthOffset = (i - 2) * 50.0;
-      final heightOffset = 100.0 - (i - 2).abs() * 30.0;
+    final center = Offset(size.width * 0.82, size.height * 0.22);
+    final radius = math.min(size.width, size.height) * 0.45;
 
-      path.moveTo(center.dx, center.dy);
-      path.quadraticBezierTo(
-        center.dx + widthOffset * 1.5,
-        center.dy - heightOffset * 1.5,
-        center.dx + widthOffset,
-        center.dy - heightOffset * 3,
-      );
-      path.quadraticBezierTo(
-        center.dx - widthOffset * 1.5,
-        center.dy - heightOffset * 1.5,
-        center.dx,
-        center.dy,
-      );
-      canvas.drawPath(path, paint);
+    // Outer graduation ring
+    canvas.drawCircle(center, radius, paint);
+    canvas.drawCircle(center, radius * 1.05, paint..strokeWidth = 0.6);
+
+    // Degree tick marks on outer ring
+    for (int deg = 0; deg < 360; deg += 15) {
+      final rad = deg * math.pi / 180;
+      final isMajor = deg % 45 == 0;
+      final len = isMajor ? 14.0 : 7.0;
+      final p1 = Offset(center.dx + radius * math.cos(rad), center.dy + radius * math.sin(rad));
+      final p2 = Offset(center.dx + (radius + len) * math.cos(rad), center.dy + (radius + len) * math.sin(rad));
+      canvas.drawLine(p1, p2, paint..strokeWidth = isMajor ? 1.5 : 0.8);
     }
 
-    // Draw tech grid dots at intersections
-    final dotPaint = Paint()
-      ..color = color.withValues(alpha: 0.3)
-      ..style = PaintingStyle.fill;
-    
-    canvas.drawCircle(Offset(center.dx, center.dy - 300), 3, dotPaint);
-    canvas.drawCircle(Offset(center.dx - 50, center.dy - 240), 3, dotPaint);
-    canvas.drawCircle(Offset(center.dx + 50, center.dy - 240), 3, dotPaint);
-    canvas.drawCircle(Offset(center.dx - 100, center.dy - 120), 3, dotPaint);
-    canvas.drawCircle(Offset(center.dx + 100, center.dy - 120), 3, dotPaint);
+    // Latitude lines (parallels)
+    for (double f in [-0.65, -0.35, 0.0, 0.35, 0.65]) {
+      final rect = Rect.fromCenter(
+        center: Offset(center.dx, center.dy + radius * f * 0.75),
+        width: radius * 2 * math.sqrt(math.max(0.1, 1 - f * f)),
+        height: radius * 0.38,
+      );
+      canvas.drawOval(rect, f == 0.0 ? dashPaint : paint);
+    }
+
+    // Longitude lines (meridians)
+    for (double f in [-0.75, -0.45, -0.15, 0.15, 0.45, 0.75]) {
+      final rect = Rect.fromCenter(
+        center: Offset(center.dx + radius * f * 0.7, center.dy),
+        width: radius * 0.42,
+        height: radius * 2 * math.sqrt(math.max(0.1, 1 - f * f * 0.6)),
+      );
+      canvas.drawOval(rect, paint);
+    }
+
+    // Compass Rose / Cardinal ticks
+    final compassPaint = Paint()
+      ..color = color.withValues(alpha: 0.32)
+      ..strokeWidth = 1.3
+      ..style = PaintingStyle.stroke;
+
+    final cLen = radius * 1.12;
+    canvas.drawLine(Offset(center.dx, center.dy - cLen), Offset(center.dx, center.dy + cLen), compassPaint);
+    canvas.drawLine(Offset(center.dx - cLen, center.dy), Offset(center.dx + cLen, center.dy), compassPaint);
   }
 
   @override

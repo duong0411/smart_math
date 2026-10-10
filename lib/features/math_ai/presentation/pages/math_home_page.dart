@@ -71,17 +71,33 @@ class MathHomePage extends ConsumerWidget {
                 child: Column(
                   children: [
                     const SizedBox(height: 10),
-                    // Large glowing abstract logo instead of small image
-                    ShaderMask(
-                      shaderCallback: (bounds) => LinearGradient(
-                        colors: [scheme.secondary, scheme.primary],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ).createShader(bounds),
-                      child: const Icon(
-                        Icons.all_inclusive_rounded,
-                        size: 90,
-                        color: Colors.white,
+                    Container(
+                      width: 110,
+                      height: 110,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF38BDF8).withValues(alpha: 0.45),
+                            blurRadius: 32,
+                            spreadRadius: 4,
+                          ),
+                          BoxShadow(
+                            color: scheme.primary.withValues(alpha: 0.3),
+                            blurRadius: 18,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                        border: Border.all(
+                          color: const Color(0xFF38BDF8).withValues(alpha: 0.85),
+                          width: 2.5,
+                        ),
+                      ),
+                      child: ClipOval(
+                        child: Image.asset(
+                          'assets/images/circular_geo_map.jpg',
+                          fit: BoxFit.cover,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 20),

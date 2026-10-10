@@ -2,7 +2,7 @@ name: Build APK, iOS & Windows
 
 on:
   push:
-    branches: [main]
+    branches: [main, dialy, mon-dia-ly]
   workflow_dispatch:
 
 permissions:
@@ -36,12 +36,24 @@ jobs:
           path: build/app/outputs/flutter-apk/app-release.apk
           if-no-files-found: error
 
+      - name: Release prefix
+        id: meta
+        shell: bash
+        run: |
+          if [[ "${{ github.ref_name }}" == "main" ]]; then
+            echo "prefix=" >> "$GITHUB_OUTPUT"
+            echo "label=" >> "$GITHUB_OUTPUT"
+          else
+            echo "prefix=dialy-" >> "$GITHUB_OUTPUT"
+            echo "label=Địa lí · " >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Publish APK to GitHub Release
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dialy' || github.ref == 'refs/heads/mon-dia-ly'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: android-v1.0.${{ github.run_number }}
-          name: Android APK v1.0.${{ github.run_number }}
+          tag_name: ${{ steps.meta.outputs.prefix }}android-v1.0.${{ github.run_number }}
+          name: ${{ steps.meta.outputs.label }}Android APK v1.0.${{ github.run_number }}
           body: Automated release APK build (signed with debug keystore for CI).
           files: build/app/outputs/flutter-apk/app-release.apk
           fail_on_unmatched_files: true
@@ -79,12 +91,24 @@ jobs:
           path: build/ios/ipa/SmartMath.ipa
           if-no-files-found: error
 
+      - name: Release prefix
+        id: meta
+        shell: bash
+        run: |
+          if [[ "${{ github.ref_name }}" == "main" ]]; then
+            echo "prefix=" >> "$GITHUB_OUTPUT"
+            echo "label=" >> "$GITHUB_OUTPUT"
+          else
+            echo "prefix=dialy-" >> "$GITHUB_OUTPUT"
+            echo "label=Địa lí · " >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Publish IPA to GitHub Release
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dialy' || github.ref == 'refs/heads/mon-dia-ly'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ios-v1.0.${{ github.run_number }}
-          name: iOS IPA v1.0.${{ github.run_number }}
+          tag_name: ${{ steps.meta.outputs.prefix }}ios-v1.0.${{ github.run_number }}
+          name: ${{ steps.meta.outputs.label }}iOS IPA v1.0.${{ github.run_number }}
           body: Automated unsigned iOS IPA (no Apple signing). Install via developer tools / sideload only.
           files: build/ios/ipa/SmartMath.ipa
           fail_on_unmatched_files: true
@@ -122,12 +146,24 @@ jobs:
           path: SmartMath-windows.zip
           if-no-files-found: error
 
+      - name: Release prefix
+        id: meta
+        shell: bash
+        run: |
+          if [[ "${{ github.ref_name }}" == "main" ]]; then
+            echo "prefix=" >> "$GITHUB_OUTPUT"
+            echo "label=" >> "$GITHUB_OUTPUT"
+          else
+            echo "prefix=dialy-" >> "$GITHUB_OUTPUT"
+            echo "label=Địa lí · " >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Publish Windows zip to GitHub Release
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dialy' || github.ref == 'refs/heads/mon-dia-ly'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: windows-v1.0.${{ github.run_number }}
-          name: Windows EXE v1.0.${{ github.run_number }}
+          tag_name: ${{ steps.meta.outputs.prefix }}windows-v1.0.${{ github.run_number }}
+          name: ${{ steps.meta.outputs.label }}Windows EXE v1.0.${{ github.run_number }}
           body: |
             Windows desktop build (unzip and run `eduself_study_app.exe`).
             Keep the whole extracted folder together (DLL + data).
