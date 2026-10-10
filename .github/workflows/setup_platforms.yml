@@ -1,0 +1,33 @@
+name: Generate Flutter Platforms
+on:
+  push:
+    branches: [camera_AI]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Generate platform folders
+        run: flutter create --platforms=windows,android,ios .
+        working-directory: ./apps/desktop
+
+      - name: Commit and push changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add apps/desktop/android apps/desktop/ios apps/desktop/windows
+          # Bỏ qua lỗi nếu không có thay đổi nào
+          git commit -m "Auto-generate Flutter platform folders" || exit 0
+          git push
