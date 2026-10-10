@@ -20,15 +20,17 @@ jobs:
           cache: true
 
       - run: flutter pub get
+        working-directory: ./apps/desktop
 
       # Project uses Swift Package Manager (no Podfile).
       - run: flutter build ios --release --no-codesign
+        working-directory: ./apps/desktop
 
       - name: Package unsigned IPA
         run: |
-          mkdir -p build/ios/ipa/Payload
-          cp -r build/ios/iphoneos/Runner.app build/ios/ipa/Payload/
-          cd build/ios/ipa
+          mkdir -p apps/desktop/build/ios/ipa/Payload
+          cp -r apps/desktop/build/ios/iphoneos/Runner.app apps/desktop/build/ios/ipa/Payload/
+          cd apps/desktop/build/ios/ipa
           zip -qq -r -9 FlutterIpaExport.ipa Payload
 
       - name: Upload IPA to GitHub Release
@@ -37,7 +39,7 @@ jobs:
           tag_name: ios-v1.0.${{ github.run_number }}
           name: iOS IPA v1.0.${{ github.run_number }}
           body: Automated unsigned iOS IPA build from workflow_dispatch.
-          files: build/ios/ipa/FlutterIpaExport.ipa
+          files: apps/desktop/build/ios/ipa/FlutterIpaExport.ipa
           fail_on_unmatched_files: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -2,7 +2,7 @@ name: Build APK, iOS & Windows
 
 on:
   push:
-    branches: [main]
+    branches: [main, camera_AI]
   workflow_dispatch:
 
 permissions:
@@ -26,14 +26,16 @@ jobs:
           cache: true
 
       - run: flutter pub get
+        working-directory: ./apps/desktop
 
       - run: flutter build apk --release
+        working-directory: ./apps/desktop
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: smart-math-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+          path: apps/desktop/build/app/outputs/flutter-apk/app-release.apk
           if-no-files-found: error
 
       - name: Publish APK to GitHub Release
@@ -43,7 +45,7 @@ jobs:
           tag_name: android-v1.0.${{ github.run_number }}
           name: Android APK v1.0.${{ github.run_number }}
           body: Automated release APK build (signed with debug keystore for CI).
-          files: build/app/outputs/flutter-apk/app-release.apk
+          files: apps/desktop/build/app/outputs/flutter-apk/app-release.apk
           fail_on_unmatched_files: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -60,23 +62,25 @@ jobs:
           cache: true
 
       - run: flutter pub get
+        working-directory: ./apps/desktop
 
       # Project uses Swift Package Manager (no Podfile). Flutter resolves
       # iOS deps during build — do not run `pod install`.
       - run: flutter build ios --release --no-codesign
+        working-directory: ./apps/desktop
 
       - name: Package unsigned IPA
         run: |
-          mkdir -p build/ios/ipa/Payload
-          cp -r build/ios/iphoneos/Runner.app build/ios/ipa/Payload/
-          cd build/ios/ipa
+          mkdir -p apps/desktop/build/ios/ipa/Payload
+          cp -r apps/desktop/build/ios/iphoneos/Runner.app apps/desktop/build/ios/ipa/Payload/
+          cd apps/desktop/build/ios/ipa
           zip -qq -r -9 SmartMath.ipa Payload
 
       - name: Upload IPA artifact
         uses: actions/upload-artifact@v4
         with:
           name: smart-math-ipa
-          path: build/ios/ipa/SmartMath.ipa
+          path: apps/desktop/build/ios/ipa/SmartMath.ipa
           if-no-files-found: error
 
       - name: Publish IPA to GitHub Release
@@ -86,7 +90,7 @@ jobs:
           tag_name: ios-v1.0.${{ github.run_number }}
           name: iOS IPA v1.0.${{ github.run_number }}
           body: Automated unsigned iOS IPA (no Apple signing). Install via developer tools / sideload only.
-          files: build/ios/ipa/SmartMath.ipa
+          files: apps/desktop/build/ios/ipa/SmartMath.ipa
           fail_on_unmatched_files: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -103,15 +107,18 @@ jobs:
           cache: true
 
       - run: flutter config --enable-windows-desktop
+        working-directory: ./apps/desktop
 
       - run: flutter pub get
+        working-directory: ./apps/desktop
 
       - run: flutter build windows --release
+        working-directory: ./apps/desktop
 
       - name: Zip Windows Release folder
         shell: pwsh
         run: |
-          $src = "build\windows\x64\runner\Release"
+          $src = "apps\desktop\build\windows\x64\runner\Release"
           if (-not (Test-Path $src)) { throw "Missing $src" }
           Compress-Archive -Path "$src\*" -DestinationPath "SmartMath-windows.zip" -Force
 
