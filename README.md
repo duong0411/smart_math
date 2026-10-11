@@ -37,6 +37,12 @@ Tải file ở tab **Actions** (Artifacts) hoặc **Releases**.
 > IPA không có chữ ký Apple — chỉ dùng để kiểm thử / sideload.  
 > Windows: giải nén cả zip rồi chạy `eduself_study_app.exe` (giữ nguyên thư mục DLL + `data`).
 
+## Hướng dẫn tạo phần mềm (hồ sơ dự thi)
+
+Xem chi tiết quy trình viết mã → test → build → GitHub Actions:
+
+**[docs/HUONG_DAN_TAO_PHAN_MEM.md](docs/HUONG_DAN_TAO_PHAN_MEM.md)**
+
 ## Chạy local
 
 ```bash

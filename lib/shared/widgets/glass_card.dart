@@ -1,4 +1,3 @@
-import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:eduself_study_app/core/theme/app_theme.dart';
@@ -9,7 +8,7 @@ class GlassCard extends StatelessWidget {
   const GlassCard({
     super.key,
     required this.child,
-    this.padding = const EdgeInsets.all(24),
+    this.padding = const EdgeInsets.all(20),
   });
 
   final Widget child;
@@ -22,21 +21,24 @@ class GlassCard extends StatelessWidget {
     final radius = BorderRadius.circular(glass.borderRadius);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    // Shadow must sit outside ClipRRect or it gets clipped away.
     return DecoratedBox(
       decoration: BoxDecoration(
         borderRadius: radius,
         boxShadow: [
           BoxShadow(
-            color: scheme.shadow.withValues(alpha: isDark ? 0.45 : 0.14),
-            blurRadius: 24,
+            color: isDark
+                ? Colors.black.withValues(alpha: 0.35)
+                : scheme.primary.withValues(alpha: 0.06),
+            blurRadius: 18,
             spreadRadius: -2,
-            offset: const Offset(0, 10),
+            offset: const Offset(0, 6),
           ),
           BoxShadow(
-            color: scheme.primary.withValues(alpha: isDark ? 0.12 : 0.10),
-            blurRadius: 18,
-            offset: const Offset(0, 6),
+            color: isDark
+                ? Colors.black.withValues(alpha: 0.20)
+                : const Color(0xFF64748B).withValues(alpha: 0.04),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -49,12 +51,15 @@ class GlassCard extends StatelessWidget {
           ),
           child: DecoratedBox(
             decoration: BoxDecoration(
-              color: scheme.surface.withValues(alpha: glass.fillOpacity),
+              color: isDark
+                  ? const Color(0xFF1E293B).withValues(alpha: 0.92)
+                  : Colors.white.withValues(alpha: 0.94),
               borderRadius: radius,
               border: Border.all(
-                color: Colors.white.withValues(
-                  alpha: isDark ? 0.10 : 0.55,
-                ),
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.12)
+                    : const Color(0xFFE2E8F0),
+                width: 1.0,
               ),
             ),
             child: Material(
@@ -68,6 +73,9 @@ class GlassCard extends StatelessWidget {
   }
 }
 
+/// A clean, distraction-free educational background designed specifically for Math students.
+/// Features a calm pastel gradient, subtle math graph paper grid, and gentle corner lighting.
+/// Leaves the entire center 100% clean and unobstructed so all formulas and text are perfectly readable.
 class AtmosphericBackground extends StatelessWidget {
   const AtmosphericBackground({super.key, required this.child});
 
@@ -75,116 +83,63 @@ class AtmosphericBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return DecoratedBox(
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
           colors: isDark
-              ? [
-                  const Color(0xFF0F172A),
-                  scheme.surface,
-                  const Color(0xFF1E1B4B),
+              ? const [
+                  Color(0xFF0F172A),
+                  Color(0xFF111E36),
+                  Color(0xFF0B132B),
                 ]
-              : [
-                  const Color(0xFFEEF2FF),
-                  const Color(0xFFFDF4FF),
-                  const Color(0xFFFFF1F2),
+              : const [
+                  Color(0xFFF8FAFC),
+                  Color(0xFFF1F5F9),
+                  Color(0xFFEBF2F7),
                 ],
         ),
       ),
       child: Stack(
         children: [
-          // Animated Glow Orbs for dynamic feel
+          // Gentle ambient corner glow - Top Left (Sky Blue)
           Positioned(
-            top: -150,
+            top: -120,
+            left: -100,
+            child: _AmbientGlowOrb(
+              size: 380,
+              color: const Color(0xFF38BDF8).withValues(alpha: isDark ? 0.08 : 0.12),
+            ),
+          ),
+
+          // Gentle ambient corner glow - Bottom Right (Soft Indigo)
+          Positioned(
+            bottom: -140,
             right: -100,
-            child: TweenAnimationBuilder<double>(
-              tween: Tween<double>(begin: 0, end: 1),
-              duration: const Duration(seconds: 10),
-              curve: Curves.easeInOutSine,
-              builder: (context, value, child) {
-                return Transform.translate(
-                  offset: Offset(math.sin(value * math.pi * 2) * 30, math.cos(value * math.pi * 2) * 30),
-                  child: _GlowOrb(
-                    size: 600,
-                    color: const Color(0xFFFACC15).withValues(alpha: isDark ? 0.35 : 0.65), // Golden VN star
-                  ),
-                );
-              },
+            child: _AmbientGlowOrb(
+              size: 420,
+              color: const Color(0xFF818CF8).withValues(alpha: isDark ? 0.07 : 0.10),
             ),
           ),
-          Positioned(
-            bottom: -200,
-            left: -150,
-            child: TweenAnimationBuilder<double>(
-              tween: Tween<double>(begin: 1, end: 0),
-              duration: const Duration(seconds: 12),
-              curve: Curves.easeInOutSine,
-              builder: (context, value, child) {
-                return Transform.translate(
-                  offset: Offset(math.cos(value * math.pi * 2) * -40, math.sin(value * math.pi * 2) * 40),
-                  child: _GlowOrb(
-                    size: 800,
-                    color: const Color(0xFFEF4444).withValues(alpha: isDark ? 0.25 : 0.55), // Red VN flag
-                  ),
-                );
-              },
-            ),
-          ),
-          Positioned(
-             top: MediaQuery.sizeOf(context).height * 0.2,
-             left: MediaQuery.sizeOf(context).width * 0.4,
-             child: TweenAnimationBuilder<double>(
-               tween: Tween<double>(begin: 0, end: 1),
-               duration: const Duration(seconds: 8),
-               curve: Curves.easeInOutSine,
-               builder: (context, value, child) {
-                 return Transform.scale(
-                   scale: 1.0 + math.sin(value * math.pi * 2) * 0.1,
-                   child: _GlowOrb(
-                     size: 500,
-                     color: scheme.primary.withValues(alpha: isDark ? 0.3 : 0.6), // AI Cyan/Blue
-                   ),
-                 );
-               }
-             ),
-          ),
-          Positioned(
-             bottom: MediaQuery.sizeOf(context).height * 0.1,
-             right: MediaQuery.sizeOf(context).width * 0.1,
-             child: TweenAnimationBuilder<double>(
-               tween: Tween<double>(begin: 1, end: 0),
-               duration: const Duration(seconds: 15),
-               curve: Curves.easeInOutSine,
-               builder: (context, value, child) {
-                 return Transform.translate(
-                   offset: Offset(math.sin(value * math.pi * 2) * -50, math.cos(value * math.pi * 2) * 50),
-                   child: _GlowOrb(
-                     size: 600,
-                     color: scheme.secondary.withValues(alpha: isDark ? 0.3 : 0.65), // Xanh nước biển
-                   ),
-                 );
-               }
-             ),
-          ),
-          // Tech Lotus Motif - Made much more visible
+
+          // Subtle Math graph paper grid (inspires math focus, never clutters text)
           Positioned.fill(
             child: CustomPaint(
-              painter: _TechLotusPainter(
-                color: scheme.primary.withValues(alpha: isDark ? 0.4 : 0.7),
+              painter: _MathGridPainter(
+                gridColor: isDark
+                    ? const Color(0xFF60A5FA).withValues(alpha: 0.025)
+                    : const Color(0xFF2563EB).withValues(alpha: 0.035),
+                dotColor: isDark
+                    ? const Color(0xFF93C5FD).withValues(alpha: 0.04)
+                    : const Color(0xFF3B82F6).withValues(alpha: 0.05),
               ),
             ),
           ),
-          // Flowing Data Stream Effect
-          Positioned.fill(
-            child: _DataStreamEffect(
-              color: scheme.primary.withValues(alpha: isDark ? 0.5 : 0.8),
-            ),
-          ),
+
+          // Foreground page content with pristine clarity
           Positioned.fill(child: child),
         ],
       ),
@@ -192,168 +147,54 @@ class AtmosphericBackground extends StatelessWidget {
   }
 }
 
-class _TechLotusPainter extends CustomPainter {
-  _TechLotusPainter({required this.color});
-  final Color color;
+class _MathGridPainter extends CustomPainter {
+  const _MathGridPainter({
+    required this.gridColor,
+    required this.dotColor,
+  });
+
+  final Color gridColor;
+  final Color dotColor;
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..strokeWidth = 2.5 // Thicker line
-      ..style = PaintingStyle.stroke
-      ..maskFilter = const MaskFilter.blur(BlurStyle.solid, 3); // Glow effect
+    const double step = 32.0;
 
-    final center = Offset(size.width / 2, size.height * 0.65);
-    final maxRadius = size.width * 0.6;
+    final linePaint = Paint()
+      ..color = gridColor
+      ..strokeWidth = 0.8
+      ..style = PaintingStyle.stroke;
 
-    // Draw abstract tech lotus petals using overlapping bezier curves
-    for (int i = 0; i < 5; i++) {
-      final path = Path();
-      final widthOffset = (i - 2) * 50.0;
-      final heightOffset = 100.0 - (i - 2).abs() * 30.0;
-
-      path.moveTo(center.dx, center.dy);
-      path.quadraticBezierTo(
-        center.dx + widthOffset * 1.5,
-        center.dy - heightOffset * 1.5,
-        center.dx + widthOffset,
-        center.dy - heightOffset * 3,
-      );
-      path.quadraticBezierTo(
-        center.dx - widthOffset * 1.5,
-        center.dy - heightOffset * 1.5,
-        center.dx,
-        center.dy,
-      );
-      canvas.drawPath(path, paint);
-    }
-
-    // Draw tech grid dots at intersections
     final dotPaint = Paint()
-      ..color = color.withValues(alpha: 0.3)
+      ..color = dotColor
       ..style = PaintingStyle.fill;
-    
-    canvas.drawCircle(Offset(center.dx, center.dy - 300), 3, dotPaint);
-    canvas.drawCircle(Offset(center.dx - 50, center.dy - 240), 3, dotPaint);
-    canvas.drawCircle(Offset(center.dx + 50, center.dy - 240), 3, dotPaint);
-    canvas.drawCircle(Offset(center.dx - 100, center.dy - 120), 3, dotPaint);
-    canvas.drawCircle(Offset(center.dx + 100, center.dy - 120), 3, dotPaint);
-  }
 
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-class _DataStreamEffect extends StatefulWidget {
-  final Color color;
-  const _DataStreamEffect({required this.color});
-
-  @override
-  State<_DataStreamEffect> createState() => _DataStreamEffectState();
-}
-
-class _DataStreamEffectState extends State<_DataStreamEffect> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(vsync: this, duration: const Duration(seconds: 20))..repeat();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, child) {
-        return CustomPaint(
-          painter: _DataStreamPainter(
-            color: widget.color,
-            progress: _controller.value,
-          ),
-          size: Size.infinite,
-        );
-      }
-    );
-  }
-}
-
-class _DataStreamPainter extends CustomPainter {
-  final Color color;
-  final double progress;
-
-  _DataStreamPainter({required this.color, required this.progress});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    if (size.width == 0 || size.height == 0) return;
-    
-    final paint = Paint()..strokeWidth = 1.0;
-    final dotPaint = Paint()..style = PaintingStyle.fill;
-    
-    // Scale distance based on screen size, max 150
-    final double maxDistance = (size.width / 10).clamp(80.0, 150.0);
-    
-    // Determine number of points based on area
-    final int numPoints = ((size.width * size.height) / 12000).clamp(30, 100).toInt();
-    final List<Offset> points = [];
-
-    // Calculate seamlessly looping positions
-    for (int i = 0; i < numPoints; i++) {
-      final double baseX = (i * 873.123) % size.width;
-      final double baseY = (i * 2137.456) % size.height;
-      
-      final double amplitudeX = 20.0 + (i * 13) % 40;
-      final double amplitudeY = 20.0 + (i * 17) % 40;
-      final double phaseX = (i * 0.5) % (math.pi * 2);
-      final double phaseY = (i * 0.7) % (math.pi * 2);
-
-      final currentPhase = progress * math.pi * 2;
-      
-      final double x = baseX + math.sin(currentPhase + phaseX) * amplitudeX;
-      final double y = baseY + math.cos(currentPhase + phaseY) * amplitudeY;
-      
-      points.add(Offset(x, y));
+    // Draw vertical grid lines
+    for (double x = 0; x < size.width; x += step) {
+      canvas.drawLine(Offset(x, 0), Offset(x, size.height), linePaint);
     }
 
-    // Draw lines and nodes
-    for (int i = 0; i < points.length; i++) {
-      final p1 = points[i];
-      
-      // Draw node
-      final bool isMajorNode = i % 7 == 0;
-      dotPaint.color = color.withValues(alpha: isMajorNode ? 0.8 : 0.4);
-      canvas.drawCircle(p1, isMajorNode ? 3.0 : 1.5, dotPaint);
+    // Draw horizontal grid lines
+    for (double y = 0; y < size.height; y += step) {
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), linePaint);
+    }
 
-      // Draw connections
-      for (int j = i + 1; j < points.length; j++) {
-        final p2 = points[j];
-        final distance = (p1 - p2).distance;
-
-        if (distance < maxDistance) {
-          final opacity = 1.0 - (distance / maxDistance);
-          paint.color = color.withValues(alpha: opacity * 0.6);
-          canvas.drawLine(p1, p2, paint);
-        }
+    // Draw subtle coordinate intersection dots every 2 grid steps
+    const double dotStep = step * 2;
+    for (double x = dotStep; x < size.width; x += dotStep) {
+      for (double y = dotStep; y < size.height; y += dotStep) {
+        canvas.drawCircle(Offset(x, y), 1.2, dotPaint);
       }
     }
   }
 
   @override
-  bool shouldRepaint(covariant _DataStreamPainter oldDelegate) {
-    return oldDelegate.progress != progress;
-  }
+  bool shouldRepaint(covariant _MathGridPainter oldDelegate) =>
+      oldDelegate.gridColor != gridColor || oldDelegate.dotColor != dotColor;
 }
 
-class _GlowOrb extends StatelessWidget {
-  const _GlowOrb({required this.size, required this.color});
+class _AmbientGlowOrb extends StatelessWidget {
+  const _AmbientGlowOrb({required this.size, required this.color});
 
   final double size;
   final Color color;
@@ -411,15 +252,15 @@ class BrandMark extends StatelessWidget {
             ],
           ),
           child: Icon(
-            Icons.auto_stories_rounded,
-            size: size * 0.42,
+            Icons.calculate_rounded,
+            size: size * 0.44,
             color: scheme.onPrimary,
           ),
         ),
         if (showTitle) ...[
           const SizedBox(height: 18),
           Text(
-            'EduSelf',
+            'EduSelf Toán AI',
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.w800,
                   letterSpacing: -0.8,
@@ -457,11 +298,11 @@ class ChatBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    // Keep all corners equally rounded to avoid sharp corner artifacts.
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final radius = BorderRadius.circular(20);
     final fill = isUser
-        ? const Color(0xFFF3F4F6)
-        : scheme.surfaceContainerLowest.withValues(alpha: 0.96);
+        ? const Color(0xFF2563EB)
+        : (isDark ? const Color(0xFF1E293B) : Colors.white);
 
     return Align(
       alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
@@ -477,14 +318,14 @@ class ChatBubble extends StatelessWidget {
               boxShadow: [
                 BoxShadow(
                   color: (isUser ? scheme.primary : scheme.shadow)
-                      .withValues(alpha: 0.10),
+                      .withValues(alpha: isUser ? 0.18 : 0.06),
                   blurRadius: 14,
-                  offset: const Offset(0, 5),
+                  offset: const Offset(0, 4),
                 ),
               ],
             ),
             child: Material(
-              color: fill ?? Colors.transparent,
+              color: fill,
               borderRadius: radius,
               clipBehavior: Clip.antiAlias,
               child: InkWell(
@@ -496,7 +337,9 @@ class ChatBubble extends StatelessWidget {
                     border: isUser
                         ? null
                         : Border.all(
-                            color: scheme.outlineVariant.withValues(alpha: 0.28),
+                            color: isDark
+                                ? Colors.white.withValues(alpha: 0.12)
+                                : const Color(0xFFE2E8F0),
                           ),
                   ),
                   child: Padding(
@@ -506,28 +349,28 @@ class ChatBubble extends StatelessWidget {
                     ),
                     child: GptMarkdownTheme(
                       gptThemeData: GptMarkdownThemeData(
-                        brightness: Theme.of(context).brightness,
+                        brightness: isUser ? Brightness.dark : Theme.of(context).brightness,
                         hrLineColor: (isUser
-                                ? Colors.black26
+                                ? Colors.white24
                                 : scheme.outlineVariant)
                             .withValues(alpha: 0.45),
                         linkColor:
-                            isUser ? scheme.primary : scheme.primary,
+                            isUser ? Colors.white : scheme.primary,
                         h1: Theme.of(context).textTheme.titleLarge?.copyWith(
                               color: isUser
-                                  ? Colors.black87
+                                  ? Colors.white
                                   : scheme.onSurface,
                               fontWeight: FontWeight.w800,
                             ),
                         h2: Theme.of(context).textTheme.titleMedium?.copyWith(
                               color: isUser
-                                  ? Colors.black87
+                                  ? Colors.white
                                   : scheme.onSurface,
                               fontWeight: FontWeight.w700,
                             ),
                         h3: Theme.of(context).textTheme.titleSmall?.copyWith(
                               color: isUser
-                                  ? Colors.black87
+                                  ? Colors.white
                                   : scheme.onSurface,
                               fontWeight: FontWeight.w700,
                             ),
@@ -537,11 +380,10 @@ class ChatBubble extends StatelessWidget {
                         style:
                             Theme.of(context).textTheme.bodyLarge?.copyWith(
                                   color: isUser
-                                      ? Colors.black87
+                                      ? Colors.white
                                       : scheme.onSurface,
                                   height: 1.45,
                                 ),
-                        // Gemini tutoring replies use $...$ / $$...$$ for math.
                         useDollarSignsForLatex: true,
                       ),
                     ),

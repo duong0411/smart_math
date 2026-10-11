@@ -53,6 +53,8 @@ class MathTutorSessionsPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final scheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final sessionsAsync = ref.watch(mathSessionsProvider);
 
     return AtmosphericBackground(
@@ -60,7 +62,10 @@ class MathTutorSessionsPage extends ConsumerWidget {
         backgroundColor: Colors.transparent,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
-          title: const Text('Gia sư Toán AI'),
+          title: const Text(
+            'Gia sư Toán AI',
+            style: TextStyle(fontWeight: FontWeight.w700),
+          ),
         ),
         floatingActionButton: FloatingActionButton.extended(
           onPressed: () => _startNewSession(context, ref),
@@ -73,16 +78,107 @@ class MathTutorSessionsPage extends ConsumerWidget {
             error: (e, _) => Center(child: Text('Lỗi: $e')),
             data: (sessions) {
               if (sessions.isEmpty) {
-                return const Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(32),
-                    child: Text(
-                      'Chưa có buổi học.\nNhấn “Buổi học mới”, chọn lớp, rồi hỏi AI Toán.',
-                      textAlign: TextAlign.center,
+                return Center(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+                      decoration: BoxDecoration(
+                        color: isDark ? const Color(0xFF1E293B) : Colors.white,
+                        borderRadius: BorderRadius.circular(24),
+                        border: Border.all(
+                          color: isDark
+                              ? Colors.white.withValues(alpha: 0.10)
+                              : const Color(0xFFE2E8F0),
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: scheme.primary.withValues(alpha: isDark ? 0.2 : 0.06),
+                            blurRadius: 20,
+                            offset: const Offset(0, 6),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 68,
+                            height: 68,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF2563EB).withValues(alpha: 0.12),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.psychology_rounded,
+                              size: 36,
+                              color: Color(0xFF2563EB),
+                            ),
+                          ),
+                          const SizedBox(height: 18),
+                          Text(
+                            'Chưa có buổi học nào',
+                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                  fontWeight: FontWeight.w800,
+                                ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Nhấn nút bên dưới để chọn lớp và bắt đầu hỏi đáp bài tập, ôn luyện công thức toán cùng AI.',
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                  color: scheme.onSurfaceVariant,
+                                  height: 1.45,
+                                ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 22),
+                          FilledButton.icon(
+                            onPressed: () => _startNewSession(context, ref),
+                            icon: const Icon(Icons.add_rounded),
+                            label: const Text('Bắt đầu buổi học mới'),
+                          ),
+                          const SizedBox(height: 18),
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: isDark
+                                  ? Colors.white.withValues(alpha: 0.05)
+                                  : const Color(0xFFF8FAFC),
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(
+                                color: isDark
+                                    ? Colors.white.withValues(alpha: 0.08)
+                                    : const Color(0xFFE2E8F0),
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(
+                                  Icons.lightbulb_outline_rounded,
+                                  size: 18,
+                                  color: Color(0xFFF59E0B),
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    'Mẹo: Em có thể chụp ảnh đề bài để AI nhận diện và giải từng bước!',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: scheme.onSurfaceVariant,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 );
               }
+
               return ListView.separated(
                 padding: const EdgeInsets.fromLTRB(20, 8, 20, 100),
                 itemCount: sessions.length,
@@ -90,30 +186,88 @@ class MathTutorSessionsPage extends ConsumerWidget {
                 itemBuilder: (context, index) {
                   final s = sessions[index];
                   final gradeLabel =
-                      s.gradeLevel != null ? 'Lớp ${s.gradeLevel} · ' : '';
-                  return GlassCard(
-                    padding: EdgeInsets.zero,
+                      s.gradeLevel != null ? 'Lớp ${s.gradeLevel}' : 'Chung';
+
+                  return Container(
+                    decoration: BoxDecoration(
+                      color: isDark ? const Color(0xFF1E293B) : Colors.white,
+                      borderRadius: BorderRadius.circular(18),
+                      border: Border.all(
+                        color: isDark
+                            ? Colors.white.withValues(alpha: 0.08)
+                            : const Color(0xFFE2E8F0),
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
+                          blurRadius: 10,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
+                    ),
                     child: ListTile(
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 16,
-                        vertical: 8,
+                        vertical: 6,
+                      ),
+                      leading: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF2563EB).withValues(alpha: 0.10),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          gradeLabel,
+                          style: const TextStyle(
+                            color: Color(0xFF2563EB),
+                            fontWeight: FontWeight.w700,
+                            fontSize: 12,
+                          ),
+                        ),
                       ),
                       title: Text(
                         s.title,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontWeight: FontWeight.w700),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 15,
+                        ),
                       ),
                       subtitle: Text(
-                        '$gradeLabel${s.messages.length} tin nhắn · ${_fmt(s.updatedAt)}',
+                        '${s.messages.length} tin nhắn · ${_fmt(s.updatedAt)}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: scheme.onSurfaceVariant,
+                        ),
                       ),
                       trailing: IconButton(
-                        icon: const Icon(Icons.delete_outline),
+                        icon: const Icon(Icons.delete_outline_rounded, size: 20),
+                        tooltip: 'Xoá buổi học',
                         onPressed: () async {
-                          await ref
-                              .read(mathLocalStoreProvider)
-                              .deleteSession(s.id);
-                          ref.invalidate(mathSessionsProvider);
+                          final confirm = await showDialog<bool>(
+                            context: context,
+                            builder: (ctx) => AlertDialog(
+                              title: const Text('Xoá buổi học'),
+                              content: Text('Em có chắc muốn xoá buổi học "${s.title}" không?'),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(ctx, false),
+                                  child: const Text('Huỷ'),
+                                ),
+                                FilledButton(
+                                  onPressed: () => Navigator.pop(ctx, true),
+                                  child: const Text('Xoá'),
+                                ),
+                              ],
+                            ),
+                          );
+                          if (confirm == true) {
+                            await ref
+                                .read(mathLocalStoreProvider)
+                                .deleteSession(s.id);
+                            ref.invalidate(mathSessionsProvider);
+                          }
                         },
                       ),
                       onTap: () => context.push('/tutor/${s.id}'),

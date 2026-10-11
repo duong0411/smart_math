@@ -17,17 +17,17 @@ class GlassTheme extends ThemeExtension<GlassTheme> {
   final double borderRadius;
 
   static const light = GlassTheme(
-    blurSigma: 24,
-    fillOpacity: 0.65,
-    borderOpacity: 0.35,
-    borderRadius: 24,
+    blurSigma: 20,
+    fillOpacity: 0.92,
+    borderOpacity: 0.25,
+    borderRadius: 20,
   );
 
   static const dark = GlassTheme(
-    blurSigma: 24,
-    fillOpacity: 0.15,
+    blurSigma: 20,
+    fillOpacity: 0.88,
     borderOpacity: 0.15,
-    borderRadius: 24,
+    borderRadius: 20,
   );
 
   @override
@@ -58,16 +58,16 @@ class GlassTheme extends ThemeExtension<GlassTheme> {
 }
 
 abstract final class AppTheme {
-  // Template palette: Neon Blue + Cyan
-  static const _seed = Color(0xFF2563EB); // Blue
-  static const _secondary = Color(0xFF00E5FF); // Cyan
+  // Educational Math palette: Focused Royal Blue + Clear Indigo/Cyan
+  static const _seed = Color(0xFF2563EB); // Royal Blue
+  static const _secondary = Color(0xFF0284C7); // Sky / Tech Blue
 
   static ThemeData light() {
     final scheme = ColorScheme.fromSeed(
       seedColor: _seed,
       secondary: _secondary,
       brightness: Brightness.light,
-      surface: const Color(0xFFF8FAFC),
+      surface: const Color(0xFFFFFFFF),
     );
     return _base(scheme, GlassTheme.light);
   }
@@ -77,7 +77,7 @@ abstract final class AppTheme {
       seedColor: _seed,
       secondary: _secondary,
       brightness: Brightness.dark,
-      surface: const Color(0xFF090E17), // Very dark template background
+      surface: const Color(0xFF1E293B),
     );
     return _base(scheme, GlassTheme.dark);
   }
@@ -111,7 +111,7 @@ abstract final class AppTheme {
       ),
       cardTheme: CardThemeData(
         elevation: 0,
-        color: scheme.surface.withValues(alpha: 0.6),
+        color: scheme.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(glass.borderRadius),
         ),
@@ -122,7 +122,7 @@ abstract final class AppTheme {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: scheme.surface.withValues(alpha: 0.5),
+        fillColor: scheme.surface,
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
@@ -146,8 +146,6 @@ abstract final class AppTheme {
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
           elevation: 0,
-          // Do NOT use Size.fromHeight — that sets width to infinity and
-          // breaks AlertDialog actions (Cancel above a full-width primary).
           minimumSize: const Size(64, 48),
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
           textStyle: const TextStyle(
