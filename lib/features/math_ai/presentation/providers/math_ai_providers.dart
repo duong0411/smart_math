@@ -158,7 +158,7 @@ Future<Result<String>> askMathAi(
   if (effectiveGrade != null) {
     profileBlock.writeln('Lớp: $effectiveGrade');
     profileBlock.writeln(
-      'Chỉ dạy / ra đề / giải thích phù hợp chương trình Toán lớp $effectiveGrade '
+      'Chỉ dạy / ra đề / giải thích phù hợp chương trình STEM Toán lớp $effectiveGrade '
       '(THCS, GDPT Việt Nam). Điều chỉnh độ khó và thuật ngữ theo lớp này.',
     );
   }
@@ -171,9 +171,11 @@ Future<Result<String>> askMathAi(
       : '$basePrompt\n\n## Thông tin học sinh hiện tại\n$profileBlock';
 
   final reinforced = '$systemPrompt\n\n'
-      '## Nhắc ngắn cho lượt này\n'
-      '- Ưu tiên đúng kiến thức Toán; tự kiểm tra phép tính trước khi trả lời.\n'
-      '- Trả lời bằng tiếng Việt, rõ ràng, dùng LaTeX cho biểu thức.';
+      '## NGUYÊN TẮC BẮT BUỘC CHO LƯỢT NÀY:\n'
+      '1. BẠN LÀ CHATBOT HỖ TRỢ HỌC TẬP STEM MÔN TOÁN. TUYỆT ĐỐI CHỈ TRẢ LỜI CÁC NỘI DUNG VỀ TOÁN HỌC VÀ ỨNG DỤNG STEM LIÊN QUAN ĐẾN TOÁN.\n'
+      '2. NẾU HỌC SINH HỎI NỘI DUNG KHÔNG LIÊN QUAN (tán gẫu, đời tư, phim ảnh, ca nhạc, chính trị, game không liên quan, làm thơ, chuyện phiếm...): TUYỆT ĐỐI KHÔNG TRẢ LỜI LAN MAN. Hãy từ chối lịch sự và nhắc học sinh quay lại môn Toán.\n'
+      '3. NẾU HỌC SINH GỬI ẢNH KHÔNG LIÊN QUAN ĐẾN TOÁN HỌC (ảnh người, đồ vật, thú cưng, ảnh rác, ảnh mờ...): TUYỆT ĐỐI TỪ CHỐI, KHÔNG SUY DIỄN VÀ KHÔNG CHẤM ĐÚNG.\n'
+      '4. ĐỘ CHÍNH XÁC: Luôn giải nháp trước để kiểm tra phép tính; dùng LaTeX \$...\$ hoặc \$\$...\$\$ cho biểu thức toán.';
 
   final message = _composeUserMessage(
     userMessage: userMessage,
@@ -200,18 +202,36 @@ String _composeUserMessage({
 }) {
   final text = userMessage.trim();
   final doc = documentText?.trim() ?? '';
-  if (doc.isEmpty) return text;
-
   final name = (documentName == null || documentName.trim().isEmpty)
       ? 'tài liệu'
       : documentName.trim();
-  final block = '\n\n--- Nội dung tệp đính kèm ($name) ---\n$doc\n--- Hết nội dung tệp ---';
+  final docBlock = doc.isNotEmpty
+      ? '\n\n--- Nội dung tệp đính kèm ($name) ---\n$doc\n--- Hết nội dung tệp ---'
+      : '';
 
-  if (text.isNotEmpty) return '$text$block';
-  if (hasImage) {
-    return 'Em kèm ảnh và tệp "$name". Hãy đọc cả hai rồi hướng dẫn giải từng bước.$block';
+  if (text.isNotEmpty) {
+    if (hasImage) {
+      return '$text\n\n(Học sinh kèm hình ảnh bài làm/đề bài. Hãy kiểm tra ảnh: nếu ảnh chứa bài toán thì phân tích và hướng dẫn giải; nếu ảnh không liên quan đến Toán học thì từ chối lịch sự và nhắc học sinh gửi đúng ảnh bài tập Toán.)$docBlock';
+    }
+    return '$text$docBlock';
   }
-  return 'Em gửi tệp "$name" chứa đề / bài Toán. '
-      'Hãy đọc kỹ nội dung tệp, nêu lại đề ngắn gọn nếu cần, '
-      'rồi hướng dẫn giải từng bước (chưa đưa đáp án ngay trừ khi em yêu cầu).$block';
+
+  // Khi học sinh không gõ chữ mà gửi ảnh hoặc tệp:
+  if (hasImage && doc.isNotEmpty) {
+    return 'Học sinh gửi ảnh và tệp "$name". Hãy kiểm tra xem có chứa đề bài hoặc bài giải Toán không: nếu có thì phân tích và hướng dẫn; nếu không liên quan đến Toán học thì từ chối lịch sự.$docBlock';
+  }
+
+  if (hasImage) {
+    return 'Học sinh gửi 1 hình ảnh (không kèm lời nhắn). '
+        'Hãy quan sát kỹ ảnh:\n'
+        '1. Nếu ảnh chứa đề bài toán hoặc bài làm toán: Hãy tóm tắt lại đề bài và hướng dẫn phương pháp giải từng bước (chưa vội đưa đáp số cuối cùng).\n'
+        '2. NẾU ẢNH KHÔNG LIÊN QUAN ĐẾN TOÁN HỌC (ảnh người, phong cảnh, thú cưng, đồ vật, meme, ảnh rác, ảnh mờ không đọc được): BẮT BUỘC TỪ CHỐI LỊCH SỰ: thông báo ảnh không chứa bài tập môn Toán và nhắc học sinh chụp rõ đề bài Toán.';
+  }
+
+  if (doc.isNotEmpty) {
+    return 'Học sinh gửi tệp "$name" chứa tài liệu học tập. '
+        'Hãy đọc kỹ nội dung tệp: nếu chứa đề bài hoặc bài tập Toán thì tóm tắt và hướng dẫn giải từng bước; nếu nội dung không liên quan đến môn Toán thì từ chối lịch sự.$docBlock';
+  }
+
+  return text;
 }

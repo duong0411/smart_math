@@ -103,19 +103,20 @@ class _MathPracticePageState extends ConsumerState<MathPracticePage> {
       ref,
       gradeLevel: grade,
       userMessage: '''
-Hãy tạo ĐÚNG 1 bài tập Toán lớp $grade (chưa có đáp án trong phần hiển thị cho học sinh).
-Chủ đề: $topic
+Bạn là trợ lý EduSelf STEM Toán AI dành cho học sinh THCS.
+Hãy tạo ĐÚNG 1 bài tập Toán lớp $grade (hoặc bài toán ứng dụng STEM liên quan đến Toán học lớp $grade).
+Yêu cầu chủ đề: $topic (Nếu người dùng nhập chủ đề không liên quan môn Toán, hãy tự động bỏ qua và tạo 1 bài toán THCS trọng tâm chuẩn mực).
 
 Yêu cầu chất lượng:
-- Đề phải có nghiệm / đáp án xác định, không mâu thuẫn, vừa sức lớp $grade.
-- Nêu rõ đơn vị / điều kiện nếu cần.
-- Dùng LaTeX \$...\$ hoặc \$\$...\$\$ cho biểu thức.
+- Đề bài phải chuẩn xác 100%, có nghiệm / đáp số xác định, không mâu thuẫn, vừa sức học sinh lớp $grade.
+- Trình bày sư phạm, rõ ràng điều kiện và đơn vị.
+- Dùng LaTeX \$...\$ hoặc \$\$...\$\$ cho mọi biểu thức, công thức toán.
 
-Trả lời CHỈ bằng JSON thuần (không markdown, không code fence):
-{"topic":"...","question":"..."}
+Trả lời CHỈ bằng 1 đối tượng JSON duy nhất (không có markdown code fence):
+{"topic":"Tên chủ đề Toán","question":"Đề bài toán đầy đủ chuẩn LaTeX"}
 ''',
       extraSystemContext:
-          'Chế độ luyện tập: chỉ tạo 1 bài đúng kiến thức Toán lớp $grade, vừa sức. Ưu tiên độ chính xác đề bài.',
+          'Chế độ luyện tập EduSelf STEM Toán AI: Chỉ tạo đề bài môn Toán và ứng dụng STEM Toán lớp $grade. Nghiêm cấm tạo nội dung ngoài lề môn Toán.',
     );
 
     if (!mounted) return;
@@ -264,31 +265,55 @@ Trả lời CHỈ bằng JSON thuần (không markdown, không code fence):
             ? '(Bài làm gửi bằng tệp ${_answerDocumentName ?? 'tài liệu'})'
             : '(Bài làm gửi bằng ảnh)')
         : answer;
-    final imageNote = hasImage
-        ? '\n(Học sinh kèm ảnh bài làm — hãy đọc chữ/phép tính trên ảnh.)'
-        : '';
-    final documentNote = hasDocument
-        ? '\n(Học sinh kèm tệp bài làm — nội dung chữ nằm trong phần tệp đính kèm.)'
-        : '';
+
 
     final result = await askMathAi(
       ref,
       gradeLevel: _grade,
       userMessage: '''
-Chấm bài luyện tập Toán lớp $_grade — ưu tiên độ chính xác toán học.
+Bạn là giám khảo chấm bài luyện tập môn Toán lớp $_grade (Chương trình GDPT THCS).
+Nhiệm vụ: Chấm điểm bài làm của học sinh cho bài toán dưới đây với độ chính xác toán học tuyệt đối.
 
-Đề: $_question
-Bài làm học sinh (text): $answerLabel$imageNote$documentNote
+[ĐỀ BÀI TOÁN LỚP $_grade]:
+$_question
 
-Quy trình chấm:
-1. Tự giải đúng đề (không hiện hết cho học sinh nếu sai).
-2. So sánh với bài làm (text, ảnh và/hoặc tệp); đọc kỹ phép tính trên ảnh/tệp nếu có.
-3. correct=true chỉ khi kết quả cuối cùng đúng (chấp nhận dạng tương đương hợp lệ).
-4. Nếu sai: chỉ ra bước/lỗi cụ thể + gợi ý bước tiếp theo — chưa đưa đáp án đầy đủ trừ khi gần đúng.
-5. Dùng LaTeX trong feedback khi cần.
+[BÀI LÀM CỦA HỌC SINH]:
+- Dạng văn bản (text): $answerLabel
+- Có ảnh đính kèm: ${hasImage ? "CÓ (Xem ảnh bài làm)" : "KHÔNG"}
+- Có tệp đính kèm: ${hasDocument ? "CÓ (${_answerDocumentName ?? 'tệp'})" : "KHÔNG"}
 
-Trả lời CHỈ bằng JSON thuần (không markdown, không code fence):
-{"correct":true/false,"feedback":"..."}
+==============================
+QUY TRÌNH CHẤM BẮT BUỘC (TUÂN THỦ THEO THỨ TỰ TỪNG BƯỚC):
+
+BƯỚC 1: KIỂM TRA TÍNH HỢP LỆ VÀ LIÊN QUAN (ĐIỀU KIỆN TIÊN QUYẾT):
+1. NẾU HỌC SINH GỬI ẢNH:
+   - Hãy quan sát kỹ toàn bộ bức ảnh đính kèm.
+   - Bức ảnh có chứa chữ viết tay, bài giải, công thức hoặc các bước giải liên quan đến bài toán [$_question] này không?
+   - NẾU ẢNH LÀ ẢNH KHÔNG LIÊN QUAN (Ví dụ: ảnh người, ảnh phong cảnh, động vật, đồ vật, meme, ảnh rác, ảnh đen, ảnh mờ không đọc được chữ, hoặc ảnh chụp bài toán KHÁC không liên quan đến đề bài này):
+     => BẮT BUỘC ĐẶT: "correct": false
+     => "feedback": "Ảnh bạn tải lên không chứa bài giải hoặc không liên quan đến bài toán này. Em hãy chụp rõ bài làm hoặc nhập câu trả lời vào ô để hệ thống chấm điểm nhé!"
+     => DỪNG LẠI NGAY, TUYỆT ĐỐI KHÔNG CHẤM ĐÚNG!
+2. NẾU HỌC SINH GỬI VĂN BẢN (TEXT):
+   - Kiểm tra xem văn bản có chứa câu trả lời / lời giải liên quan bài toán không?
+   - NẾU VĂN BẢN LÀ NỘI DUNG NHẢM NHÍ, TÁN GẪU, SPAM, GÕ BỪA (Ví dụ: 'abc', 'hello', 'không biết', 'haha', 'test', câu chữ không liên quan):
+     => BẮT BUỘC ĐẶT: "correct": false
+     => "feedback": "Câu trả lời không liên quan đến bài toán. Em hãy tính toán cẩn thận và điền đáp số vào nhé!"
+     => DỪNG LẠI NGAY, TUYỆT ĐỐI KHÔNG CHẤM ĐÚNG!
+
+BƯỚC 2: TỰ GIẢI BÀI TOÁN ĐỂ CÓ KẾT QUẢ CHUẨN:
+- Tự giải bài toán [$_question] từng bước để có đáp số chính xác K_chuẩn và điều kiện nghiệm.
+
+BƯỚC 3: ĐỐI CHIẾU VÀ ĐÁNH GIÁ ĐÚNG / SAI:
+- Đọc kỹ kết quả và các bước giải trong bài làm của học sinh (trên ảnh / tệp / text).
+- ĐẶT "correct": true CHỈ KHI:
+  + Bài làm thực sự giải bài toán này VÀ kết quả cuối cùng chính xác trùng khớp với K_chuẩn (chấp nhận cách viết tương đương hợp lệ: phân số tối giản, số thập phân tương đương).
+- ĐẶT "correct": false KHI:
+  + Kết quả sai, tính nhầm, sai dấu, thiếu điều kiện, hoặc các bước giải sai logic.
+  + Trong "feedback": Chỉ rõ lỗi sai ở bước nào, gợi ý phương pháp giải / công thức cần áp dụng (chưa vội đưa toàn bộ đáp án để học sinh tự làm lại).
+
+ĐỊNH DẠNG ĐẦU RA BẮT BUỘC:
+Trả lời CHỈ bằng 1 đối tượng JSON duy nhất (không có markdown fence, không có chữ thừa):
+{"correct": true hoặc false, "feedback": "Lời nhận xét chi tiết bằng tiếng Việt, dùng LaTeX \$...\$ cho biểu thức"}
 ''',
       image: hasImage
           ? GeminiImage(
@@ -299,7 +324,7 @@ Trả lời CHỈ bằng JSON thuần (không markdown, không code fence):
       documentText: _answerDocumentText,
       documentName: _answerDocumentName,
       extraSystemContext:
-          'Chế độ chấm luyện tập: tự giải để đối chiếu trước khi kết luận đúng/sai. Không bịa.',
+          'Chế độ chấm bài luyện tập STEM Toán: BẮT BUỘC kiểm tra tính liên quan của ảnh/text trước. Nếu ảnh/text không liên quan hoặc sai kết quả, BẮT BUỘC đặt correct = false. Tuyệt đối không chấm đúng cho ảnh hoặc câu trả lời không liên quan.',
     );
 
     if (!mounted) return;

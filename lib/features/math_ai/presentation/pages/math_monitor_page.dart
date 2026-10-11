@@ -65,7 +65,10 @@ Không bịa số liệu ngoài dữ liệu. Nếu thiếu dữ liệu, nói rõ
 $summary
 ''',
       extraSystemContext:
-          'Chế độ giám sát & báo cáo: trung thực với dữ liệu, kế hoạch ôn cụ thể theo lớp.',
+          'Chế độ giám sát & báo cáo học tập EduSelf STEM Toán AI: '
+          'Trung thực 100% với dữ liệu bài tập Toán và thực hành STEM. '
+          'Chỉ nhận xét về năng lực Toán học và tư duy STEM, kế hoạch ôn 5 ngày bám sát chương trình Toán THCS. '
+          'Tuyệt đối không đưa nhận xét ngoài lề môn Toán.',
     );
 
     if (!mounted) return;

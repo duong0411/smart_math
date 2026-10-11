@@ -225,9 +225,17 @@ class _MathTutorChatPageState extends ConsumerState<MathTutorChatPage> {
           ),
       ];
 
+      final promptMessage = text.isNotEmpty
+          ? text
+          : (hasDocument
+              ? 'Em gửi tệp "${documentName ?? 'tài liệu'}". Thầy xem giúp em bài toán trong tệp và hướng dẫn giải từng bước nhé.'
+              : (hasImage
+                  ? 'Em gửi ảnh này. Thầy xem có phải đề bài hoặc bài tập Toán không và hướng dẫn giải giúp em với ạ.'
+                  : ''));
+
       final result = await askMathAi(
         ref,
-        userMessage: text,
+        userMessage: promptMessage,
         history: history,
         gradeLevel: _session?.gradeLevel,
         image: imageBytes == null
@@ -238,6 +246,11 @@ class _MathTutorChatPageState extends ConsumerState<MathTutorChatPage> {
               ),
         documentText: documentText,
         documentName: documentName,
+        extraSystemContext:
+            'Gia sư STEM Toán: Chỉ hỗ trợ môn Toán và ứng dụng STEM. '
+            'Nếu học sinh hỏi nội dung không liên quan hoặc gửi ảnh không liên quan đến Toán (ảnh người, phong cảnh, đồ vật, thú cưng, meme, ảnh rác...), '
+            'hãy từ chối lịch sự, ngắn gọn và nhắc học sinh gửi bài tập Toán. '
+            'Tuyệt đối không trả lời lan man hoặc tiếp chuyện ngoài lề.',
       );
 
       switch (result) {
