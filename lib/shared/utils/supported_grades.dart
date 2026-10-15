@@ -1,4 +1,4 @@
-/// Khối lớp Toán được hỗ trợ trong app (THCS).
+/// Khối lớp Ngữ văn được hỗ trợ trong app (THCS).
 abstract final class SupportedGrades {
   static const int min = 6;
   static const int max = 9;
@@ -6,7 +6,7 @@ abstract final class SupportedGrades {
   static const List<int> all = [6, 7, 8, 9];
 
   static const String labelShort = 'Lớp 6–9';
-  static const String labelLong = 'chương trình Toán THCS lớp 6–9';
+  static const String labelLong = 'chương trình Ngữ văn THCS lớp 6–9';
 
   /// Ép về lớp hợp lệ; `null` → [fallback].
   static int normalize(int? grade) {

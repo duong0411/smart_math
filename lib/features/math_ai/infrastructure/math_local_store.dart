@@ -78,10 +78,10 @@ class MathLocalStore {
       title: (title?.trim().isNotEmpty == true)
           ? title!.trim()
           : (topic?.trim().isNotEmpty == true
-              ? 'Toán: ${topic!.trim()}'
+              ? 'Ngữ văn: ${topic!.trim()}'
               : (grade != null
-                  ? 'Buổi học Toán lớp $grade'
-                  : 'Buổi học Toán')),
+                  ? 'Buổi học Ngữ văn lớp $grade'
+                  : 'Buổi học Ngữ văn')),
       topic: topic?.trim(),
       gradeLevel: grade,
       messages: const [],
@@ -130,7 +130,7 @@ class MathLocalStore {
 
   String _titleFrom(String content) {
     final oneLine = content.replaceAll(RegExp(r'\s+'), ' ').trim();
-    if (oneLine.isEmpty) return 'Buổi học Toán';
+    if (oneLine.isEmpty) return 'Buổi học Ngữ văn';
     return oneLine.length <= 42 ? oneLine : '${oneLine.substring(0, 42)}…';
   }
 
@@ -349,7 +349,7 @@ class MathTutorSession {
     final msgs = json['messages'];
     return MathTutorSession(
       id: json['id'] as String? ?? '',
-      title: json['title'] as String? ?? 'Buổi học Toán',
+      title: json['title'] as String? ?? 'Buổi học Ngữ văn',
       topic: json['topic'] as String?,
       gradeLevel: () {
         final raw = json['gradeLevel'] as int?;
@@ -404,7 +404,7 @@ class MathStudyEvent {
         (t) => t.name == typeName,
         orElse: () => MathStudyEventType.tutor,
       ),
-      topic: json['topic'] as String? ?? 'Toán',
+      topic: json['topic'] as String? ?? 'Ngữ văn',
       detail: json['detail'] as String? ?? '',
       correct: json['correct'] as bool?,
       at: DateTime.tryParse(json['at'] as String? ?? '') ??
@@ -445,7 +445,7 @@ class MathPracticeAttempt {
   factory MathPracticeAttempt.fromJson(Map<String, dynamic> json) {
     return MathPracticeAttempt(
       id: json['id'] as String? ?? '',
-      topic: json['topic'] as String? ?? 'Toán',
+      topic: json['topic'] as String? ?? 'Ngữ văn',
       question: json['question'] as String? ?? '',
       studentAnswer: json['studentAnswer'] as String? ?? '',
       feedback: json['feedback'] as String? ?? '',

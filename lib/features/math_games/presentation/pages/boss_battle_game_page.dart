@@ -79,8 +79,8 @@ class _BossBattleGamePageState extends ConsumerState<BossBattleGamePage> {
       if (_won) {
         await logMathGameResult(
           ref,
-          topic: 'Đại chiến Boss Toán',
-          detail: 'Toán $_grade · hạ ${_boss.name}',
+          topic: 'Đại chiến Boss Ngữ văn',
+          detail: 'Ngữ văn $_grade · hạ ${_boss.name}',
           success: true,
         );
       }
@@ -104,8 +104,8 @@ class _BossBattleGamePageState extends ConsumerState<BossBattleGamePage> {
       if (_lost) {
         await logMathGameResult(
           ref,
-          topic: 'Đại chiến Boss Toán',
-          detail: 'Toán $_grade · thua ${_boss.name}',
+          topic: 'Đại chiến Boss Ngữ văn',
+          detail: 'Ngữ văn $_grade · thua ${_boss.name}',
           success: false,
         );
       }
@@ -190,7 +190,7 @@ class _BossBattleGamePageState extends ConsumerState<BossBattleGamePage> {
                                   key: const ValueKey('bw'),
                                   title: 'Chiến thắng!',
                                   subtitle:
-                                      'Em đã hạ ${_boss.name} bằng trí tuệ Toán lớp $_grade!',
+                                      'Em đã hạ ${_boss.name} bằng trí tuệ Ngữ văn lớp $_grade!',
                                   emoji: '⚔️',
                                   onAgain: _start,
                                 )
@@ -336,7 +336,7 @@ class _BattleAsk extends StatelessWidget {
     return Column(
       children: [
         Text(
-          'Đòn tấn Toán!',
+          'Đòn tấn Ngữ văn!',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w800,
                 color: const Color(0xFFE76F51),

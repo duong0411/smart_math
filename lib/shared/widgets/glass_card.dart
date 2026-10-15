@@ -260,7 +260,7 @@ class BrandMark extends StatelessWidget {
         if (showTitle) ...[
           const SizedBox(height: 18),
           Text(
-            'EduSelf Toán AI',
+            'EduSelf Ngữ Văn AI',
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.w800,
                   letterSpacing: -0.8,

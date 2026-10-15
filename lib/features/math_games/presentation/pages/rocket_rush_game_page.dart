@@ -89,7 +89,7 @@ class _RocketRushGamePageState extends ConsumerState<RocketRushGamePage>
     await logMathGameResult(
       ref,
       topic: 'Phóng Tên Lửa',
-      detail: 'Toán $_grade · hết giờ · nhiên liệu $_fuel%',
+      detail: 'Ngữ văn $_grade · hết giờ · nhiên liệu $_fuel%',
       success: false,
     );
   }
@@ -117,7 +117,7 @@ class _RocketRushGamePageState extends ConsumerState<RocketRushGamePage>
         await logMathGameResult(
           ref,
           topic: 'Phóng Tên Lửa',
-          detail: 'Toán $_grade · phóng thành công · ${_seconds - _secondsLeft}s',
+          detail: 'Ngữ văn $_grade · phóng thành công · ${_seconds - _secondsLeft}s',
           success: true,
         );
       }
@@ -223,7 +223,7 @@ class _RocketRushGamePageState extends ConsumerState<RocketRushGamePage>
                                   key: const ValueKey('rw'),
                                   title: 'Phóng thành công!',
                                   subtitle:
-                                      'Tên lửa Toán lớp $_grade đã lên quỹ đạo. Tuyệt vời!',
+                                      'Tên lửa Ngữ văn lớp $_grade đã lên quỹ đạo. Tuyệt vời!',
                                   emoji: '🌌',
                                   onAgain: _start,
                                 )

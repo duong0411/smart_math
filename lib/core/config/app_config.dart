@@ -2,10 +2,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 abstract final class AppConfig {
-  static const appName = 'EduSelf STEM Toán AI';
+  static const appName = 'EduSelf Ngữ Văn AI';
   static const appVersion = '2.1.0';
   static const appTagline =
-      'Ứng dụng AI hỗ trợ học tập STEM và giám sát môn Toán';
+      'Ứng dụng AI hỗ trợ học tập và giám sát môn Ngữ văn THCS (lớp 6–9)';
   static const storageMode = 'Local + Gemini API';
   static const aiGatewayTimeout = Duration(seconds: 45);
   static const _apiBaseUrlKey = 'API_BASE_URL';

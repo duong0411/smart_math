@@ -63,7 +63,7 @@ class MathTutorSessionsPage extends ConsumerWidget {
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           title: const Text(
-            'Gia sư Toán AI',
+            'Gia sư Ngữ văn AI',
             style: TextStyle(fontWeight: FontWeight.w700),
           ),
         ),
@@ -125,7 +125,7 @@ class MathTutorSessionsPage extends ConsumerWidget {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            'Nhấn nút bên dưới để chọn lớp và bắt đầu hỏi đáp bài tập, ôn luyện công thức toán cùng AI.',
+                            'Nhấn nút bên dưới để chọn lớp và bắt đầu hỏi đáp bài tập Ngữ văn, ôn luyện tiếng Việt – làm văn cùng AI.',
                             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                   color: scheme.onSurfaceVariant,
                                   height: 1.45,
@@ -328,7 +328,7 @@ class _GradePickSheetState extends State<_GradePickSheet> {
             ),
             const SizedBox(height: 4),
             Text(
-              'Gia sư AI sẽ dạy theo chương trình Toán THCS (${SupportedGrades.labelShort}).',
+              'Gia sư AI sẽ dạy theo chương trình Ngữ văn THCS (${SupportedGrades.labelShort}).',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),

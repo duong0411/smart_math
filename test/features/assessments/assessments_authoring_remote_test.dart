@@ -26,7 +26,7 @@ Map<String, dynamic> _assessmentJson({
       'id': id,
       'ownerId': 1,
       'title': 'Đề mới',
-      'subject': 'Toán',
+      'subject': 'Ngữ văn',
       'gradeLevel': 6,
       'status': status,
       'createdAtUtc': '2026-01-01T00:00:00.000Z',
@@ -46,7 +46,7 @@ void main() {
         );
       }),
     );
-    final result = await repo.createAssessment(title: 'Đề mới', subject: 'Toán');
+    final result = await repo.createAssessment(title: 'Đề mới', subject: 'Ngữ văn');
     expect(result.isSuccess, isTrue);
     expect(result.valueOrNull!.id, 5);
   });

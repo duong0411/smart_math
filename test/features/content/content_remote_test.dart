@@ -34,7 +34,7 @@ void main() {
               {
                 'id': 1,
                 'code': 'math',
-                'name': 'Toán',
+                'name': 'Ngữ văn',
                 'gradeBand': 'lower_secondary',
                 'sortOrder': 1,
               },
@@ -47,7 +47,7 @@ void main() {
     );
     final result = await repo.listSubjects();
     expect(result.isSuccess, isTrue);
-    expect(result.valueOrNull?.first.name, 'Toán');
+    expect(result.valueOrNull?.first.name, 'Ngữ văn');
   });
 
   test('library lists documents', () async {
@@ -61,10 +61,10 @@ void main() {
               {
                 'id': 2,
                 'ownerId': 1,
-                'title': 'SGK Toán 6',
+                'title': 'SGK Ngữ văn 6',
                 'description': null,
                 'gradeLevel': 6,
-                'subject': 'Toán',
+                'subject': 'Ngữ văn',
                 'mediaId': null,
                 'sourceUrl': null,
                 'visibility': 'private',
@@ -80,7 +80,7 @@ void main() {
     );
     final result = await repo.listDocuments();
     expect(result.isSuccess, isTrue);
-    expect(result.valueOrNull?.first.title, 'SGK Toán 6');
+    expect(result.valueOrNull?.first.title, 'SGK Ngữ văn 6');
   });
 
   test('study tools merges decks and mindmaps', () async {
@@ -112,7 +112,7 @@ void main() {
                 'id': 9,
                 'ownerId': 1,
                 'title': 'Sơ đồ phân số',
-                'subject': 'Toán',
+                'subject': 'Ngữ văn',
                 'graph': <String, dynamic>{},
                 'createdAtUtc': '2026-01-01T00:00:00.000Z',
                 'updatedAtUtc': '2026-01-01T00:00:00.000Z',
@@ -172,7 +172,7 @@ void main() {
                 'study': {'count': 4, 'durationSec': 600},
               },
               'bySubject': {
-                'Toán': {'count': 4, 'durationSec': 600, 'avgScore': 80},
+                'Ngữ văn': {'count': 4, 'durationSec': 600, 'avgScore': 80},
               },
             },
           }),
@@ -184,7 +184,7 @@ void main() {
     final result = await repo.getSummary();
     expect(result.isSuccess, isTrue);
     expect(result.valueOrNull?.totalEvents, 4);
-    expect(result.valueOrNull?.bySubject['Toán']?.avgScore, 80);
+    expect(result.valueOrNull?.bySubject['Ngữ văn']?.avgScore, 80);
   });
 
   test('assessments list parses items', () async {
@@ -198,7 +198,7 @@ void main() {
                 'id': 5,
                 'ownerId': 1,
                 'title': 'Kiểm tra giữa kỳ',
-                'subject': 'Toán',
+                'subject': 'Ngữ văn',
                 'gradeLevel': 6,
                 'status': 'published',
                 'createdAtUtc': '2026-01-01T00:00:00.000Z',

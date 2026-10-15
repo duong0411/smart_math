@@ -24,7 +24,7 @@ void main() {
               'userId': 1,
               'displayName': 'Minh',
               'gradeLevel': 6,
-              'subjects': ['Toán'],
+              'subjects': ['Ngữ văn'],
               'preferences': <String, dynamic>{},
               'updatedAtUtc': '2026-01-01T00:00:00.000Z',
             },

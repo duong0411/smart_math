@@ -228,9 +228,9 @@ class _MathTutorChatPageState extends ConsumerState<MathTutorChatPage> {
       final promptMessage = text.isNotEmpty
           ? text
           : (hasDocument
-              ? 'Em gửi tệp "${documentName ?? 'tài liệu'}". Thầy xem giúp em bài toán trong tệp và hướng dẫn giải từng bước nhé.'
+              ? 'Em gửi tệp "${documentName ?? 'tài liệu'}". Thầy xem giúp em bài Ngữ văn trong tệp và hướng dẫn làm từng bước nhé.'
               : (hasImage
-                  ? 'Em gửi ảnh này. Thầy xem có phải đề bài hoặc bài tập Toán không và hướng dẫn giải giúp em với ạ.'
+                  ? 'Em gửi ảnh này. Thầy xem có phải đề bài hoặc bài tập Ngữ văn không và hướng dẫn giúp em với ạ.'
                   : ''));
 
       final result = await askMathAi(
@@ -247,9 +247,9 @@ class _MathTutorChatPageState extends ConsumerState<MathTutorChatPage> {
         documentText: documentText,
         documentName: documentName,
         extraSystemContext:
-            'Gia sư STEM Toán: Chỉ hỗ trợ môn Toán và ứng dụng STEM. '
-            'Nếu học sinh hỏi nội dung không liên quan hoặc gửi ảnh không liên quan đến Toán (ảnh người, phong cảnh, đồ vật, thú cưng, meme, ảnh rác...), '
-            'hãy từ chối lịch sự, ngắn gọn và nhắc học sinh gửi bài tập Toán. '
+            'Gia sư Ngữ văn: Chỉ hỗ trợ môn Ngữ văn THCS (đọc hiểu, tiếng Việt, tập làm văn). '
+            'Nếu học sinh hỏi nội dung không liên quan hoặc gửi ảnh không liên quan đến Ngữ văn (ảnh người, phong cảnh, đồ vật, thú cưng, meme, ảnh rác...), '
+            'hãy từ chối lịch sự, ngắn gọn và nhắc học sinh gửi bài tập Ngữ văn. '
             'Tuyệt đối không trả lời lan man hoặc tiếp chuyện ngoài lề.',
       );
 
@@ -274,7 +274,7 @@ class _MathTutorChatPageState extends ConsumerState<MathTutorChatPage> {
             MathStudyEvent(
               id: reply.id,
               type: MathStudyEventType.tutor,
-              topic: session.topic ?? 'Gia sư Toán',
+              topic: session.topic ?? 'Gia sư Ngữ văn',
               detail: attachNote,
               at: reply.at,
             ),

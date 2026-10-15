@@ -2,8 +2,8 @@ import 'dart:math';
 
 import 'package:eduself_study_app/shared/utils/supported_grades.dart';
 
-/// Câu hỏi Toán THCS (lớp 6–9).
-/// Chỉ dùng đáp án số nguyên để phù hợp chọn đáp án trong game.
+/// Câu hỏi Ngữ văn THCS (lớp 6–9).
+/// Đáp án là số 1–4 tương ứng các lựa chọn trong đề.
 class GradeQuestion {
   const GradeQuestion({
     required this.prompt,
@@ -26,617 +26,465 @@ abstract final class GradeQuestionBank {
   /// Câu hỏi ngẫu nhiên theo lớp 6–9 (ngoài khoảng → lớp 8).
   static GradeQuestion next(int gradeLevel) {
     final grade = SupportedGrades.normalize(gradeLevel);
-    final generators = _generatorsFor(grade);
-    return generators[_rng.nextInt(generators.length)]();
+    final bank = _bankFor(grade);
+    final item = bank[_rng.nextInt(bank.length)];
+    return _shuffled(item);
   }
 
   @Deprecated('Dùng GradeQuestionBank.next(8)')
   static GradeQuestion nextGrade8() => next(8);
 
-  static String bandLabel(int gradeLevel) => 'THCS';
+  static String bandLabel(int gradeLevel) => 'Ngữ văn THCS';
 
   static String curriculumHint(int gradeLevel) {
     final g = SupportedGrades.normalize(gradeLevel);
     return switch (g) {
-      6 => 'Số nguyên, tỉ lệ, phần trăm, phương trình đơn giản.',
-      7 => 'Biểu thức, tỉ lệ thức, góc trong tam giác, lũy thừa.',
-      8 => 'Đa thức, hằng đẳng thức, PT bậc nhất, Pythagore…',
-      _ => 'Căn bậc hai, PT bậc hai, hệ PT, đường tròn.',
+      6 => 'Từ ngữ, chính tả, kể chuyện, nhận biết biện pháp tu từ cơ bản.',
+      7 => 'Đọc hiểu, miêu tả, thành ngữ tục ngữ, nhân hóa – so sánh.',
+      8 => 'Phân tích văn bản, nghị luận đơn giản, biện pháp tu từ nâng cao.',
+      _ => 'Nghị luận văn học/xã hội, cảm nhận thơ văn, tiếng Việt nâng cao.',
     };
   }
 
-  static List<GradeQuestion Function()> _generatorsFor(int grade) {
+  static List<_LitItem> _bankFor(int grade) {
     return switch (grade) {
-      6 => [
-          _intAdd,
-          _intMul,
-          _percentOf,
-          _ratioValue,
-          _simpleLinear,
-        ],
-      7 => [
-          _exprValue,
-          _powerValue,
-          _triangleAngleSum,
-          _proportion,
-          _simpleLinear,
-          _intMul,
-        ],
-      9 => [
-          _sqrtPerfect,
-          _quadraticRootSum,
-          _systemSum,
-          _circleCircumferenceCoeff,
-          _pythagoreanHyp,
-          _pythagoreanLeg,
-          _identityDiffSquares,
-        ],
-      _ => _grade8Generators,
+      6 => _grade6,
+      7 => _grade7,
+      9 => _grade9,
+      _ => _grade8,
     };
   }
 
-  static final List<GradeQuestion Function()> _grade8Generators = [
-    _monomialDegree,
-    _polyAddCoeff,
-    _polyMultiplyValue,
-    _identityDiffSquares,
-    _identitySquareSum,
-    _identitySquareDiff,
-    _factorCommon,
-    _rectanglePerimeter,
-    _rhombusPerimeter,
-    _parallelogramArea,
-    _squareDiagonalRelated,
-    _thalesMidline,
-    _statsMean,
-    _statsRange,
-    _rationalSimplifyValue,
-    _rationalAddSameDen,
-    _linearEquation,
-    _linearEquationWithConst,
-    _wordLinearAge,
-    _functionValue,
-    _slopeOfLine,
-    _probabilityFavorable,
-    _similarTriangleSide,
-    _pythagoreanLeg,
-    _pythagoreanHyp,
-    _pyramidEdges,
+  static GradeQuestion _shuffled(_LitItem item) {
+    final options = List<String>.from(item.options);
+    final correctText = options[item.correctIndex];
+    options.shuffle(_rng);
+    final answer = options.indexOf(correctText) + 1;
+    final buf = StringBuffer(item.stem);
+    for (var i = 0; i < options.length; i++) {
+      buf.write('\n${i + 1}. ${options[i]}');
+    }
+    return GradeQuestion(
+      prompt: buf.toString(),
+      answer: answer,
+      choices: const [1, 2, 3, 4],
+      chapter: item.chapter,
+      storyHint: item.hint,
+    );
+  }
+
+  // —— Lớp 6 ——
+  static final List<_LitItem> _grade6 = [
+    _LitItem(
+      'Từ nào viết đúng chính tả?',
+      ['xúc động', 'súc động', 'xúc dộng', 'súc dộng'],
+      0,
+      chapter: 'Chính tả',
+      hint: 'Chú ý phân biệt s/x và d/gi.',
+    ),
+    _LitItem(
+      'Câu nào dùng dấu hỏi đúng?',
+      [
+        'Em đi đâu vậy?',
+        'Em đi đâu vậy!',
+        'Em đi đâu vậy.',
+        'Em đi đâu vậy,',
+      ],
+      0,
+      chapter: 'Dấu câu',
+    ),
+    _LitItem(
+      'Biện pháp tu từ trong câu "Mặt trời thức dậy sau núi" là gì?',
+      ['Nhân hóa', 'So sánh', 'Điệp ngữ', 'Ẩn dụ'],
+      0,
+      chapter: 'Biện pháp tu từ',
+      hint: 'Gán hành động của người cho sự vật.',
+    ),
+    _LitItem(
+      'Thể loại nào sau đây thuộc văn xuôi?',
+      ['Truyện ngắn', 'Thơ lục bát', 'Thơ thất ngôn', 'Ca dao'],
+      0,
+      chapter: 'Thể loại',
+    ),
+    _LitItem(
+      'Câu nào là câu kể chuyện?',
+      [
+        'Hôm qua em đi thăm ông bà.',
+        'Hãy tả khu vườn nhà em.',
+        'Em hãy nêu ý nghĩa của tình bạn.',
+        'Hãy giải thích nghĩa của từ "cần cù".',
+      ],
+      0,
+      chapter: 'Tập làm văn',
+    ),
+    _LitItem(
+      'Từ nào là từ đồng nghĩa với "vui vẻ"?',
+      ['hân hoan', 'buồn bã', 'tức giận', 'lo lắng'],
+      0,
+      chapter: 'Từ vựng',
+    ),
+    _LitItem(
+      'Trong câu "Hoa nở như nụ cười", biện pháp tu từ chính là?',
+      ['So sánh', 'Nhân hóa', 'Điệp từ', 'Nói quá'],
+      0,
+      chapter: 'Biện pháp tu từ',
+    ),
+    _LitItem(
+      'Phần mở bài của bài văn thường làm gì?',
+      [
+        'Giới thiệu vấn đề / mở đầu câu chuyện',
+        'Kết thúc và nêu bài học',
+        'Liệt kê toàn bộ chi tiết cuối cùng',
+        'Chỉ viết một từ duy nhất',
+      ],
+      0,
+      chapter: 'Bố cục',
+    ),
+    _LitItem(
+      'Câu tục ngữ nào khuyên con người phải chăm chỉ?',
+      [
+        'Có công mài sắt, có ngày nên kim',
+        'Ăn quả nhớ kẻ trồng cây',
+        'Gần mực thì đen, gần đèn thì sáng',
+        'Một cây làm chẳng nên non',
+      ],
+      0,
+      chapter: 'Tục ngữ',
+    ),
+    _LitItem(
+      'Từ trái nghĩa với "siêng năng" là?',
+      ['lười biếng', 'chăm chỉ', 'cần cù', 'kiên trì'],
+      0,
+      chapter: 'Từ vựng',
+    ),
   ];
 
-  // —— Lớp 6–7 ——
-  static GradeQuestion _percentOf() {
-    final p = [10, 20, 25, 50][_rng.nextInt(4)];
-    final whole = [20, 40, 60, 80, 100][_rng.nextInt(5)];
-    return _q(
-      '$p% của $whole là?',
-      whole * p ~/ 100,
-      chapter: 'Phần trăm',
-      hint: 'a% của N = a × N / 100.',
-    );
-  }
+  // —— Lớp 7 ——
+  static final List<_LitItem> _grade7 = [
+    _LitItem(
+      'Biện pháp tu từ trong câu "Làn gió thì thầm bên tai" là?',
+      ['Nhân hóa', 'So sánh', 'Hoán dụ', 'Điệp ngữ'],
+      0,
+      chapter: 'Biện pháp tu từ',
+    ),
+    _LitItem(
+      'Đặc điểm nổi bật của văn miêu tả là gì?',
+      [
+        'Tái hiện đặc điểm sự vật, con người bằng giác quan',
+        'Chứng minh một luận điểm bằng lý lẽ',
+        'Kể lại chuỗi sự kiện có xung đột',
+        'Chỉ liệt kê số liệu thống kê',
+      ],
+      0,
+      chapter: 'Tập làm văn',
+    ),
+    _LitItem(
+      'Thành ngữ "nước mắt cá sấu" dùng để nói về?',
+      [
+        'Sự giả tạo, giả dối trong cảm xúc',
+        'Niềm vui chân thành',
+        'Sự chăm chỉ học tập',
+        'Tình bạn thủy chung',
+      ],
+      0,
+      chapter: 'Thành ngữ',
+    ),
+    _LitItem(
+      'Câu nào dùng dấu phẩy đúng hơn?',
+      [
+        'Hôm nay trời đẹp, em đi dạo công viên.',
+        'Hôm nay trời đẹp em đi dạo công viên?',
+        'Hôm nay, trời đẹp em đi dạo, công viên!',
+        'Hôm nay trời đẹp; em đi dạo công viên?',
+      ],
+      0,
+      chapter: 'Dấu câu',
+    ),
+    _LitItem(
+      'Khi viết đoạn văn tả người, cần chú ý điều gì?',
+      [
+        'Ngoại hình, cử chỉ, tính cách nổi bật',
+        'Chỉ nêu tên và tuổi',
+        'Chỉ kể ngày tháng',
+        'Chỉ viết công thức toán',
+      ],
+      0,
+      chapter: 'Miêu tả',
+    ),
+    _LitItem(
+      'Từ nào thuộc nhóm từ tượng thanh?',
+      ['rì rào', 'xanh ngắt', 'rất đẹp', 'cao lớn'],
+      0,
+      chapter: 'Từ tượng thanh',
+    ),
+    _LitItem(
+      'Chủ đề của bài văn thường trả lời câu hỏi nào?',
+      [
+        'Bài văn nói về vấn đề gì?',
+        'Bài văn có bao nhiêu dấu chấm?',
+        'Bài văn viết bằng mực gì?',
+        'Bài văn dài bao nhiêu trang?',
+      ],
+      0,
+      chapter: 'Đọc hiểu',
+    ),
+    _LitItem(
+      'Câu nào dùng phép so sánh?',
+      [
+        'Mắt em trong như hồ nước mùa thu.',
+        'Mắt em rất đẹp.',
+        'Em có đôi mắt.',
+        'Em nhìn xung quanh.',
+      ],
+      0,
+      chapter: 'Biện pháp tu từ',
+    ),
+    _LitItem(
+      'Tục ngữ "Ăn quả nhớ kẻ trồng cây" khuyên điều gì?',
+      [
+        'Biết ơn người đã giúp mình',
+        'Chỉ nghĩ đến bản thân',
+        'Không cần giúp đỡ ai',
+        'Tránh tiếp xúc với mọi người',
+      ],
+      0,
+      chapter: 'Tục ngữ',
+    ),
+    _LitItem(
+      'Phần kết bài của bài văn thường?',
+      [
+        'Khái quát ý nghĩa hoặc cảm xúc chung',
+        'Đưa thêm nhân vật mới không liên quan',
+        'Bắt đầu kể lại từ đầu',
+        'Chỉ viết dấu chấm hỏi',
+      ],
+      0,
+      chapter: 'Bố cục',
+    ),
+  ];
 
-  static GradeQuestion _intAdd() {
-    final a = -20 + _rng.nextInt(41);
-    final b = -20 + _rng.nextInt(41);
-    final bStr = b >= 0 ? '+ $b' : '− ${-b}';
-    return _q(
-      '$a $bStr = ?',
-      a + b,
-      chapter: 'Số nguyên',
-      hint: 'Cộng đại số.',
-    );
-  }
+  // —— Lớp 8 ——
+  static final List<_LitItem> _grade8 = [
+    _LitItem(
+      'Nghị luận xã hội thường bàn về vấn đề nào?',
+      [
+        'Hiện tượng đời sống, đạo đức, lối sống',
+        'Công thức phương trình bậc hai',
+        'Bản đồ địa lý hành chính',
+        'Thí nghiệm hóa học trong phòng lab',
+      ],
+      0,
+      chapter: 'Nghị luận',
+    ),
+    _LitItem(
+      'Trong câu "Áo nâu thật đẹp trong nắng", từ "nâu" thuộc từ loại nào?',
+      ['Tính từ', 'Danh từ', 'Động từ', 'Số từ'],
+      0,
+      chapter: 'Tiếng Việt',
+    ),
+    _LitItem(
+      'Phép điệp ngữ thường có tác dụng gì?',
+      [
+        'Nhấn mạnh ý, tạo nhịp điệu',
+        'Làm câu ngắn hơn bằng cách xóa chữ',
+        'Thay thế dấu câu',
+        'Chỉ dùng trong bảng số liệu',
+      ],
+      0,
+      chapter: 'Biện pháp tu từ',
+    ),
+    _LitItem(
+      'Khi phân tích một đoạn văn, cần ưu tiên làm gì trước?',
+      [
+        'Xác định nội dung chính và nghệ thuật nổi bật',
+        'Đếm số chữ rồi dừng lại',
+        'Chỉ chép lại nguyên văn không nhận xét',
+        'Chuyển sang giải bài toán',
+      ],
+      0,
+      chapter: 'Đọc hiểu',
+    ),
+    _LitItem(
+      'Câu nào thể hiện phép hoán dụ rõ hơn?',
+      [
+        'Áo xanh ấy vẫn bền bỉ trên công trường.',
+        'Trời xanh như tấm thảm.',
+        'Gió thì thầm bên tai em.',
+        'Em vui như mở hội.',
+      ],
+      0,
+      chapter: 'Biện pháp tu từ',
+      hint: 'Lấy đặc điểm gắn với người/vật để chỉ đối tượng.',
+    ),
+    _LitItem(
+      'Luận điểm trong bài nghị luận là gì?',
+      [
+        'Ý kiến then chốt cần chứng minh',
+        'Một câu chuyện cổ tích dài',
+        'Một bài thơ lục bát',
+        'Một công thức hóa học',
+      ],
+      0,
+      chapter: 'Nghị luận',
+    ),
+    _LitItem(
+      'Để chứng minh luận điểm, học sinh cần?',
+      [
+        'Đưa lý lẽ và dẫn chứng phù hợp',
+        'Chỉ viết cảm xúc không có ý',
+        'Chỉ liệt kê tên riêng ngẫu nhiên',
+        'Bỏ qua phần thân bài',
+      ],
+      0,
+      chapter: 'Nghị luận',
+    ),
+    _LitItem(
+      'Từ "bền bỉ" gần nghĩa nhất với từ nào?',
+      ['kiên trì', 'nông nổi', 'hời hợt', 'lười biếng'],
+      0,
+      chapter: 'Từ vựng',
+    ),
+    _LitItem(
+      'Khi viết đoạn văn nghị luận khoảng 200 chữ, điều quan trọng là?',
+      [
+        'Rõ luận điểm, có lý lẽ – dẫn chứng, kết đoạn gọn',
+        'Viết càng dài càng tốt không cần ý',
+        'Chỉ kể chuyện không liên quan đề',
+        'Chỉ dùng tiếng Anh',
+      ],
+      0,
+      chapter: 'Tập làm văn',
+    ),
+    _LitItem(
+      'Câu nào dùng phép nói quá (cường điệu)?',
+      [
+        'Nỗi buồn ấy nặng trĩu cả trời đất.',
+        'Em buồn một chút.',
+        'Trời hôm nay dịu.',
+        'Em đi học bình thường.',
+      ],
+      0,
+      chapter: 'Biện pháp tu từ',
+    ),
+  ];
 
-  static GradeQuestion _intMul() {
-    final a = -8 + _rng.nextInt(17);
-    if (a == 0) return _intMul();
-    final b = -8 + _rng.nextInt(17);
-    if (b == 0) return _intMul();
-    return _q(
-      '($a) × ($b) = ?',
-      a * b,
-      chapter: 'Số nguyên',
-      hint: 'Cùng dấu dương, trái dấu âm.',
-    );
-  }
+  // —— Lớp 9 ——
+  static final List<_LitItem> _grade9 = [
+    _LitItem(
+      'Khi cảm nhận một khổ thơ, cần kết hợp yếu tố nào?',
+      [
+        'Nội dung cảm xúc và nghệ thuật biểu đạt',
+        'Chỉ đếm số dòng thơ',
+        'Chỉ nêu tên tác giả rồi kết thúc',
+        'Chỉ viết công thức vật lý',
+      ],
+      0,
+      chapter: 'Cảm nhận văn học',
+    ),
+    _LitItem(
+      'Nghị luận văn học thường yêu cầu học sinh?',
+      [
+        'Phân tích, đánh giá giá trị nội dung – nghệ thuật của tác phẩm',
+        'Giải phương trình bậc hai',
+        'Vẽ bản đồ Việt Nam',
+        'Thực hiện thí nghiệm sinh học',
+      ],
+      0,
+      chapter: 'Nghị luận văn học',
+    ),
+    _LitItem(
+      'Tác giả Truyện Kiều là ai?',
+      ['Nguyễn Du', 'Nguyễn Trãi', 'Hồ Xuân Hương', 'Nguyễn Đình Chiểu'],
+      0,
+      chapter: 'Tác giả – tác phẩm',
+    ),
+    _LitItem(
+      'Thể thơ lục bát có đặc điểm số chữ lần lượt là?',
+      ['6 – 8', '7 – 7', '5 – 7', '8 – 8'],
+      0,
+      chapter: 'Thể loại thơ',
+    ),
+    _LitItem(
+      'Trong bài nghị luận, dẫn chứng văn học nên?',
+      [
+        'Gắn với luận điểm, trích dẫn ngắn, phân tích rõ',
+        'Chép dài cả chương không nhận xét',
+        'Bịa tên tác phẩm không tồn tại',
+        'Chỉ nêu số trang sách giáo khoa',
+      ],
+      0,
+      chapter: 'Kỹ năng làm bài',
+    ),
+    _LitItem(
+      'Phép ẩn dụ khác so sánh ở điểm nào?',
+      [
+        'Không có từ so sánh rõ (như, là, tựa…)',
+        'Luôn có từ "như"',
+        'Chỉ dùng trong bảng biểu',
+        'Không liên quan đến hình ảnh',
+      ],
+      0,
+      chapter: 'Biện pháp tu từ',
+    ),
+    _LitItem(
+      'Mở bài nghị luận văn học thường nên?',
+      [
+        'Dẫn dắt vào tác phẩm / vấn đề cần bàn',
+        'Viết kết luận ngay từ câu đầu',
+        'Kể chuyện không liên quan dài dòng',
+        'Chỉ ghi tên mình',
+      ],
+      0,
+      chapter: 'Bố cục bài văn',
+    ),
+    _LitItem(
+      'Câu nào thể hiện phép đối rõ hơn?',
+      [
+        'Trên thuận hòa, dưới yên ấm.',
+        'Trời hôm nay đẹp.',
+        'Em học bài.',
+        'Hoa nở rất nhiều.',
+      ],
+      0,
+      chapter: 'Biện pháp tu từ',
+    ),
+    _LitItem(
+      'Khi nhận xét nghệ thuật của một đoạn văn, nên tránh?',
+      [
+        'Nêu nhận xét chung chung không có dẫn chứng',
+        'Chỉ ra biện pháp tu từ cụ thể',
+        'Phân tích tác dụng thẩm mỹ',
+        'Gắn nghệ thuật với nội dung',
+      ],
+      0,
+      chapter: 'Kỹ năng phân tích',
+    ),
+    _LitItem(
+      'Mục tiêu của phần kết bài nghị luận là?',
+      [
+        'Khái quát giá trị và liên hệ ngắn gọn',
+        'Mở thêm một đề bài mới hoàn toàn',
+        'Xóa bỏ toàn bộ luận điểm đã nêu',
+        'Chỉ viết một dấu chấm than',
+      ],
+      0,
+      chapter: 'Bố cục bài văn',
+    ),
+  ];
+}
 
-  static GradeQuestion _ratioValue() {
-    final a = 2 + _rng.nextInt(6);
-    final b = 2 + _rng.nextInt(6);
-    final k = 2 + _rng.nextInt(5);
-    return _q(
-      'Tỉ số $a : $b. Nếu số thứ nhất = ${a * k} thì số thứ hai?',
-      b * k,
-      chapter: 'Tỉ lệ',
-      hint: 'Nhân cùng một số k.',
-    );
-  }
+class _LitItem {
+  const _LitItem(
+    this.stem,
+    this.options,
+    this.correctIndex, {
+    this.chapter,
+    this.hint,
+  });
 
-  static GradeQuestion _simpleLinear() {
-    final a = 2 + _rng.nextInt(8);
-    final x = 1 + _rng.nextInt(12);
-    return _q(
-      '${a}x = ${a * x}  ⇒  x = ?',
-      x,
-      chapter: 'Phương trình',
-      hint: 'Chia cả hai vế cho $a.',
-    );
-  }
-
-  static GradeQuestion _exprValue() {
-    final a = 1 + _rng.nextInt(8);
-    final b = 1 + _rng.nextInt(8);
-    final x = 1 + _rng.nextInt(6);
-    return _q(
-      'Giá trị $a x + $b khi x = $x?',
-      a * x + b,
-      chapter: 'Biểu thức',
-      hint: 'Thay x rồi tính.',
-    );
-  }
-
-  static GradeQuestion _powerValue() {
-    final a = 2 + _rng.nextInt(5);
-    final n = 2 + _rng.nextInt(3);
-    var value = 1;
-    for (var i = 0; i < n; i++) {
-      value *= a;
-    }
-    return _q(
-      '$a^$n = ?',
-      value,
-      chapter: 'Lũy thừa',
-      hint: 'Nhân $a với chính nó $n lần.',
-    );
-  }
-
-  static GradeQuestion _triangleAngleSum() {
-    final a = 30 + _rng.nextInt(60);
-    final b = 20 + _rng.nextInt(70);
-    if (a + b >= 170) return _triangleAngleSum();
-    final c = 180 - a - b;
-    return _q(
-      'Tam giác có hai góc $a° và $b°. Góc thứ ba?',
-      c,
-      chapter: 'Tam giác',
-      hint: 'Tổng 3 góc = 180°.',
-    );
-  }
-
-  static GradeQuestion _proportion() {
-    final a = 2 + _rng.nextInt(8);
-    final b = 2 + _rng.nextInt(8);
-    final k = 2 + _rng.nextInt(6);
-    return _q(
-      'a/b = $a/$b. Nếu a = ${a * k} thì b = ?',
-      b * k,
-      chapter: 'Tỉ lệ thức',
-      hint: 'Hai tỉ số bằng nhau.',
-    );
-  }
-
-  // —— Lớp 8 (SGK KNTT) ——
-  static GradeQuestion _monomialDegree() {
-    final a = 2 + _rng.nextInt(5);
-    final b = 1 + _rng.nextInt(4);
-    return _q(
-      'Bậc của đơn thức ${a}x^$b là?',
-      b,
-      chapter: 'Ch1 · Đa thức',
-      hint: 'Bậc đơn thức = tổng số mũ các biến.',
-    );
-  }
-
-  static GradeQuestion _polyAddCoeff() {
-    final a = 1 + _rng.nextInt(9);
-    final b = 1 + _rng.nextInt(9);
-    final c = 1 + _rng.nextInt(9);
-    final d = 1 + _rng.nextInt(9);
-    return _q(
-      'Hệ số của x trong ($a x + $b) + ($c x + $d) là?',
-      a + c,
-      chapter: 'Ch1 · Đa thức',
-      hint: 'Cộng các hạng tử đồng dạng.',
-    );
-  }
-
-  static GradeQuestion _polyMultiplyValue() {
-    final a = 2 + _rng.nextInt(6);
-    final b = 1 + _rng.nextInt(5);
-    final x = 1 + _rng.nextInt(5);
-    return _q(
-      'Giá trị $a x($x + $b) khi x = $x là?',
-      a * x * (x + b),
-      chapter: 'Ch1 · Đa thức',
-      hint: 'Nhân phân phối rồi thay số.',
-    );
-  }
-
-  static GradeQuestion _identityDiffSquares() {
-    final a = 4 + _rng.nextInt(10);
-    final b = 1 + _rng.nextInt(a - 1);
-    return _q(
-      '($a − $b)($a + $b) = ?',
-      a * a - b * b,
-      chapter: 'Hằng đẳng thức',
-      hint: 'A² − B² = (A − B)(A + B).',
-    );
-  }
-
-  static GradeQuestion _identitySquareSum() {
-    final a = 2 + _rng.nextInt(8);
-    final b = 1 + _rng.nextInt(6);
-    return _q(
-      '($a + $b)² = ?',
-      (a + b) * (a + b),
-      chapter: 'Hằng đẳng thức',
-      hint: '(A + B)² = A² + 2AB + B².',
-    );
-  }
-
-  static GradeQuestion _identitySquareDiff() {
-    final a = 5 + _rng.nextInt(8);
-    final b = 1 + _rng.nextInt(4);
-    return _q(
-      '($a − $b)² = ?',
-      (a - b) * (a - b),
-      chapter: 'Hằng đẳng thức',
-      hint: '(A − B)² = A² − 2AB + B².',
-    );
-  }
-
-  static GradeQuestion _factorCommon() {
-    final a = 4 + _rng.nextInt(20);
-    final b = 4 + _rng.nextInt(20);
-    final g = _gcd(a, b);
-    return _q(
-      'Đặt nhân tử chung của ${a}x + $b (số nguyên dương lớn nhất) là?',
-      g,
-      chapter: 'Phân tích nhân tử',
-      hint: 'Tìm ước chung lớn nhất của các hệ số.',
-    );
-  }
-
-  static int _gcd(int a, int b) {
-    var x = a.abs();
-    var y = b.abs();
-    while (y != 0) {
-      final t = x % y;
-      x = y;
-      y = t;
-    }
-    return x == 0 ? 1 : x;
-  }
-
-  static GradeQuestion _rectanglePerimeter() {
-    final l = 5 + _rng.nextInt(12);
-    final w = 3 + _rng.nextInt(10);
-    return _q(
-      'Chu vi hình chữ nhật kích thước $l × $w là?',
-      2 * (l + w),
-      chapter: 'Tứ giác',
-      hint: 'Chu vi HCN = 2(dài + rộng).',
-    );
-  }
-
-  static GradeQuestion _rhombusPerimeter() {
-    final side = 3 + _rng.nextInt(14);
-    return _q(
-      'Chu vi hình thoi cạnh $side là?',
-      4 * side,
-      chapter: 'Tứ giác',
-      hint: 'Hình thoi có 4 cạnh bằng nhau.',
-    );
-  }
-
-  static GradeQuestion _parallelogramArea() {
-    final base = 4 + _rng.nextInt(12);
-    final height = 3 + _rng.nextInt(10);
-    return _q(
-      'Diện tích hình bình hành đáy $base, chiều cao $height là?',
-      base * height,
-      chapter: 'Tứ giác',
-      hint: 'S = đáy × chiều cao.',
-    );
-  }
-
-  static GradeQuestion _squareDiagonalRelated() {
-    final a = 3 + _rng.nextInt(10);
-    return _q(
-      'Diện tích hình vuông cạnh $a là?',
-      a * a,
-      chapter: 'Tứ giác',
-      hint: 'Hình vuông: S = a².',
-    );
-  }
-
-  static GradeQuestion _thalesMidline() {
-    final base = 2 * (4 + _rng.nextInt(12));
-    return _q(
-      'Đường trung bình của tam giác song song cạnh đáy $base thì dài bao nhiêu?',
-      base ~/ 2,
-      chapter: 'Đường trung bình',
-      hint: 'Đường trung bình = 1/2 cạnh thứ ba.',
-    );
-  }
-
-  static GradeQuestion _statsMean() {
-    final a = 4 + _rng.nextInt(10);
-    final b = 4 + _rng.nextInt(10);
-    final c = 4 + _rng.nextInt(10);
-    final d = 4 + _rng.nextInt(10);
-    final sum = a + b + c + d;
-    final adj = sum % 4;
-    final d2 = d - adj + (adj == 0 ? 0 : 4);
-    final mean = (a + b + c + d2) ~/ 4;
-    return _q(
-      'Trung bình cộng của $a, $b, $c, $d2 là?',
-      mean,
-      chapter: 'Thống kê',
-      hint: 'Trung bình = tổng chia số số liệu.',
-    );
-  }
-
-  static GradeQuestion _statsRange() {
-    final values = List.generate(5, (_) => 5 + _rng.nextInt(30))..sort();
-    final range = values.last - values.first;
-    return _q(
-      'Khoảng biến thiên của ${values.join(', ')} là?',
-      range,
-      chapter: 'Thống kê',
-      hint: 'Khoảng biến thiên = max − min.',
-    );
-  }
-
-  static GradeQuestion _rationalSimplifyValue() {
-    final k = 2 + _rng.nextInt(6);
-    final a = 2 + _rng.nextInt(8);
-    return _q(
-      'Rút gọn phân số ${k * a}/$k được tử số (mẫu = 1) là?',
-      a,
-      chapter: 'Phân thức',
-      hint: 'Chia tử và mẫu cho ước chung.',
-    );
-  }
-
-  static GradeQuestion _rationalAddSameDen() {
-    final d = 2 + _rng.nextInt(9);
-    final a = 1 + _rng.nextInt(8);
-    final b = 1 + _rng.nextInt(8);
-    return _q(
-      'Tử số của $a/$d + $b/$d (sau khi cùng mẫu $d) là?',
-      a + b,
-      chapter: 'Phân thức',
-      hint: 'Cùng mẫu: cộng tử, giữ mẫu.',
-    );
-  }
-
-  static GradeQuestion _linearEquation() {
-    final a = 2 + _rng.nextInt(9);
-    final x = -8 + _rng.nextInt(17);
-    if (x == 0) return _linearEquation();
-    return _q(
-      '${a}x = ${a * x}  ⇒  x = ?',
-      x,
-      chapter: 'PT bậc nhất',
-      hint: 'Chia cả hai vế cho hệ số của x.',
-    );
-  }
-
-  static GradeQuestion _linearEquationWithConst() {
-    final a = 1 + _rng.nextInt(8);
-    final x = -6 + _rng.nextInt(13);
-    final b = -9 + _rng.nextInt(19);
-    final c = a * x + b;
-    final bStr = b >= 0 ? '+ $b' : '− ${-b}';
-    return _q(
-      '${a}x $bStr = $c  ⇒  x = ?',
-      x,
-      chapter: 'PT bậc nhất',
-      hint: 'Chuyển vế số hạng tự do rồi chia.',
-    );
-  }
-
-  static GradeQuestion _wordLinearAge() {
-    final child = 8 + _rng.nextInt(12);
-    const diff = 25;
-    final total = child + (child + diff);
-    return _q(
-      'Tuổi con là x, bố hơn con $diff tuổi, tổng hai tuổi = $total. Tìm x.',
-      child,
-      chapter: 'Lập phương trình',
-      hint: 'x + (x + $diff) = $total.',
-    );
-  }
-
-  static GradeQuestion _functionValue() {
-    final a = -4 + _rng.nextInt(9);
-    if (a == 0) return _functionValue();
-    final b = -8 + _rng.nextInt(17);
-    final x = -3 + _rng.nextInt(7);
-    final bStr = b >= 0 ? '+ $b' : '− ${-b}';
-    return _q(
-      'y = ${a}x $bStr · khi x = $x thì y = ?',
-      a * x + b,
-      chapter: 'Hàm số bậc nhất',
-      hint: 'Thay x vào biểu thức hàm số.',
-    );
-  }
-
-  static GradeQuestion _slopeOfLine() {
-    final a = 1 + _rng.nextInt(9);
-    return _q(
-      'Đường thẳng y = ${a}x − 2 có hệ số góc bằng?',
-      a,
-      chapter: 'Hệ số góc',
-      hint: 'Với y = ax + b, hệ số góc là a.',
-    );
-  }
-
-  static GradeQuestion _probabilityFavorable() {
-    final total = [6, 8, 10, 12][_rng.nextInt(4)];
-    final fav = 1 + _rng.nextInt(total - 1);
-    return _q(
-      'Có $total kết quả khả dĩ, xác suất = $fav/$total. Số kết quả thuận lợi?',
-      fav,
-      chapter: 'Xác suất',
-      hint: 'P = (số thuận lợi) / (số khả dĩ).',
-    );
-  }
-
-  static GradeQuestion _similarTriangleSide() {
-    final k = 2 + _rng.nextInt(4);
-    final small = 3 + _rng.nextInt(6);
-    return _q(
-      'Hai tam giác đồng dạng tỉ số $k : 1. Cạnh nhỏ $small thì cạnh tương ứng?',
-      small * k,
-      chapter: 'Đồng dạng',
-      hint: 'Cạnh tương ứng tỉ lệ với tỉ số đồng dạng.',
-    );
-  }
-
-  static GradeQuestion _pythagoreanLeg() {
-    const triples = [
-      [3, 4, 5],
-      [5, 12, 13],
-      [6, 8, 10],
-      [8, 15, 17],
-      [9, 12, 15],
-    ];
-    final t = triples[_rng.nextInt(triples.length)];
-    final askA = _rng.nextBool();
-    if (askA) {
-      return _q(
-        'Tam giác vuông: cạnh góc vuông ${t[1]}, cạnh huyền ${t[2]}. Cạnh góc vuông còn lại?',
-        t[0],
-        chapter: 'Pythagore',
-        hint: 'a² + b² = c².',
-      );
-    }
-    return _q(
-      'Tam giác vuông: cạnh góc vuông ${t[0]}, cạnh huyền ${t[2]}. Cạnh góc vuông còn lại?',
-      t[1],
-      chapter: 'Pythagore',
-      hint: 'a² + b² = c².',
-    );
-  }
-
-  static GradeQuestion _pythagoreanHyp() {
-    const triples = [
-      [3, 4, 5],
-      [5, 12, 13],
-      [6, 8, 10],
-      [8, 15, 17],
-      [9, 12, 15],
-    ];
-    final t = triples[_rng.nextInt(triples.length)];
-    return _q(
-      'Tam giác vuông có hai cạnh góc vuông ${t[0]} và ${t[1]}. Cạnh huyền?',
-      t[2],
-      chapter: 'Pythagore',
-      hint: 'c = √(a² + b²).',
-    );
-  }
-
-  static GradeQuestion _pyramidEdges() {
-    final isTri = _rng.nextBool();
-    if (isTri) {
-      return _q(
-        'Hình chóp tam giác đều có bao nhiêu cạnh?',
-        6,
-        chapter: 'Hình khối',
-        hint: 'Đáy 3 cạnh + 3 cạnh bên.',
-      );
-    }
-    return _q(
-      'Hình chóp tứ giác đều có bao nhiêu cạnh?',
-      8,
-      chapter: 'Hình khối',
-      hint: 'Đáy 4 cạnh + 4 cạnh bên.',
-    );
-  }
-
-  // —— Lớp 9+ ——
-  static GradeQuestion _sqrtPerfect() {
-    final a = 2 + _rng.nextInt(12);
-    return _q(
-      '√${a * a} = ?',
-      a,
-      chapter: 'Căn bậc hai',
-      hint: '√(a²) = |a| (a > 0).',
-    );
-  }
-
-  static GradeQuestion _quadraticRootSum() {
-    // (x-p)(x-q)=0 → tổng nghiệm p+q
-    final p = -5 + _rng.nextInt(11);
-    final q = -5 + _rng.nextInt(11);
-    if (p == 0 && q == 0) return _quadraticRootSum();
-    final b = -(p + q);
-    final c = p * q;
-    final bStr = b >= 0 ? '+ $b' : '− ${-b}';
-    final cStr = c >= 0 ? '+ $c' : '− ${-c}';
-    return _q(
-      'Tổng nghiệm của x² $bStr x $cStr = 0 là?',
-      p + q,
-      chapter: 'PT bậc hai',
-      hint: 'Với x² − Sx + P = 0, tổng nghiệm = S.',
-    );
-  }
-
-  static GradeQuestion _systemSum() {
-    final x = 1 + _rng.nextInt(9);
-    final y = 1 + _rng.nextInt(9);
-    return _q(
-      'Hệ: x + y = ${x + y}, x − y = ${x - y}. Tìm x.',
-      x,
-      chapter: 'Hệ PT',
-      hint: 'Cộng hai phương trình: 2x = …',
-    );
-  }
-
-  static GradeQuestion _circleCircumferenceCoeff() {
-    // Chu vi = 2πr → hỏi 2r (hệ số của π)
-    final r = 2 + _rng.nextInt(12);
-    return _q(
-      'Chu vi đường tròn bán kính $r bằng kπ. k = ?',
-      2 * r,
-      chapter: 'Đường tròn',
-      hint: 'C = 2πr.',
-    );
-  }
-
-  static GradeQuestion _q(
-    String prompt,
-    int answer, {
-    String? hint,
-    String? chapter,
-  }) {
-    return GradeQuestion(
-      prompt: prompt,
-      answer: answer,
-      choices: _choices(answer),
-      storyHint: [
-        ?chapter,
-        ?hint,
-      ].join(' · '),
-      chapter: chapter,
-    );
-  }
-
-  static List<int> _choices(int answer) {
-    final set = <int>{answer};
-    var i = 0;
-    while (set.length < 4 && i < 60) {
-      i++;
-      final delta = 1 + _rng.nextInt(14);
-      set.add(_rng.nextBool() ? answer + delta : answer - delta);
-    }
-    while (set.length < 4) {
-      set.add(answer + set.length * 3 + 1);
-    }
-    final list = set.toList()..shuffle(_rng);
-    return list;
-  }
+  final String stem;
+  final List<String> options;
+  final int correctIndex;
+  final String? chapter;
+  final String? hint;
 }

@@ -96,27 +96,27 @@ class _MathPracticePageState extends ConsumerState<MathPracticePage> {
     _answerController.clear();
 
     final topic = _topicController.text.trim().isEmpty
-        ? 'theo chương trình Toán lớp $grade'
+        ? 'theo chương trình Ngữ văn lớp $grade'
         : _topicController.text.trim();
 
     final result = await askMathAi(
       ref,
       gradeLevel: grade,
       userMessage: '''
-Bạn là trợ lý EduSelf STEM Toán AI dành cho học sinh THCS.
-Hãy tạo ĐÚNG 1 bài tập Toán lớp $grade (hoặc bài toán ứng dụng STEM liên quan đến Toán học lớp $grade).
-Yêu cầu chủ đề: $topic (Nếu người dùng nhập chủ đề không liên quan môn Toán, hãy tự động bỏ qua và tạo 1 bài toán THCS trọng tâm chuẩn mực).
+Bạn là trợ lý EduSelf Ngữ Văn AI dành cho học sinh THCS.
+Hãy tạo ĐÚNG 1 bài tập Ngữ văn lớp $grade (đọc hiểu / tiếng Việt / tập làm văn theo chương trình GDPT).
+Yêu cầu chủ đề: $topic (Nếu người dùng nhập chủ đề không liên quan môn Ngữ văn, hãy tự động bỏ qua và tạo 1 bài Ngữ văn THCS chuẩn mực).
 
 Yêu cầu chất lượng:
-- Đề bài phải chuẩn xác 100%, có nghiệm / đáp số xác định, không mâu thuẫn, vừa sức học sinh lớp $grade.
-- Trình bày sư phạm, rõ ràng điều kiện và đơn vị.
-- Dùng LaTeX \$...\$ hoặc \$\$...\$\$ cho mọi biểu thức, công thức toán.
+- Đề bài rõ ràng, vừa sức học sinh lớp $grade, có thể chấm được (có đáp án hoặc tiêu chí đánh giá rõ).
+- Trình bày sư phạm, nêu đầy đủ yêu cầu (số chữ / hình thức nếu là làm văn).
+- Không tạo đề Toán, Lý, Hóa hay môn khác.
 
 Trả lời CHỈ bằng 1 đối tượng JSON duy nhất (không có markdown code fence):
-{"topic":"Tên chủ đề Toán","question":"Đề bài toán đầy đủ chuẩn LaTeX"}
+{"topic":"Tên chủ đề Ngữ văn","question":"Đề bài Ngữ văn đầy đủ bằng tiếng Việt"}
 ''',
       extraSystemContext:
-          'Chế độ luyện tập EduSelf STEM Toán AI: Chỉ tạo đề bài môn Toán và ứng dụng STEM Toán lớp $grade. Nghiêm cấm tạo nội dung ngoài lề môn Toán.',
+          'Chế độ luyện tập EduSelf Ngữ Văn AI: Chỉ tạo đề bài môn Ngữ văn lớp $grade. Nghiêm cấm tạo nội dung ngoài lề môn Ngữ văn.',
     );
 
     if (!mounted) return;
@@ -271,10 +271,10 @@ Trả lời CHỈ bằng 1 đối tượng JSON duy nhất (không có markdown 
       ref,
       gradeLevel: _grade,
       userMessage: '''
-Bạn là giám khảo chấm bài luyện tập môn Toán lớp $_grade (Chương trình GDPT THCS).
-Nhiệm vụ: Chấm điểm bài làm của học sinh cho bài toán dưới đây với độ chính xác toán học tuyệt đối.
+Bạn là giám khảo chấm bài luyện tập môn Ngữ văn lớp $_grade (Chương trình GDPT THCS).
+Nhiệm vụ: Chấm bài làm của học sinh cho đề Ngữ văn dưới đây một cách công bằng, sư phạm.
 
-[ĐỀ BÀI TOÁN LỚP $_grade]:
+[ĐỀ BÀI NGỮ VĂN LỚP $_grade]:
 $_question
 
 [BÀI LÀM CỦA HỌC SINH]:
@@ -287,33 +287,30 @@ QUY TRÌNH CHẤM BẮT BUỘC (TUÂN THỦ THEO THỨ TỰ TỪNG BƯỚC):
 
 BƯỚC 1: KIỂM TRA TÍNH HỢP LỆ VÀ LIÊN QUAN (ĐIỀU KIỆN TIÊN QUYẾT):
 1. NẾU HỌC SINH GỬI ẢNH:
-   - Hãy quan sát kỹ toàn bộ bức ảnh đính kèm.
-   - Bức ảnh có chứa chữ viết tay, bài giải, công thức hoặc các bước giải liên quan đến bài toán [$_question] này không?
-   - NẾU ẢNH LÀ ẢNH KHÔNG LIÊN QUAN (Ví dụ: ảnh người, ảnh phong cảnh, động vật, đồ vật, meme, ảnh rác, ảnh đen, ảnh mờ không đọc được chữ, hoặc ảnh chụp bài toán KHÁC không liên quan đến đề bài này):
+   - Quan sát kỹ toàn bộ bức ảnh đính kèm.
+   - Ảnh có chứa chữ viết tay / bài làm liên quan đến đề Ngữ văn này không?
+   - NẾU ẢNH KHÔNG LIÊN QUAN (ảnh người, phong cảnh, động vật, đồ vật, meme, ảnh rác, ảnh mờ, hoặc bài môn khác):
      => BẮT BUỘC ĐẶT: "correct": false
-     => "feedback": "Ảnh bạn tải lên không chứa bài giải hoặc không liên quan đến bài toán này. Em hãy chụp rõ bài làm hoặc nhập câu trả lời vào ô để hệ thống chấm điểm nhé!"
+     => "feedback": "Ảnh bạn tải lên không chứa bài làm hoặc không liên quan đến đề Ngữ văn này. Em hãy chụp rõ bài làm hoặc nhập câu trả lời vào ô để hệ thống chấm điểm nhé!"
      => DỪNG LẠI NGAY, TUYỆT ĐỐI KHÔNG CHẤM ĐÚNG!
 2. NẾU HỌC SINH GỬI VĂN BẢN (TEXT):
-   - Kiểm tra xem văn bản có chứa câu trả lời / lời giải liên quan bài toán không?
-   - NẾU VĂN BẢN LÀ NỘI DUNG NHẢM NHÍ, TÁN GẪU, SPAM, GÕ BỪA (Ví dụ: 'abc', 'hello', 'không biết', 'haha', 'test', câu chữ không liên quan):
+   - Kiểm tra xem văn bản có trả lời đúng yêu cầu đề Ngữ văn không?
+   - NẾU LÀ NHẢM NHÍ, TÁN GẪU, SPAM, GÕ BỪA:
      => BẮT BUỘC ĐẶT: "correct": false
-     => "feedback": "Câu trả lời không liên quan đến bài toán. Em hãy tính toán cẩn thận và điền đáp số vào nhé!"
+     => "feedback": "Câu trả lời không liên quan đến đề Ngữ văn. Em hãy làm bài cẩn thận theo yêu cầu đề nhé!"
      => DỪNG LẠI NGAY, TUYỆT ĐỐI KHÔNG CHẤM ĐÚNG!
 
-BƯỚC 2: TỰ GIẢI BÀI TOÁN ĐỂ CÓ KẾT QUẢ CHUẨN:
-- Tự giải bài toán [$_question] từng bước để có đáp số chính xác K_chuẩn và điều kiện nghiệm.
+BƯỚC 2: XÁC ĐỊNH ĐÁP ÁN / TIÊU CHÍ CHUẨN:
+- Tự xác định đáp án đúng (trắc nghiệm / điền từ / nhận biết) hoặc tiêu chí chấm (làm văn: đủ ý, đúng đề, bố cục, diễn đạt).
 
 BƯỚC 3: ĐỐI CHIẾU VÀ ĐÁNH GIÁ ĐÚNG / SAI:
-- Đọc kỹ kết quả và các bước giải trong bài làm của học sinh (trên ảnh / tệp / text).
-- ĐẶT "correct": true CHỈ KHI:
-  + Bài làm thực sự giải bài toán này VÀ kết quả cuối cùng chính xác trùng khớp với K_chuẩn (chấp nhận cách viết tương đương hợp lệ: phân số tối giản, số thập phân tương đương).
-- ĐẶT "correct": false KHI:
-  + Kết quả sai, tính nhầm, sai dấu, thiếu điều kiện, hoặc các bước giải sai logic.
-  + Trong "feedback": Chỉ rõ lỗi sai ở bước nào, gợi ý phương pháp giải / công thức cần áp dụng (chưa vội đưa toàn bộ đáp án để học sinh tự làm lại).
+- ĐẶT "correct": true CHỈ KHI bài làm đáp ứng đúng yêu cầu đề ở mức đạt.
+- ĐẶT "correct": false KHI lạc đề, sai ý chính, thiếu bố cục nghiêm trọng, hoặc sai kiến thức tiếng Việt/văn học.
+- Trong "feedback": Chỉ rõ ưu điểm/hạn chế, gợi ý cách sửa (chưa vội viết hộ toàn bài nếu học sinh chưa yêu cầu).
 
 ĐỊNH DẠNG ĐẦU RA BẮT BUỘC:
 Trả lời CHỈ bằng 1 đối tượng JSON duy nhất (không có markdown fence, không có chữ thừa):
-{"correct": true hoặc false, "feedback": "Lời nhận xét chi tiết bằng tiếng Việt, dùng LaTeX \$...\$ cho biểu thức"}
+{"correct": true hoặc false, "feedback": "Lời nhận xét chi tiết bằng tiếng Việt"}
 ''',
       image: hasImage
           ? GeminiImage(
@@ -324,7 +321,7 @@ Trả lời CHỈ bằng 1 đối tượng JSON duy nhất (không có markdown 
       documentText: _answerDocumentText,
       documentName: _answerDocumentName,
       extraSystemContext:
-          'Chế độ chấm bài luyện tập STEM Toán: BẮT BUỘC kiểm tra tính liên quan của ảnh/text trước. Nếu ảnh/text không liên quan hoặc sai kết quả, BẮT BUỘC đặt correct = false. Tuyệt đối không chấm đúng cho ảnh hoặc câu trả lời không liên quan.',
+          'Chế độ chấm bài luyện tập Ngữ văn: BẮT BUỘC kiểm tra tính liên quan của ảnh/text trước. Nếu ảnh/text không liên quan hoặc sai yêu cầu đề, BẮT BUỘC đặt correct = false. Tuyệt đối không chấm đúng cho ảnh hoặc câu trả lời không liên quan.',
     );
 
     if (!mounted) return;
@@ -348,7 +345,7 @@ Trả lời CHỈ bằng 1 đối tượng JSON duy nhất (không có markdown 
         }();
         final attempt = MathPracticeAttempt(
           id: DateTime.now().millisecondsSinceEpoch.toString(),
-          topic: _topic ?? 'Toán',
+          topic: _topic ?? 'Ngữ văn',
           question: _question!,
           studentAnswer: storedAnswer,
           feedback: feedback,
@@ -396,7 +393,7 @@ Trả lời CHỈ bằng 1 đối tượng JSON duy nhất (không có markdown 
         backgroundColor: Colors.transparent,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
-          title: Text('Luyện tập Toán · Lớp $_grade'),
+          title: Text('Luyện tập Ngữ văn · Lớp $_grade'),
         ),
         body: ListView(
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),

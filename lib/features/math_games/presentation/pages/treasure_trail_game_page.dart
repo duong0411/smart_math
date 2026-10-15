@@ -114,7 +114,7 @@ class _TreasureTrailGamePageState extends ConsumerState<TreasureTrailGamePage>
         await logMathGameResult(
           ref,
           topic: 'Hành trình Kho báu',
-          detail: 'Toán $_grade · thắng · $_stars sao',
+          detail: 'Ngữ văn $_grade · thắng · $_stars sao',
           success: true,
         );
       }
@@ -134,7 +134,7 @@ class _TreasureTrailGamePageState extends ConsumerState<TreasureTrailGamePage>
         await logMathGameResult(
           ref,
           topic: 'Hành trình Kho báu',
-          detail: 'Toán $_grade · thua ở trạm $_step',
+          detail: 'Ngữ văn $_grade · thua ở trạm $_step',
           success: false,
         );
       }
@@ -186,7 +186,7 @@ class _TreasureTrailGamePageState extends ConsumerState<TreasureTrailGamePage>
                               ? _EndPanel(
                                   key: const ValueKey('w'),
                                   title: 'Mở được rương kho báu!',
-                                  subtitle: '$_stars ngôi sao · Toán lớp $_grade',
+                                  subtitle: '$_stars ngôi sao · Ngữ văn lớp $_grade',
                                   emoji: '🏆',
                                   onAgain: _start,
                                 )

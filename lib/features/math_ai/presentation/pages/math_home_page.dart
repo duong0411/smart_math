@@ -25,7 +25,7 @@ class MathHomePage extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                'Chọn khối lớp học Toán',
+                'Chọn khối lớp học Ngữ văn',
                 style: Theme.of(ctx).textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.w700,
                     ),
@@ -107,7 +107,7 @@ class MathHomePage extends ConsumerWidget {
               ),
               const SizedBox(width: 10),
               const Text(
-                'EduSelf Toán AI',
+                'EduSelf Ngữ Văn AI',
                 style: TextStyle(fontWeight: FontWeight.w700),
               ),
             ],
@@ -199,7 +199,7 @@ class MathHomePage extends ConsumerWidget {
                                       borderRadius: BorderRadius.circular(20),
                                     ),
                                     child: const Text(
-                                      'Toán THCS',
+                                      'Ngữ văn THCS',
                                       style: TextStyle(
                                         color: Color(0xFF059669),
                                         fontWeight: FontWeight.w600,
@@ -219,7 +219,7 @@ class MathHomePage extends ConsumerWidget {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                'Hôm nay em muốn chinh phục bài toán nào?',
+                                'Hôm nay em muốn chinh phục bài Ngữ văn nào?',
                                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                       color: scheme.onSurfaceVariant,
                                       height: 1.35,
@@ -347,7 +347,7 @@ class MathHomePage extends ConsumerWidget {
                 children: [
                   _FeatureGridItem(
                     icon: Icons.psychology_rounded,
-                    title: 'Gia sư Toán AI',
+                    title: 'Gia sư Ngữ văn AI',
                     subtitle: 'Hỏi đáp & giải từng bước',
                     tag: 'AI 24/7',
                     iconColor: const Color(0xFF2563EB),
@@ -356,7 +356,7 @@ class MathHomePage extends ConsumerWidget {
                   ),
                   _FeatureGridItem(
                     icon: Icons.edit_note_rounded,
-                    title: 'Luyện tập Toán',
+                    title: 'Luyện tập Ngữ văn',
                     subtitle: 'Sinh đề & chấm tự động',
                     tag: 'Luyện đề',
                     iconColor: const Color(0xFF0D9488),
@@ -365,8 +365,8 @@ class MathHomePage extends ConsumerWidget {
                   ),
                   _FeatureGridItem(
                     icon: Icons.sports_esports_rounded,
-                    title: 'Giải trí Toán',
-                    subtitle: 'Đấu boss & game toán',
+                    title: 'Giải trí Ngữ văn',
+                    subtitle: 'Đấu boss & game Ngữ văn',
                     tag: 'Game vui',
                     iconColor: const Color(0xFFEA580C),
                     imagePath: 'assets/images/icon_games_1791474095200.png',
@@ -432,7 +432,7 @@ class MathHomePage extends ConsumerWidget {
               const SizedBox(height: 12),
               _RecentActivityTile(
                 icon: Icons.timeline_rounded,
-                title: 'Tương tác học Toán 7 ngày qua',
+                title: 'Tương tác học Ngữ văn 7 ngày qua',
                 subtitle: '$weekEvents lượt câu hỏi & bài luyện tập',
                 iconColor: const Color(0xFF2563EB),
               ),

@@ -33,15 +33,13 @@ class AboutPage extends StatelessWidget {
                   Text('Version ${AppConfig.appVersion}'),
                   const SizedBox(height: 16),
                   const Text(
-                    'EduSelf is an AI study companion for Vietnamese students '
-                    'in grades 6–9 (THCS). It helps learners understand concepts, '
-                    'practice step by step, and build self-study habits.',
+                    'EduSelf Ngữ Văn AI hỗ trợ học sinh THCS lớp 6–9 học môn '
+                    'Ngữ văn: đọc hiểu, tiếng Việt, tập làm văn và cảm thụ văn học.',
                   ),
                   const SizedBox(height: 16),
                   const Text(
-                    'Teaching style follows the EduSelf Study AI Pro guide: '
-                    'patient, encouraging, and focused on understanding — '
-                    'not giving answers immediately.',
+                    'Phong cách sư phạm: kiên nhẫn, khích lệ, gợi mở từng bước '
+                    'để học sinh tự hiểu bài — không viết hộ ngay từ đầu.',
                   ),
                 ],
               ),

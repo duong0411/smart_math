@@ -34,7 +34,7 @@ class _MathMonitorPageState extends ConsumerState<MathMonitorPage> {
     setState(() => _loadingInsight = true);
 
     final summary = StringBuffer();
-    summary.writeln('=== Nhật ký học Toán (gần đây) ===');
+    summary.writeln('=== Nhật ký học Ngữ văn (gần đây) ===');
     for (final e in events.take(30)) {
       summary.writeln(
         '- [${e.type.name}] ${e.topic}: ${e.detail}'
@@ -65,10 +65,10 @@ Không bịa số liệu ngoài dữ liệu. Nếu thiếu dữ liệu, nói rõ
 $summary
 ''',
       extraSystemContext:
-          'Chế độ giám sát & báo cáo học tập EduSelf STEM Toán AI: '
-          'Trung thực 100% với dữ liệu bài tập Toán và thực hành STEM. '
-          'Chỉ nhận xét về năng lực Toán học và tư duy STEM, kế hoạch ôn 5 ngày bám sát chương trình Toán THCS. '
-          'Tuyệt đối không đưa nhận xét ngoài lề môn Toán.',
+          'Chế độ giám sát & báo cáo học tập EduSelf Ngữ Văn AI: '
+          'Trung thực 100% với dữ liệu bài tập Ngữ văn. '
+          'Chỉ nhận xét về năng lực Ngữ văn và kỹ năng đọc–viết, kế hoạch ôn 5 ngày bám sát chương trình Ngữ văn THCS. '
+          'Tuyệt đối không đưa nhận xét ngoài lề môn Ngữ văn.',
     );
 
     if (!mounted) return;

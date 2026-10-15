@@ -2,7 +2,7 @@ name: Build APK, iOS & Windows
 
 on:
   push:
-    branches: [main]
+    branches: [main, ngu-van]
   workflow_dispatch:
 
 permissions:
@@ -32,17 +32,17 @@ jobs:
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: smart-math-apk
+          name: eduself-nguvan-apk
           path: build/app/outputs/flutter-apk/app-release.apk
           if-no-files-found: error
 
       - name: Publish APK to GitHub Release
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/ngu-van'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: android-v1.0.${{ github.run_number }}
-          name: Android APK v1.0.${{ github.run_number }}
-          body: Automated release APK build (signed with debug keystore for CI).
+          tag_name: nguvan-android-v1.0.${{ github.run_number }}
+          name: Ngữ văn Android APK v1.0.${{ github.run_number }}
+          body: Automated release APK build for EduSelf Ngữ Văn (signed with debug keystore for CI).
           files: build/app/outputs/flutter-apk/app-release.apk
           fail_on_unmatched_files: true
         env:
@@ -70,23 +70,23 @@ jobs:
           mkdir -p build/ios/ipa/Payload
           cp -r build/ios/iphoneos/Runner.app build/ios/ipa/Payload/
           cd build/ios/ipa
-          zip -qq -r -9 SmartMath.ipa Payload
+          zip -qq -r -9 EduSelfNguVan.ipa Payload
 
       - name: Upload IPA artifact
         uses: actions/upload-artifact@v4
         with:
-          name: smart-math-ipa
-          path: build/ios/ipa/SmartMath.ipa
+          name: eduself-nguvan-ipa
+          path: build/ios/ipa/EduSelfNguVan.ipa
           if-no-files-found: error
 
       - name: Publish IPA to GitHub Release
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/ngu-van'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ios-v1.0.${{ github.run_number }}
-          name: iOS IPA v1.0.${{ github.run_number }}
-          body: Automated unsigned iOS IPA (no Apple signing). Install via developer tools / sideload only.
-          files: build/ios/ipa/SmartMath.ipa
+          tag_name: nguvan-ios-v1.0.${{ github.run_number }}
+          name: Ngữ văn iOS IPA v1.0.${{ github.run_number }}
+          body: Automated unsigned iOS IPA for EduSelf Ngữ Văn (no Apple signing). Install via developer tools / sideload only.
+          files: build/ios/ipa/EduSelfNguVan.ipa
           fail_on_unmatched_files: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -113,25 +113,25 @@ jobs:
         run: |
           $src = "build\windows\x64\runner\Release"
           if (-not (Test-Path $src)) { throw "Missing $src" }
-          Compress-Archive -Path "$src\*" -DestinationPath "SmartMath-windows.zip" -Force
+          Compress-Archive -Path "$src\*" -DestinationPath "EduSelfNguVan-windows.zip" -Force
 
       - name: Upload Windows artifact
         uses: actions/upload-artifact@v4
         with:
-          name: smart-math-windows
-          path: SmartMath-windows.zip
+          name: eduself-nguvan-windows
+          path: EduSelfNguVan-windows.zip
           if-no-files-found: error
 
       - name: Publish Windows zip to GitHub Release
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/ngu-van'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: windows-v1.0.${{ github.run_number }}
-          name: Windows EXE v1.0.${{ github.run_number }}
+          tag_name: nguvan-windows-v1.0.${{ github.run_number }}
+          name: Ngữ văn Windows EXE v1.0.${{ github.run_number }}
           body: |
-            Windows desktop build (unzip and run `eduself_study_app.exe`).
+            Windows desktop build for EduSelf Ngữ Văn (unzip and run `eduself_study_app.exe`).
             Keep the whole extracted folder together (DLL + data).
-          files: SmartMath-windows.zip
+          files: EduSelfNguVan-windows.zip
           fail_on_unmatched_files: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

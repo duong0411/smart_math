@@ -41,7 +41,7 @@ class _MathGamesHubPageState extends ConsumerState<MathGamesHubPage> {
         backgroundColor: Colors.transparent,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
-          title: const Text('Giải trí Toán'),
+          title: const Text('Giải trí Ngữ văn'),
         ),
         body: ListView(
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
@@ -52,7 +52,7 @@ class _MathGamesHubPageState extends ConsumerState<MathGamesHubPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Toán THCS · lớp $grade',
+                    'Ngữ văn THCS · lớp $grade',
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                           fontWeight: FontWeight.w800,
                           letterSpacing: -0.4,
@@ -90,14 +90,14 @@ class _MathGamesHubPageState extends ConsumerState<MathGamesHubPage> {
             _MissionTile(
               emoji: '🏝️',
               title: 'Hành trình Kho báu',
-              subtitle: '8 trạm · câu hỏi Toán lớp $grade',
+              subtitle: '8 trạm · câu hỏi Ngữ văn lớp $grade',
               accent: const Color(0xFFD4A373),
               onTap: () => context.push('/games/treasure?grade=$grade'),
             ),
             const SizedBox(height: 10),
             _MissionTile(
               emoji: '⚔️',
-              title: 'Đại chiến Boss Toán',
+              title: 'Đại chiến Boss Ngữ văn',
               subtitle: 'Hạ boss bằng kiến thức lớp $grade',
               accent: const Color(0xFFE76F51),
               onTap: () => context.push('/games/boss?grade=$grade'),
