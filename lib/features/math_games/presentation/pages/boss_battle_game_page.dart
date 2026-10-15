@@ -237,16 +237,16 @@ class _Boss {
     final g = SupportedGrades.normalize(grade);
     if (g <= 7) {
       return const _Boss(
-        name: 'Phù Thủy Số Học',
+        name: 'Phù Thủy Chính Tả',
         emoji: '🧚',
-        taunt: 'Số nguyên · tỉ lệ · biểu thức — sai một phép là biến mất!',
+        taunt: 'Từ ngữ · tu từ · kể chuyện — trả lời sai là biến mất!',
         maxHp: 110,
       );
     }
     return const _Boss(
-      name: 'Pháp Sư Hằng Đẳng Thức',
+      name: 'Pháp Sư Nghị Luận',
       emoji: '🧙',
-      taunt: 'Đại số · hình học THCS — giải sai là bị lời nguyền!',
+      taunt: 'Đọc hiểu · làm văn THCS — sai ý là bị lời nguyền!',
       maxHp: 120,
     );
   }

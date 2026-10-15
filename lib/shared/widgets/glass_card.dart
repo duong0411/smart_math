@@ -73,7 +73,7 @@ class GlassCard extends StatelessWidget {
   }
 }
 
-/// A clean, distraction-free educational background designed specifically for Math students.
+/// A clean, distraction-free educational background designed for Ngữ văn students.
 /// Features a calm pastel gradient, subtle math graph paper grid, and gentle corner lighting.
 /// Leaves the entire center 100% clean and unobstructed so all formulas and text are perfectly readable.
 class AtmosphericBackground extends StatelessWidget {
@@ -125,7 +125,7 @@ class AtmosphericBackground extends StatelessWidget {
             ),
           ),
 
-          // Subtle Math graph paper grid (inspires math focus, never clutters text)
+          // Subtle ruled-paper grid (study focus, never clutters text)
           Positioned.fill(
             child: CustomPaint(
               painter: _MathGridPainter(

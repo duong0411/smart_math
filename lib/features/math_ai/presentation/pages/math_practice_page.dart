@@ -422,7 +422,7 @@ Trả lời CHỈ bằng 1 đối tượng JSON duy nhất (không có markdown 
                   TextField(
                     controller: _topicController,
                     decoration: const InputDecoration(
-                      hintText: 'VD: phương trình bậc nhất, phân số…',
+                      hintText: 'VD: biện pháp tu từ, tả người, nghị luận…',
                       border: OutlineInputBorder(),
                     ),
                   ),
@@ -483,7 +483,7 @@ Trả lời CHỈ bằng 1 đối tượng JSON duy nhất (không có markdown 
                       minLines: 2,
                       maxLines: 5,
                       decoration: const InputDecoration(
-                        hintText: 'Gõ lời giải, đáp án…',
+                        hintText: 'Gõ bài làm, đáp án hoặc đoạn văn…',
                         border: OutlineInputBorder(),
                       ),
                     ),

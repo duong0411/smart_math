@@ -39,25 +39,25 @@ class _TreasureTrailGamePageState extends ConsumerState<TreasureTrailGamePage>
     final g = SupportedGrades.normalize(grade);
     if (g <= 7) {
       return const [
-        'Trạm 1 — Cổng Số nguyên mở ra…',
-        'Trạm 2 — Cầu Tỉ lệ & phần trăm',
-        'Trạm 3 — Rừng Biểu thức',
-        'Trạm 4 — Hồ Phương trình',
-        'Trạm 5 — Hang Hình học bí ẩn',
-        'Trạm 6 — Đồi Lũy thừa',
-        'Trạm 7 — Thung lũng Góc & tỉ lệ thức',
-        'Trạm 8 — Đỉnh kho báu lớp 6–7!',
+        'Trạm 1 — Cổng Chính tả mở ra…',
+        'Trạm 2 — Cầu Từ vựng & đồng nghĩa',
+        'Trạm 3 — Rừng Biện pháp tu từ',
+        'Trạm 4 — Hồ Kể chuyện',
+        'Trạm 5 — Hang Miêu tả bí ẩn',
+        'Trạm 6 — Đồi Thành ngữ tục ngữ',
+        'Trạm 7 — Thung lũng Đọc hiểu',
+        'Trạm 8 — Đỉnh kho báu Ngữ văn 6–7!',
       ];
     }
     return const [
-      'Trạm 1 — Cổng Đại số mở ra…',
-      'Trạm 2 — Hằng đẳng thức canh cầu!',
-      'Trạm 3 — Mê cung Hình học',
-      'Trạm 4 — Đường trung bình / tỉ lệ',
-      'Trạm 5 — Biểu đồ dữ liệu bí ẩn',
-      'Trạm 6 — Phân thức & phương trình',
-      'Trạm 7 — Xác suất · Pythagore',
-      'Trạm 8 — Đỉnh kho báu lớp 8–9!',
+      'Trạm 1 — Cổng Nghị luận mở ra…',
+      'Trạm 2 — Phép tu từ canh cầu!',
+      'Trạm 3 — Mê cung Phân tích văn bản',
+      'Trạm 4 — Cảm nhận thơ & văn xuôi',
+      'Trạm 5 — Thư viện Tác giả – tác phẩm',
+      'Trạm 6 — Làm văn & bố cục',
+      'Trạm 7 — Tiếng Việt nâng cao',
+      'Trạm 8 — Đỉnh kho báu Ngữ văn 8–9!',
     ];
   }
 

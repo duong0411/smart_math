@@ -129,7 +129,7 @@ class MathHomePage extends ConsumerWidget {
           child: ListView(
             padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
             children: [
-              // Hero Banner - Tailored specifically for Math students
+              // Hero Banner - Tailored specifically for Literature students
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
@@ -295,15 +295,15 @@ class MathHomePage extends ConsumerWidget {
                         runSpacing: 8,
                         children: [
                           _QuickPromptChip(
-                            label: '📐 Giải phương trình',
+                            label: '📖 Phân tích văn bản',
                             onTap: () => context.push('/tutor'),
                           ),
                           _QuickPromptChip(
-                            label: '📏 Hình học',
+                            label: '✍️ Luyện làm văn',
                             onTap: () => context.push('/tutor'),
                           ),
                           _QuickPromptChip(
-                            label: '⚡ Phân tích đa thức',
+                            label: '✨ Biện pháp tu từ',
                             onTap: () => context.push('/tutor'),
                           ),
                         ],
@@ -348,7 +348,7 @@ class MathHomePage extends ConsumerWidget {
                   _FeatureGridItem(
                     icon: Icons.psychology_rounded,
                     title: 'Gia sư Ngữ văn AI',
-                    subtitle: 'Hỏi đáp & giải từng bước',
+                    subtitle: 'Hỏi đáp & hướng dẫn từng bước',
                     tag: 'AI 24/7',
                     iconColor: const Color(0xFF2563EB),
                     imagePath: 'assets/images/icon_tutor_1791473992645.png',

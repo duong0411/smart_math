@@ -300,7 +300,7 @@ class _RocketAsk extends StatelessWidget {
     return Column(
       children: [
         Text(
-          'Tính nhanh để nạp nhiên liệu',
+          'Trả lời nhanh câu hỏi Ngữ văn để nạp nhiên liệu',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w800,
                 color: const Color(0xFF4CC9F0),

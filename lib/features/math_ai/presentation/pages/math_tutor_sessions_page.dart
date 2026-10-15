@@ -162,7 +162,7 @@ class MathTutorSessionsPage extends ConsumerWidget {
                                 const SizedBox(width: 8),
                                 Expanded(
                                   child: Text(
-                                    'Mẹo: Em có thể chụp ảnh đề bài để AI nhận diện và giải từng bước!',
+                                    'Mẹo: Em có thể chụp ảnh đề bài Ngữ văn để AI nhận diện và hướng dẫn từng bước!',
                                     style: TextStyle(
                                       fontSize: 12,
                                       color: scheme.onSurfaceVariant,
