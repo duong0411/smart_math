@@ -30,6 +30,28 @@ abstract final class GradeQuestionBank {
     return generators[_rng.nextInt(generators.length)]();
   }
 
+  /// Sinh bộ câu hỏi trắc nghiệm ôn tập (đáp án đã xáo thứ tự).
+  static List<GradeQuestion> pickQuestions({
+    required int count,
+    required int gradeLevel,
+  }) {
+    final grade = SupportedGrades.normalize(gradeLevel);
+    final n = count.clamp(1, 40);
+    final seen = <String>{};
+    final out = <GradeQuestion>[];
+    var guard = 0;
+    while (out.length < n && guard < n * 40) {
+      guard++;
+      final q = next(grade);
+      final key = '${q.prompt}|${q.answer}';
+      if (seen.add(key)) out.add(q);
+    }
+    while (out.length < n) {
+      out.add(next(grade));
+    }
+    return out;
+  }
+
   @Deprecated('Dùng GradeQuestionBank.next(8)')
   static GradeQuestion nextGrade8() => next(8);
 
