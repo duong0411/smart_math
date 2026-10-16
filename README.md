@@ -13,7 +13,7 @@ Repo: [duong0411/smart_math](https://github.com/duong0411/smart_math)
 5. Dùng:
    - **Gia sư Địa lí AI** — hỏi đáp hiện tượng tự nhiên, dân cư, kinh tế, phân tích Atlat & biểu đồ
    - **Luyện tập Địa lí** — AI tạo câu hỏi theo chuyên đề THCS & chấm điểm
-   - **Khám phá Địa lí** — thám hiểm Trái Đất, vượt ải châu lục, chinh phục đỉnh núi qua mini games (không cần API)
+   - **Trắc nghiệm Địa lí** — luyện câu hỏi 4 đáp án theo lớp 6–9 (không cần API)
    - **Giám sát học tập** — tiến độ, điểm yếu, kế hoạch ôn tập AI bám sát chương trình THCS
 
 API key được lưu trên thiết bị (secure storage), gọi thẳng Gemini — không cần backend.
@@ -36,6 +36,12 @@ Tải file ở tab **Actions** (Artifacts) hoặc **Releases**.
 
 > IPA không có chữ ký Apple — chỉ dùng để kiểm thử / sideload.  
 > Windows: giải nén cả zip rồi chạy `eduself_study_app.exe` (giữ nguyên thư mục DLL + `data`).
+
+## Hướng dẫn tạo phần mềm (hồ sơ dự thi)
+
+Xem chi tiết quy trình viết mã → test → build → GitHub Actions:
+
+**[docs/HUONG_DAN_TAO_PHAN_MEM.md](docs/HUONG_DAN_TAO_PHAN_MEM.md)**
 
 ## Chạy local
 

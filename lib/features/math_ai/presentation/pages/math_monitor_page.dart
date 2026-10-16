@@ -236,7 +236,7 @@ $summary
                                 MathStudyEventType.monitor =>
                                   Icons.insights_outlined,
                                 MathStudyEventType.game =>
-                                  Icons.sports_esports_rounded,
+                                  Icons.quiz_outlined,
                               },
                               color: scheme.primary,
                             ),

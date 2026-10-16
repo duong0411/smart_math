@@ -1,4 +1,3 @@
-import 'package:eduself_study_app/core/config/app_config.dart';
 import 'package:eduself_study_app/features/math_ai/presentation/providers/math_ai_providers.dart';
 import 'package:eduself_study_app/shared/widgets/glass_card.dart';
 import 'package:flutter/material.dart';
@@ -158,9 +157,9 @@ class MathHomePage extends ConsumerWidget {
                     onTap: () => context.push('/practice'),
                   ),
                   _FeatureGridItem(
-                    icon: Icons.public_rounded,
-                    title: 'Khám phá Địa lí',
-                    subtitle: 'Trò chơi Địa lí THCS',
+                    icon: Icons.quiz_outlined,
+                    title: 'Trắc nghiệm Địa lí',
+                    subtitle: 'Câu hỏi 4 đáp án · lớp 6–9',
                     iconColor: const Color(0xFFF59E0B),
                     gradientColors: [const Color(0xFFF59E0B).withValues(alpha: 0.7), const Color(0xFFF59E0B).withValues(alpha: 0.1)],
                     imagePath: 'assets/images/icon_games_1791474095200.png',

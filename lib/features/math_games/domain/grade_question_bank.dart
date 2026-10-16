@@ -263,14 +263,32 @@ abstract final class GradeQuestionBank {
   ];
 
   /// Lấy câu hỏi ngẫu nhiên trong ngân hàng câu hỏi Địa lí THCS
-  static GradeQuestion nextQuestion() {
-    final idx = _rng.nextInt(_allQuestions.length);
-    final q = _allQuestions[idx];
+  static GradeQuestion nextQuestion({int? grade}) {
+    final pool = _poolForGrade(grade);
+    final q = pool[_rng.nextInt(pool.length)];
     return _shuffledChoices(q);
   }
 
   /// Alias tương thích ngược cho các trang gọi `nextGrade8()`
   static GradeQuestion nextGrade8() => nextQuestion();
+
+  /// Lấy bộ câu hỏi không trùng (nếu đủ) để làm trắc nghiệm.
+  static List<GradeQuestion> pickQuestions({
+    required int count,
+    int? grade,
+  }) {
+    final pool = List<GradeQuestion>.from(_poolForGrade(grade))..shuffle(_rng);
+    final take = count.clamp(1, pool.length);
+    return pool.take(take).map(_shuffledChoices).toList(growable: false);
+  }
+
+  static List<GradeQuestion> _poolForGrade(int? grade) {
+    if (grade == null) return _allQuestions;
+    final marker = 'Địa lí $grade';
+    final filtered =
+        _allQuestions.where((q) => (q.chapter ?? '').contains(marker)).toList();
+    return filtered.isEmpty ? _allQuestions : filtered;
+  }
 
   /// Đảo thứ tự đáp án ngẫu nhiên để tăng tính thử thách
   static GradeQuestion _shuffledChoices(GradeQuestion q) {
