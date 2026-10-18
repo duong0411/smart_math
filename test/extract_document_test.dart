@@ -1,4 +1,5 @@
 ﻿import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
@@ -174,5 +175,41 @@ void main() {
         ),
       ),
     );
+  });
+
+  test('rut_gon.docx MathType OLE extracts equation text', () async {
+    final file = File('test/fixtures/rut_gon.docx');
+    expect(file.existsSync(), isTrue, reason: 'fixture missing');
+    final result = await extractStudyDocumentText(
+      filename: 'rut gon.docx',
+      bytes: await file.readAsBytes(),
+    );
+    // Must not throw empty — MathType-only worksheet.
+    expect(result.text, isNotEmpty);
+    expect(result.text.toLowerCase(), contains('mathtype'));
+    // Expect factors like (x−1)(y−3) or similar algebraic tokens.
+    expect(
+      result.text.contains('x') && result.text.contains('y'),
+      isTrue,
+      reason: result.text,
+    );
+    expect(
+      result.text.contains('(') && result.text.contains(')'),
+      isTrue,
+      reason: result.text,
+    );
+  });
+
+  test('rut_gon.pdf extracts math text (may be jumbled + note)', () async {
+    final file = File('test/fixtures/rut_gon.pdf');
+    expect(file.existsSync(), isTrue, reason: 'fixture missing');
+    final result = await extractStudyDocumentText(
+      filename: 'rut gon.pdf',
+      bytes: await file.readAsBytes(),
+    );
+    expect(result.text, isNotEmpty);
+    expect(result.text.toLowerCase(), contains('x'));
+    // Jumbled school PDFs should carry a guidance note for the model.
+    expect(result.text, contains('Ghi chú'));
   });
 }

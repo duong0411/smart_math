@@ -134,12 +134,51 @@ String _normalizePdfMathText(String text) {
   s = s.replaceAll(RegExp(r'[ \t]{2,}'), ' ');
   s = s.replaceAll(RegExp(r'[ \t]+\n'), '\n');
   s = s.replaceAll(RegExp(r'\n{3,}'), '\n\n');
-  // Common glyph glitches in school PDFs.
-  s = s
-      .replaceAll('×', '×')
-      .replaceAll('−', '−')
-      .replaceAll(RegExp(r' [?？]'), '?');
-  return s.trim();
+  s = s.replaceAll(RegExp(r' [?？]'), '?');
+  s = s.trim();
+  // School math PDFs often emit superscripts/parentheses out of order.
+  if (_looksJumbledMathPdf(s)) {
+    final guess = _guessJumbledMathPdf(s);
+    final note =
+        '[Ghi chú: PDF toán có thể lệch thứ tự số mũ/ngoặc khi trích chữ. '
+        'Hãy suy luận đề bài hợp lý theo ngữ cảnh Toán THCS'
+        '${guess == null ? '' : '; gợi ý đọc lại: $guess'}.]';
+    return '$s\n$note';
+  }
+  return s;
+}
+
+bool _looksJumbledMathPdf(String s) {
+  if (s.length > 180) return false;
+  final hasVar = RegExp(r'[xyXY]').hasMatch(s);
+  final hasOp = RegExp(r'[+\−\-]').hasMatch(s);
+  final sparse = s.contains('\n') && s.length < 80;
+  final emptyParens = s.contains('( )') || s.contains('()');
+  return hasVar && hasOp && (sparse || emptyParens);
+}
+
+/// Heuristic for short rút-gọn style PDFs like `x² − 13xy + y²`.
+String? _guessJumbledMathPdf(String s) {
+  final flat = s.replaceAll(RegExp(r'\s+'), ' ').trim();
+  // Pattern: leading digit (sup) + vars + ops + number mid-stream.
+  final m = RegExp(
+    r'(?:^|\s)(\d)\s*([xyXY].*?)\s*([+\−\-].*)$',
+  ).firstMatch(flat);
+  if (m != null) {
+    final sup = m.group(1)!;
+    final rest = '${m.group(2)}${m.group(3)}'.replaceAll(' ', '');
+    // Prefer x^{2}… when first var is x.
+    if (rest.startsWith('x') || rest.startsWith('X')) {
+      return 'x^{$sup}${rest.substring(1)}';
+    }
+  }
+  // Collect digits/vars/ops in reading order as a compact fallback.
+  final chars = RegExp(r'[0-9xyXY+\−\-()]')
+      .allMatches(flat)
+      .map((e) => e.group(0)!)
+      .join();
+  if (chars.length >= 5) return chars;
+  return null;
 }
 
 String _extractDocx(List<int> bytes) {
@@ -178,14 +217,138 @@ String _extractDocx(List<int> bytes) {
     if (t.isNotEmpty) parts.add(t);
   }
 
+  // MathType / Equation Editor OLE (common in school worksheets) — no <w:t>.
+  final mathTypeParts = <String>[];
+  for (final file in archive.files) {
+    if (!file.isFile) continue;
+    final name = file.name.replaceAll('\\', '/').toLowerCase();
+    if (!name.contains('word/embeddings/') || !name.endsWith('.bin')) {
+      continue;
+    }
+    final oleText = _extractMathTypeOleText(file.content);
+    if (oleText != null && oleText.isNotEmpty) {
+      mathTypeParts.add(oleText);
+    }
+  }
+  if (mathTypeParts.isNotEmpty) {
+    parts.add(
+      'Công thức MathType đọc được:\n${mathTypeParts.join('\n')}',
+    );
+  }
+
   final text = parts.join('\n\n').trim();
   if (text.isEmpty) {
     throw StateError(
       'Tệp Word không có nội dung chữ đọc được '
-      '(có thể chỉ chứa ảnh hoặc phương trình dạng hình).',
+      '(có thể chỉ chứa ảnh hoặc phương trình MathType/OLE không giải mã được). '
+      'Em thử: chuyển công thức sang Office Math, xuất PDF có chữ, hoặc chụp ảnh đề.',
     );
   }
   return text;
+}
+
+/// Best-effort plain text from MathType 6/7 OLE (`Equation.DSMT4`).
+String? _extractMathTypeOleText(List<int> bytes) {
+  if (bytes.isEmpty) return null;
+  // Confirm MathType marker.
+  final hasMarker = _indexOfBytes(bytes, asciiBytes('DSMT')) >= 0 ||
+      _indexOfBytes(bytes, asciiBytes('MathType')) >= 0;
+  if (!hasMarker) return null;
+
+  final tokens = <String>[];
+  for (var i = 0; i < bytes.length - 3; i++) {
+    // Character record: 02 00 8x CHAR
+    if (bytes[i] == 0x02 &&
+        bytes[i + 1] == 0x00 &&
+        bytes[i + 2] >= 0x80 &&
+        bytes[i + 2] <= 0x9f) {
+      final c = bytes[i + 3];
+      if (c >= 0x20 && c < 0x7f) {
+        // Superscript template (0x03 …) shortly before a digit after a letter → x^{2}
+        final isDigit = c >= 0x30 && c <= 0x39;
+        final afterLetter = tokens.isNotEmpty &&
+            RegExp(r'[A-Za-z]$').hasMatch(tokens.last);
+        var hasSupTemplate = false;
+        if (isDigit && afterLetter) {
+          final from = i > 16 ? i - 16 : 0;
+          for (var k = from; k < i; k++) {
+            if (bytes[k] == 0x03) {
+              hasSupTemplate = true;
+              break;
+            }
+          }
+        }
+        if (hasSupTemplate) {
+          tokens.add('^{${String.fromCharCode(c)}}');
+        } else {
+          tokens.add(String.fromCharCode(c));
+        }
+        i += 3;
+        continue;
+      }
+    }
+    // Operator record often encodes minus as 02 04 86 2b 00 2b
+    if (bytes[i] == 0x02 &&
+        bytes[i + 1] == 0x04 &&
+        bytes[i + 2] == 0x86 &&
+        i + 5 < bytes.length) {
+      tokens.add('−');
+      i += 5;
+      continue;
+    }
+  }
+
+  if (tokens.isEmpty) return null;
+  var text = tokens.join();
+  // Drop font-table noise before the real equation (keep last math-looking run).
+  text = _cleanupMathTypeScraped(text);
+  if (text.isEmpty) return null;
+  return text;
+}
+
+String _cleanupMathTypeScraped(String raw) {
+  var s = raw;
+  // `expr()` empty size boxes → `(expr)` — MathType stores content then `()`.
+  s = s.replaceAllMapped(RegExp(r'([^()\s]+)\(\)'), (m) => '(${m[1]})');
+
+  // Prefer the richest math-looking substring (drop font-table noise).
+  final candidates = <String>{
+    s,
+    ...RegExp(r'[A-Za-z]\^\{\d\}[^A-Za-z]*$').allMatches(s).map((m) => m[0]!),
+    ...RegExp(r'\([^)]+\)\([^)]+\)').allMatches(s).map((m) => m[0]!),
+    ...RegExp(r'[xyXY0-9+\−\-\^\{\}\(\)]{4,}').allMatches(s).map((m) => m[0]!),
+  };
+  var best = s;
+  for (final c in candidates) {
+    if (_mathLikeness(c) > _mathLikeness(best)) best = c;
+  }
+  return best.trim();
+}
+
+int _mathLikeness(String s) {
+  if (s.isEmpty) return -1;
+  var score = 0;
+  if (s.contains('x') || s.contains('y')) score += 2;
+  if (RegExp(r'[0-9]').hasMatch(s)) score += 1;
+  if (s.contains('−') || s.contains('+') || s.contains('-')) score += 2;
+  if (s.contains('(') && s.contains(')')) score += 3;
+  if (s.contains('^{')) score += 2;
+  score += (s.length / 8).floor();
+  return score;
+}
+
+List<int> asciiBytes(String s) => s.codeUnits;
+
+int _indexOfBytes(List<int> haystack, List<int> needle) {
+  if (needle.isEmpty || haystack.length < needle.length) return -1;
+  outer:
+  for (var i = 0; i <= haystack.length - needle.length; i++) {
+    for (var j = 0; j < needle.length; j++) {
+      if (haystack[i + j] != needle[j]) continue outer;
+    }
+    return i;
+  }
+  return -1;
 }
 
 ArchiveFile? _findDocxPart(Archive archive, {required String endsWith}) {

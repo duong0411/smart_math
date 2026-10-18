@@ -220,9 +220,16 @@ class _BytesViewer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (_looksPdf) {
-      return PdfViewer.data(
-        bytes,
-        sourceName: 'library-$hashCode',
+      return ColoredBox(
+        color: Colors.white,
+        child: PdfViewer.data(
+          bytes,
+          // Stable name — hashCode changes every rebuild and can blank the viewer.
+          sourceName: 'library-pdf-${bytes.length}-${bytes.hashCode}',
+          params: const PdfViewerParams(
+            backgroundColor: Colors.white,
+          ),
+        ),
       );
     }
     if (_looksImage) {
