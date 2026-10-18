@@ -112,7 +112,8 @@ Future<({String name, List<int> bytes})?> pickMathAiDocument(
         'Sắp mở trình chọn tệp của hệ thống.\n\n'
         '• Chọn PDF (có chữ chọn được), Word (.docx) hoặc TXT\n'
         '• Không hỗ trợ Word cũ (.doc) — hãy lưu lại thành .docx\n'
-        '• App sẽ đọc chữ trong tệp rồi gửi cho AI\n'
+        '• Công thức Word (Office Math) và chữ PDF sẽ được đọc rồi gửi AI\n'
+        '• PDF scan / chỉ ảnh: hãy chụp ảnh đề thay vì upload file scan\n'
         '• Bấm Back / Hủy để quay lại app',
       ),
       actions: [

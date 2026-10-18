@@ -6,11 +6,12 @@ import 'package:eduself_study_app/shared/utils/extract_study_document_text.dart'
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pdfrx/pdfrx.dart';
 
-List<int> _minimalDocx(String paragraph) {
+List<int> _minimalDocx(String bodyInnerXml) {
   final documentXml = '''<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"
+ xmlns:m="http://schemas.openxmlformats.org/officeDocument/2006/math">
   <w:body>
-    <w:p><w:r><w:t>$paragraph</w:t></w:r></w:p>
+$bodyInnerXml
   </w:body>
 </w:document>''';
   const contentTypes =
@@ -30,10 +31,37 @@ List<int> _minimalDocx(String paragraph) {
   return ZipEncoder().encode(archive)!;
 }
 
+List<int> _plainParagraphDocx(String paragraph) {
+  return _minimalDocx(
+    '<w:p><w:r><w:t>$paragraph</w:t></w:r></w:p>',
+  );
+}
+
+/// DOCX with Office Math: x^2 and fraction 1/2.
+List<int> _ommlMathDocx() {
+  const omml = '''
+<w:p><w:r><w:t>Bai toan: </w:t></w:r>
+<m:oMath>
+  <m:sSup>
+    <m:e><m:r><m:t>x</m:t></m:r></m:e>
+    <m:sup><m:r><m:t>2</m:t></m:r></m:sup>
+  </m:sSup>
+  <m:r><m:t> + </m:t></m:r>
+  <m:f>
+    <m:num><m:r><m:t>1</m:t></m:r></m:num>
+    <m:den><m:r><m:t>2</m:t></m:r></m:den>
+  </m:f>
+  <m:r><m:t> = 0</m:t></m:r>
+</m:oMath>
+</w:p>''';
+  return _minimalDocx(omml);
+}
+
 /// Minimal valid PDF with one page of Helvetica text.
 Uint8List _minimalPdfWithText(String text) {
   // Escape parentheses for PDF string literals.
-  final safe = text.replaceAll(r'\', r'\\').replaceAll('(', r'\(').replaceAll(')', r'\)');
+  final safe =
+      text.replaceAll(r'\', r'\\').replaceAll('(', r'\(').replaceAll(')', r'\)');
   final stream = 'BT /F1 12 Tf 50 750 Td ($safe) Tj ET';
   final streamBytes = utf8.encode(stream);
 
@@ -84,7 +112,7 @@ void main() {
   });
 
   test('DOCX upload extract succeeds', () async {
-    final bytes = _minimalDocx('Bai toan: 2x + 3 = 7. Tim x.');
+    final bytes = _plainParagraphDocx('Bai toan: 2x + 3 = 7. Tim x.');
     final result = await extractStudyDocumentText(
       filename: 'bai_tap.docx',
       bytes: bytes,
@@ -92,8 +120,29 @@ void main() {
     expect(result.text, contains('2x + 3 = 7'));
     expect(result.text, contains('Tim x'));
     expect(result.truncated, isFalse);
-    // ignore: avoid_print
-    print('DOCX OK → "${result.text}"');
+  });
+
+  test('DOCX OMML keeps superscript and fraction', () async {
+    final bytes = _ommlMathDocx();
+    final result = await extractStudyDocumentText(
+      filename: 'omml.docx',
+      bytes: bytes,
+    );
+    // Must NOT collapse to bare "x2" without exponent marker.
+    expect(result.text, contains('x^{2}'));
+    expect(result.text, contains('(1)/(2)'));
+    expect(result.text, contains('= 0'));
+    expect(result.text, isNot(contains('x2 +')));
+  });
+
+  test('DOCX decodes numeric XML entities', () async {
+    final bytes = _plainParagraphDocx('A&#x2260;B va 3&#178;');
+    final result = await extractStudyDocumentText(
+      filename: 'entities.docx',
+      bytes: bytes,
+    );
+    expect(result.text, contains('≠'));
+    expect(result.text, contains('²'));
   });
 
   test('PDF upload extract succeeds', () async {
@@ -104,8 +153,6 @@ void main() {
     );
     expect(result.text.toLowerCase(), contains('phuong'));
     expect(result.text, contains('5'));
-    // ignore: avoid_print
-    print('PDF OK → "${result.text}"');
   });
 
   test('TXT upload extract succeeds', () async {
@@ -114,8 +161,6 @@ void main() {
       bytes: utf8.encode('Phuong trinh: x = 5'),
     );
     expect(result.text, contains('x = 5'));
-    // ignore: avoid_print
-    print('TXT OK → "${result.text}"');
   });
 
   test('old .doc is rejected clearly', () async {

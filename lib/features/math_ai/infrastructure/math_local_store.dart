@@ -262,6 +262,8 @@ class MathChatMessage {
     required this.at,
     this.imageBase64,
     this.imageMimeType,
+    this.documentName,
+    this.documentText,
   });
 
   final String id;
@@ -271,8 +273,15 @@ class MathChatMessage {
   final String? imageBase64;
   final String? imageMimeType;
 
+  /// Extracted PDF/Word text kept so follow-up turns still see the đề bài.
+  final String? documentName;
+  final String? documentText;
+
   bool get hasImage =>
       imageBase64 != null && imageBase64!.isNotEmpty;
+
+  bool get hasDocument =>
+      documentText != null && documentText!.trim().isNotEmpty;
 
   Map<String, dynamic> toJson() => {
         'id': id,
@@ -281,6 +290,8 @@ class MathChatMessage {
         'at': at.toIso8601String(),
         if (imageBase64 != null) 'imageBase64': imageBase64,
         if (imageMimeType != null) 'imageMimeType': imageMimeType,
+        if (documentName != null) 'documentName': documentName,
+        if (documentText != null) 'documentText': documentText,
       };
 
   factory MathChatMessage.fromJson(Map<String, dynamic> json) {
@@ -294,6 +305,8 @@ class MathChatMessage {
           DateTime.now().toUtc(),
       imageBase64: json['imageBase64'] as String?,
       imageMimeType: json['imageMimeType'] as String?,
+      documentName: json['documentName'] as String?,
+      documentText: json['documentText'] as String?,
     );
   }
 }

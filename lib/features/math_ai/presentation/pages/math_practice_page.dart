@@ -203,7 +203,10 @@ Trả lời CHỈ bằng 1 đối tượng JSON duy nhất (không có markdown 
         AppToast.info('Tệp khá dài — đã lấy phần đầu để chấm.');
       }
     } on Object catch (e) {
-      AppToast.error('$e');
+      final msg = e is StateError
+          ? e.message.trim()
+          : '$e'.replaceFirst(RegExp(r'^Bad state:\s*'), '');
+      AppToast.error(msg.isEmpty ? 'Không đọc được tệp.' : msg);
     }
   }
 
@@ -301,15 +304,16 @@ BƯỚC 1: KIỂM TRA TÍNH HỢP LỆ VÀ LIÊN QUAN (ĐIỀU KIỆN TIÊN QUY�
      => DỪNG LẠI NGAY, TUYỆT ĐỐI KHÔNG CHẤM ĐÚNG!
 
 BƯỚC 2: TỰ GIẢI BÀI TOÁN ĐỂ CÓ KẾT QUẢ CHUẨN:
-- Tự giải bài toán [$_question] từng bước để có đáp số chính xác K_chuẩn và điều kiện nghiệm.
+- Tự giải bài toán [$_question] từng bước trên nháp; kiểm tra lại phép tính trước khi chốt đáp số K_chuẩn và điều kiện nghiệm.
+- Nếu có tệp PDF/Word: đọc kỹ chữ đã trích xuất (có thể lệch); chỉ chấm phần bài làm liên quan đề này.
 
 BƯỚC 3: ĐỐI CHIẾU VÀ ĐÁNH GIÁ ĐÚNG / SAI:
 - Đọc kỹ kết quả và các bước giải trong bài làm của học sinh (trên ảnh / tệp / text).
-- ĐẶT "correct": true CHỈ KHI:
+- ĐẶT "correct": true (boolean JSON, không phải chuỗi) CHỈ KHI:
   + Bài làm thực sự giải bài toán này VÀ kết quả cuối cùng chính xác trùng khớp với K_chuẩn (chấp nhận cách viết tương đương hợp lệ: phân số tối giản, số thập phân tương đương).
 - ĐẶT "correct": false KHI:
   + Kết quả sai, tính nhầm, sai dấu, thiếu điều kiện, hoặc các bước giải sai logic.
-  + Trong "feedback": Chỉ rõ lỗi sai ở bước nào, gợi ý phương pháp giải / công thức cần áp dụng (chưa vội đưa toàn bộ đáp án để học sinh tự làm lại).
+  + Trong "feedback": Chỉ rõ lỗi sai ở bước nào, nêu K_chuẩn đúng, gợi ý phương pháp / công thức cần áp dụng.
 
 ĐỊNH DẠNG ĐẦU RA BẮT BUỘC:
 Trả lời CHỈ bằng 1 đối tượng JSON duy nhất (không có markdown fence, không có chữ thừa):
@@ -332,7 +336,7 @@ Trả lời CHỈ bằng 1 đối tượng JSON duy nhất (không có markdown 
     switch (result) {
       case Success(:final value):
         final parsed = _parseJson(value);
-        final correct = parsed?['correct'] == true;
+        final correct = _parseCorrectFlag(parsed?['correct']) ?? false;
         final feedback = (parsed?['feedback'] as String?) ?? value;
         final storedAnswer = () {
           if (answer.isNotEmpty) {
@@ -381,8 +385,36 @@ Trả lời CHỈ bằng 1 đối tượng JSON duy nhất (không có markdown 
     try {
       final decoded = jsonDecode(text.substring(start, end + 1));
       if (decoded is Map<String, dynamic>) return decoded;
+      if (decoded is Map) {
+        return decoded.map((k, v) => MapEntry(k.toString(), v));
+      }
     } on Object {
       return null;
+    }
+    return null;
+  }
+
+  /// Accept bool, "true"/"false", "đúng"/"sai" from the model.
+  bool? _parseCorrectFlag(Object? value) {
+    if (value is bool) return value;
+    if (value is num) return value != 0;
+    if (value is String) {
+      final s = value.trim().toLowerCase();
+      if (s == 'true' ||
+          s == '1' ||
+          s == 'đúng' ||
+          s == 'dung' ||
+          s == 'correct' ||
+          s == 'yes') {
+        return true;
+      }
+      if (s == 'false' ||
+          s == '0' ||
+          s == 'sai' ||
+          s == 'incorrect' ||
+          s == 'no') {
+        return false;
+      }
     }
     return null;
   }

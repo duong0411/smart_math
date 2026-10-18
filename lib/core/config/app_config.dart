@@ -12,13 +12,13 @@ abstract final class AppConfig {
   static const _apiAccessTokenKey = 'API_ACCESS_TOKEN';
   static const _geminiApiKeyKey = 'GEMINI_API_KEY';
 
-  /// Reliability-first chain for desktop/free-tier, then stronger models.
+  /// Accuracy-aware chain: flash first (quota), then pro before lite.
   /// Each model has separate quota; failover on rate-limit / overload / 404.
   static const geminiModelChain = <String>[
     'gemini-2.5-flash',
+    'gemini-2.5-pro',
     'gemini-2.0-flash',
     'gemini-2.5-flash-lite',
-    'gemini-2.5-pro',
   ];
 
   /// Default Cloudflare Workers API (legacy / optional).

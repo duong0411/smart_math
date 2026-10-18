@@ -124,7 +124,7 @@ class _MathTutorChatPageState extends ConsumerState<MathTutorChatPage> {
         AppToast.info('Tệp khá dài — đã lấy phần đầu để gửi AI.');
       }
     } on Object catch (e) {
-      AppToast.error('$e');
+      AppToast.error(_friendlyError(e));
     }
   }
 
@@ -202,6 +202,8 @@ class _MathTutorChatPageState extends ConsumerState<MathTutorChatPage> {
       at: now,
       imageBase64: imageBytes != null ? base64Encode(imageBytes) : null,
       imageMimeType: imageBytes != null ? imageMime : null,
+      documentName: documentName,
+      documentText: documentText,
     );
 
     try {
@@ -217,18 +219,16 @@ class _MathTutorChatPageState extends ConsumerState<MathTutorChatPage> {
             role: m.role == MathChatRole.user
                 ? GeminiRole.user
                 : GeminiRole.model,
-            text: m.hasImage && m.content.trim().isEmpty
-                ? '[Học sinh đã gửi ảnh bài tập]'
-                : (m.hasImage
-                    ? '${m.content}\n[Kèm ảnh bài tập]'
-                    : m.content),
+            text: _historyTextFor(m),
           ),
       ];
 
       final promptMessage = text.isNotEmpty
           ? text
           : (hasDocument
-              ? 'Em gửi tệp "${documentName ?? 'tài liệu'}". Thầy xem giúp em bài toán trong tệp và hướng dẫn giải từng bước nhé.'
+              ? 'Em gửi tệp "${documentName ?? 'tài liệu'}". '
+                  'Hãy đọc kỹ đề toán trong tệp (chú ý số mũ, phân số, căn, dấu), '
+                  'tóm tắt lại đề cho đúng, rồi giải chi tiết từng bước và nêu đáp án cuối cùng.'
               : (hasImage
                   ? 'Em gửi ảnh này. Thầy xem có phải đề bài hoặc bài tập Toán không và hướng dẫn giải giúp em với ạ.'
                   : ''));
@@ -250,7 +250,10 @@ class _MathTutorChatPageState extends ConsumerState<MathTutorChatPage> {
             'Gia sư STEM Toán: Chỉ hỗ trợ môn Toán và ứng dụng STEM. '
             'Nếu học sinh hỏi nội dung không liên quan hoặc gửi ảnh không liên quan đến Toán (ảnh người, phong cảnh, đồ vật, thú cưng, meme, ảnh rác...), '
             'hãy từ chối lịch sự, ngắn gọn và nhắc học sinh gửi bài tập Toán. '
-            'Tuyệt đối không trả lời lan man hoặc tiếp chuyện ngoài lề.',
+            'Tuyệt đối không trả lời lan man hoặc tiếp chuyện ngoài lề.\n'
+            'Khi có nội dung tệp PDF/Word: đọc lại đề cẩn thận (số mũ viết dạng x^{2}, phân số (a)/(b)); '
+            'tự giải nháp để kiểm tra phép tính trước khi trả lời; '
+            'nếu học sinh yêu cầu giải bài trong tệp thì đưa lời giải đầy đủ, đúng đáp án.',
       );
 
       switch (result) {
@@ -302,6 +305,43 @@ class _MathTutorChatPageState extends ConsumerState<MathTutorChatPage> {
         curve: Curves.easeOut,
       );
     });
+  }
+
+  String _friendlyError(Object e) {
+    if (e is StateError) {
+      final m = e.message.trim();
+      return m.isEmpty ? 'Không đọc được tệp.' : m;
+    }
+    final s = '$e';
+    return s.replaceFirst(RegExp(r'^Bad state:\s*'), '');
+  }
+
+  /// Rebuild Gemini history with extracted document text (not just "📄 file").
+  String _historyTextFor(MathChatMessage m) {
+    final buf = StringBuffer();
+    if (m.content.trim().isNotEmpty) {
+      buf.write(m.content.trim());
+    } else if (m.hasImage) {
+      buf.write('[Học sinh đã gửi ảnh bài tập]');
+    } else if (m.hasDocument) {
+      buf.write('📄 ${m.documentName ?? 'Tài liệu'}');
+    }
+    if (m.hasImage && m.content.trim().isNotEmpty) {
+      buf.write('\n[Kèm ảnh bài tập]');
+    }
+    if (m.hasDocument) {
+      final name = (m.documentName == null || m.documentName!.trim().isEmpty)
+          ? 'tài liệu'
+          : m.documentName!.trim();
+      // Cap history payload so long worksheets don't blow the context window.
+      var doc = m.documentText!.trim();
+      const maxDocInHistory = 12000;
+      if (doc.length > maxDocInHistory) {
+        doc = '${doc.substring(0, maxDocInHistory)}\n[…đã rút gọn…]';
+      }
+      buf.write('\n\n--- Nội dung tệp đính kèm ($name) ---\n$doc\n--- Hết nội dung tệp ---');
+    }
+    return buf.toString();
   }
 
   @override

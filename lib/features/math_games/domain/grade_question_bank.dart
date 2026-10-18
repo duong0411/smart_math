@@ -191,7 +191,7 @@ abstract final class GradeQuestionBank {
     final b = 1 + _rng.nextInt(8);
     final x = 1 + _rng.nextInt(6);
     return _q(
-      'Giá trị $a x + $b khi x = $x?',
+      'Giá trị ${a}x + $b khi x = $x?',
       a * x + b,
       chapter: 'Biểu thức',
       hint: 'Thay x rồi tính.',
@@ -267,8 +267,9 @@ abstract final class GradeQuestionBank {
     final a = 2 + _rng.nextInt(6);
     final b = 1 + _rng.nextInt(5);
     final x = 1 + _rng.nextInt(5);
+    // Keep the variable name `x` in the expression; only substitute after "khi x =".
     return _q(
-      'Giá trị $a x($x + $b) khi x = $x là?',
+      'Giá trị ${a}x(x + $b) khi x = $x là?',
       a * x * (x + b),
       chapter: 'Ch1 · Đa thức',
       hint: 'Nhân phân phối rồi thay số.',

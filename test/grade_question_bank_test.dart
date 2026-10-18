@@ -48,5 +48,28 @@ void main() {
       final q2 = GradeQuestionBank.next(11);
       expect(q2.choices.contains(q2.answer), isTrue);
     });
+
+    test('poly multiply prompts keep variable x (not substituted value)', () {
+      // Sample many draws; the buggy form was "3 x(3 + 4) khi x = 3".
+      var sawPoly = false;
+      for (var i = 0; i < 200; i++) {
+        final q = GradeQuestionBank.next(8);
+        if (!q.prompt.contains('khi x =') || !q.prompt.contains('x(')) {
+          continue;
+        }
+        sawPoly = true;
+        expect(
+          q.prompt,
+          matches(RegExp(r'\d+x\(x \+ \d+\) khi x = \d+')),
+          reason: 'prompt should keep symbolic x: ${q.prompt}',
+        );
+        expect(
+          q.prompt,
+          isNot(matches(RegExp(r'\d+x\(\d+ \+ \d+\) khi x ='))),
+          reason: 'value must not replace x inside expression: ${q.prompt}',
+        );
+      }
+      expect(sawPoly, isTrue, reason: 'expected at least one poly multiply draw');
+    });
   });
 }
