@@ -5,9 +5,7 @@ import 'package:eduself_study_app/core/ai/gemini_client.dart';
 import 'package:eduself_study_app/core/error/result.dart';
 import 'package:eduself_study_app/features/math_ai/infrastructure/math_local_store.dart';
 import 'package:eduself_study_app/features/math_ai/presentation/providers/math_ai_providers.dart';
-import 'package:eduself_study_app/shared/utils/extract_study_document_text.dart';
 import 'package:eduself_study_app/shared/utils/image_picker_errors.dart';
-import 'package:eduself_study_app/shared/utils/pick_study_document.dart';
 import 'package:eduself_study_app/shared/widgets/app_toast.dart';
 import 'package:eduself_study_app/shared/widgets/glass_card.dart';
 import 'package:flutter/material.dart';
@@ -32,8 +30,6 @@ class _MathTutorChatPageState extends ConsumerState<MathTutorChatPage> {
   var _sending = false;
   Uint8List? _pendingImageBytes;
   String? _pendingImageMime;
-  String? _pendingDocumentName;
-  String? _pendingDocumentText;
 
   @override
   void initState() {
@@ -84,12 +80,6 @@ class _MathTutorChatPageState extends ConsumerState<MathTutorChatPage> {
                 subtitle: const Text('Lấy từ thư viện ảnh'),
                 onTap: () => Navigator.pop(ctx, 'gallery'),
               ),
-              ListTile(
-                leading: const Icon(Icons.picture_as_pdf_outlined),
-                title: const Text('PDF / Word'),
-                subtitle: const Text('Đọc chữ trong tệp rồi hỏi AI'),
-                onTap: () => Navigator.pop(ctx, 'document'),
-              ),
             ],
           ),
         ),
@@ -99,32 +89,6 @@ class _MathTutorChatPageState extends ConsumerState<MathTutorChatPage> {
       await _pickImage(ImageSource.camera);
     } else if (choice == 'gallery') {
       await _pickImage(ImageSource.gallery);
-    } else if (choice == 'document') {
-      await _pickDocument();
-    }
-  }
-
-  Future<void> _pickDocument() async {
-    final picked = await pickMathAiDocument(context);
-    if (picked == null) return;
-    try {
-      final extracted = await extractStudyDocumentText(
-        filename: picked.name,
-        bytes: picked.bytes,
-      );
-      if (!mounted) return;
-      setState(() {
-        _pendingDocumentName = extracted.filename;
-        _pendingDocumentText = extracted.text;
-        // Prefer one attachment type at a time for clearer prompts.
-        _pendingImageBytes = null;
-        _pendingImageMime = null;
-      });
-      if (extracted.truncated) {
-        AppToast.info('Tệp khá dài — đã lấy phần đầu để gửi AI.');
-      }
-    } on Object catch (e) {
-      AppToast.error(_friendlyError(e));
     }
   }
 
@@ -155,8 +119,6 @@ class _MathTutorChatPageState extends ConsumerState<MathTutorChatPage> {
       setState(() {
         _pendingImageBytes = bytes;
         _pendingImageMime = mime;
-        _pendingDocumentName = null;
-        _pendingDocumentText = null;
       });
     } on Object catch (e) {
       AppToast.error(imagePickerErrorMessage(e));
@@ -166,30 +128,19 @@ class _MathTutorChatPageState extends ConsumerState<MathTutorChatPage> {
   Future<void> _send() async {
     final text = _controller.text.trim();
     final hasImage = _pendingImageBytes != null;
-    final hasDocument = _pendingDocumentText != null &&
-        _pendingDocumentText!.trim().isNotEmpty;
-    if ((text.isEmpty && !hasImage && !hasDocument) ||
-        _sending ||
-        _session == null) {
+    if ((text.isEmpty && !hasImage) || _sending || _session == null) {
       return;
     }
 
     final imageBytes = _pendingImageBytes;
     final imageMime = _pendingImageMime ?? 'image/jpeg';
-    final documentName = _pendingDocumentName;
-    final documentText = _pendingDocumentText;
-    final displayContent = text.isNotEmpty
-        ? text
-        : (hasDocument
-            ? '📄 ${documentName ?? 'Tài liệu'}'
-            : (hasImage ? '📷 Ảnh bài tập' : ''));
+    final displayContent =
+        text.isNotEmpty ? text : (hasImage ? '📷 Ảnh bài tập' : '');
 
     setState(() {
       _sending = true;
       _pendingImageBytes = null;
       _pendingImageMime = null;
-      _pendingDocumentName = null;
-      _pendingDocumentText = null;
     });
     _controller.clear();
 
@@ -202,8 +153,6 @@ class _MathTutorChatPageState extends ConsumerState<MathTutorChatPage> {
       at: now,
       imageBase64: imageBytes != null ? base64Encode(imageBytes) : null,
       imageMimeType: imageBytes != null ? imageMime : null,
-      documentName: documentName,
-      documentText: documentText,
     );
 
     try {
@@ -225,13 +174,9 @@ class _MathTutorChatPageState extends ConsumerState<MathTutorChatPage> {
 
       final promptMessage = text.isNotEmpty
           ? text
-          : (hasDocument
-              ? 'Em gửi tệp "${documentName ?? 'tài liệu'}". '
-                  'Hãy đọc kỹ đề toán trong tệp (chú ý số mũ, phân số, căn, dấu), '
-                  'tóm tắt lại đề cho đúng, rồi giải chi tiết từng bước và nêu đáp án cuối cùng.'
-              : (hasImage
-                  ? 'Em gửi ảnh này. Thầy xem có phải đề bài hoặc bài tập Toán không và hướng dẫn giải giúp em với ạ.'
-                  : ''));
+          : (hasImage
+              ? 'Em gửi ảnh này. Thầy xem có phải đề bài hoặc bài tập Toán không và hướng dẫn giải giúp em với ạ.'
+              : '');
 
       final result = await askMathAi(
         ref,
@@ -244,16 +189,11 @@ class _MathTutorChatPageState extends ConsumerState<MathTutorChatPage> {
                 base64: base64Encode(imageBytes),
                 mimeType: imageMime,
               ),
-        documentText: documentText,
-        documentName: documentName,
         extraSystemContext:
             'Gia sư STEM Toán: Chỉ hỗ trợ môn Toán và ứng dụng STEM. '
             'Nếu học sinh hỏi nội dung không liên quan hoặc gửi ảnh không liên quan đến Toán (ảnh người, phong cảnh, đồ vật, thú cưng, meme, ảnh rác...), '
             'hãy từ chối lịch sự, ngắn gọn và nhắc học sinh gửi bài tập Toán. '
-            'Tuyệt đối không trả lời lan man hoặc tiếp chuyện ngoài lề.\n'
-            'Khi có nội dung tệp PDF/Word: đọc lại đề cẩn thận (số mũ viết dạng x^{2}, phân số (a)/(b)); '
-            'tự giải nháp để kiểm tra phép tính trước khi trả lời; '
-            'nếu học sinh yêu cầu giải bài trong tệp thì đưa lời giải đầy đủ, đúng đáp án.',
+            'Tuyệt đối không trả lời lan man hoặc tiếp chuyện ngoài lề.',
       );
 
       switch (result) {
@@ -268,11 +208,9 @@ class _MathTutorChatPageState extends ConsumerState<MathTutorChatPage> {
             sessionId: widget.sessionId,
             message: reply,
           );
-          final attachNote = hasDocument
-              ? 'Chat kèm tệp · ${session.title}'
-              : (hasImage
-                  ? 'Chat kèm ảnh · ${session.title}'
-                  : 'Buổi chat · ${session.title}');
+          final attachNote = hasImage
+              ? 'Chat kèm ảnh · ${session.title}'
+              : 'Buổi chat · ${session.title}';
           await store.addEvent(
             MathStudyEvent(
               id: reply.id,
@@ -305,15 +243,6 @@ class _MathTutorChatPageState extends ConsumerState<MathTutorChatPage> {
         curve: Curves.easeOut,
       );
     });
-  }
-
-  String _friendlyError(Object e) {
-    if (e is StateError) {
-      final m = e.message.trim();
-      return m.isEmpty ? 'Không đọc được tệp.' : m;
-    }
-    final s = '$e';
-    return s.replaceFirst(RegExp(r'^Bad state:\s*'), '');
   }
 
   /// Rebuild Gemini history with extracted document text (not just "📄 file").
@@ -490,39 +419,10 @@ class _MathTutorChatPageState extends ConsumerState<MathTutorChatPage> {
                             ],
                           ),
                         ),
-                      if (_pendingDocumentText != null)
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
-                          child: Material(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .secondaryContainer
-                                .withValues(alpha: 0.7),
-                            borderRadius: BorderRadius.circular(12),
-                            child: ListTile(
-                              dense: true,
-                              leading: const Icon(Icons.description_outlined),
-                              title: Text(
-                                _pendingDocumentName ?? 'Tài liệu',
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              subtitle: const Text('Sẽ gửi nội dung chữ cho AI'),
-                              trailing: IconButton(
-                                tooltip: 'Bỏ tệp',
-                                onPressed: () => setState(() {
-                                  _pendingDocumentName = null;
-                                  _pendingDocumentText = null;
-                                }),
-                                icon: const Icon(Icons.close),
-                              ),
-                            ),
-                          ),
-                        ),
                       Row(
                         children: [
                           IconButton(
-                            tooltip: 'Ảnh / PDF / Word',
+                            tooltip: 'Đính kèm ảnh',
                             onPressed: _sending ? null : _showAttachMenu,
                             icon: const Icon(Icons.attach_file_rounded),
                           ),
@@ -534,7 +434,7 @@ class _MathTutorChatPageState extends ConsumerState<MathTutorChatPage> {
                               textInputAction: TextInputAction.send,
                               onSubmitted: (_) => _send(),
                               decoration: const InputDecoration(
-                                hintText: 'Gõ câu hỏi, gửi ảnh hoặc PDF/Word…',
+                                hintText: 'Gõ câu hỏi hoặc gửi ảnh đề bài…',
                                 border: InputBorder.none,
                               ),
                             ),

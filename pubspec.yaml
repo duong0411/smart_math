@@ -23,7 +23,6 @@ dependencies:
   fl_chart: ^1.2.0
   file_picker: ^10.3.10
   cross_file: ^0.3.4
-  archive: ^4.0.9
   google_fonts: ^6.1.0
 dev_dependencies:
   flutter_test:

@@ -176,9 +176,7 @@ Future<Result<String>> askMathAi(
       '1. BẠN LÀ CHATBOT HỖ TRỢ HỌC TẬP STEM MÔN TOÁN. TUYỆT ĐỐI CHỈ TRẢ LỜI CÁC NỘI DUNG VỀ TOÁN HỌC VÀ ỨNG DỤNG STEM LIÊN QUAN ĐẾN TOÁN.\n'
       '2. NẾU HỌC SINH HỎI NỘI DUNG KHÔNG LIÊN QUAN (tán gẫu, đời tư, phim ảnh, ca nhạc, chính trị, game không liên quan, làm thơ, chuyện phiếm...): TUYỆT ĐỐI KHÔNG TRẢ LỜI LAN MAN. Hãy từ chối lịch sự và nhắc học sinh quay lại môn Toán.\n'
       '3. NẾU HỌC SINH GỬI ẢNH KHÔNG LIÊN QUAN ĐẾN TOÁN HỌC (ảnh người, đồ vật, thú cưng, ảnh rác, ảnh mờ...): TUYỆT ĐỐI TỪ CHỐI, KHÔNG SUY DIỄN VÀ KHÔNG CHẤM ĐÚNG.\n'
-      '4. ĐỘ CHÍNH XÁC: Luôn giải nháp trước để kiểm tra phép tính; dùng LaTeX \$...\$ hoặc \$\$...\$\$ cho biểu thức toán.\n'
-      '5. NẾU CÓ NỘI DUNG TỆP PDF/WORD: chữ đã được trích xuất tự động — có thể lệch khoảng trắng hoặc mất một phần ký hiệu. '
-      'Hãy suy luận đề bài hợp lý theo ngữ cảnh Toán THCS, nêu lại đề trước khi giải, và ưu tiên đáp án đúng.';
+      '4. ĐỘ CHÍNH XÁC: Luôn giải nháp trước để kiểm tra phép tính; dùng LaTeX \$...\$ hoặc \$\$...\$\$ cho biểu thức toán.';
 
   final message = _composeUserMessage(
     userMessage: userMessage,
@@ -236,7 +234,7 @@ String _composeUserMessage({
         'Hãy đọc kỹ nội dung tệp bên dưới: '
         '1) Nếu chứa đề bài / bài tập Toán — tóm tắt lại đề (giữ đúng số mũ, phân số, căn), rồi giải chi tiết từng bước và nêu đáp án cuối cùng. '
         '2) Nếu nội dung không liên quan đến môn Toán — từ chối lịch sự. '
-        'Lưu ý: văn bản trích từ PDF/Word có thể hơi lệch; ưu tiên hiểu đúng đề toán.$docBlock';
+        'Lưu ý: ưu tiên hiểu đúng đề toán.$docBlock';
   }
 
   return text;

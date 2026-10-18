@@ -273,7 +273,7 @@ class MathChatMessage {
   final String? imageBase64;
   final String? imageMimeType;
 
-  /// Extracted PDF/Word text kept so follow-up turns still see the đề bài.
+  /// Legacy document text (old chats); math UI no longer attaches Word/PDF.
   final String? documentName;
   final String? documentText;
 
