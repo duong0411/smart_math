@@ -50,7 +50,6 @@ void main() {
     });
 
     test('poly multiply prompts keep variable x (not substituted value)', () {
-      // Sample many draws; the buggy form was "3 x(3 + 4) khi x = 3".
       var sawPoly = false;
       for (var i = 0; i < 200; i++) {
         final q = GradeQuestionBank.next(8);
@@ -70,6 +69,69 @@ void main() {
         );
       }
       expect(sawPoly, isTrue, reason: 'expected at least one poly multiply draw');
+    });
+
+    test('each grade only uses its KNTT chapter labels', () {
+      for (final grade in SupportedGrades.all) {
+        final allowed = GradeQuestionBank.knttChaptersByGrade[grade]!;
+        for (var i = 0; i < 120; i++) {
+          final q = GradeQuestionBank.next(grade);
+          expect(
+            q.chapter,
+            isNotNull,
+            reason: 'grade $grade missing chapter: ${q.prompt}',
+          );
+          expect(
+            allowed.contains(q.chapter),
+            isTrue,
+            reason:
+                'grade $grade got foreign chapter "${q.chapter}": ${q.prompt}',
+          );
+        }
+      }
+    });
+
+    test('grade 8 never yields exclusive grade-9 topics', () {
+      const banned = {
+        'Ch1 · Hệ PT',
+        'Ch2 · Bất phương trình',
+        'Ch3 · Căn bậc hai',
+        'Ch3 · Căn bậc ba',
+        'Ch4 · Lượng giác',
+        'Ch5 · Đường tròn',
+        'Ch6 · PT bậc hai',
+        'Ch6 · Hàm số y = ax²',
+        'Ch10 · Hình trụ',
+      };
+      for (var i = 0; i < 200; i++) {
+        final q = GradeQuestionBank.next(8);
+        expect(
+          banned.contains(q.chapter),
+          isFalse,
+          reason: 'lớp 8 dính lớp 9: ${q.chapter} · ${q.prompt}',
+        );
+      }
+    });
+
+    test('grade 9 never yields exclusive grade-8 algebra/geometry chapters', () {
+      const banned = {
+        'Ch1 · Đa thức',
+        'Ch2 · Hằng đẳng thức',
+        'Ch2 · Phân tích nhân tử',
+        'Ch6 · Phân thức',
+        'Ch7 · PT bậc nhất',
+        'Ch7 · Hàm số bậc nhất',
+        'Ch9 · Pythagore',
+        'Ch10 · Hình chóp',
+      };
+      for (var i = 0; i < 200; i++) {
+        final q = GradeQuestionBank.next(9);
+        expect(
+          banned.contains(q.chapter),
+          isFalse,
+          reason: 'lớp 9 dính lớp 8: ${q.chapter} · ${q.prompt}',
+        );
+      }
     });
   });
 }

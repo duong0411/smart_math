@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:eduself_study_app/shared/utils/supported_grades.dart';
 
-/// Câu hỏi Toán THCS (lớp 6–9).
+/// Câu hỏi Toán THCS bám SGK **Kết nối tri thức với cuộc sống** (lớp 6–9).
 /// Chỉ dùng đáp án số nguyên để phù hợp chọn đáp án trong game.
 class GradeQuestion {
   const GradeQuestion({
@@ -22,6 +22,53 @@ class GradeQuestion {
 
 abstract final class GradeQuestionBank {
   static final _rng = Random();
+
+  /// Chapters đúng KNTT theo lớp — dùng để kiểm thử không lẫn kiến thức.
+  static const knttChaptersByGrade = <int, Set<String>>{
+    6: {
+      'Số nguyên',
+      'Phần trăm',
+      'Tỉ lệ',
+      'Phương trình',
+      'Hình phẳng',
+    },
+    7: {
+      'Biểu thức',
+      'Lũy thừa',
+      'Tam giác',
+      'Tỉ lệ thức',
+      'Căn bậc hai số học',
+      'Đa thức một biến',
+    },
+    8: {
+      'Ch1 · Đa thức',
+      'Ch2 · Hằng đẳng thức',
+      'Ch2 · Phân tích nhân tử',
+      'Ch3 · Tứ giác',
+      'Ch4 · Đường trung bình',
+      'Ch5 · Thống kê',
+      'Ch6 · Phân thức',
+      'Ch7 · PT bậc nhất',
+      'Ch7 · Lập phương trình',
+      'Ch7 · Hàm số bậc nhất',
+      'Ch7 · Hệ số góc',
+      'Ch8 · Xác suất',
+      'Ch9 · Đồng dạng',
+      'Ch9 · Pythagore',
+      'Ch10 · Hình chóp',
+    },
+    9: {
+      'Ch1 · Hệ PT',
+      'Ch2 · Bất phương trình',
+      'Ch3 · Căn bậc hai',
+      'Ch3 · Căn bậc ba',
+      'Ch4 · Lượng giác',
+      'Ch5 · Đường tròn',
+      'Ch6 · PT bậc hai',
+      'Ch6 · Hàm số y = ax²',
+      'Ch10 · Hình trụ',
+    },
+  };
 
   /// Câu hỏi ngẫu nhiên theo lớp 6–9 (ngoài khoảng → lớp 8).
   static GradeQuestion next(int gradeLevel) {
@@ -55,48 +102,52 @@ abstract final class GradeQuestionBank {
   @Deprecated('Dùng GradeQuestionBank.next(8)')
   static GradeQuestion nextGrade8() => next(8);
 
-  static String bandLabel(int gradeLevel) => 'THCS';
+  static String bandLabel(int gradeLevel) => 'KNTT';
 
   static String curriculumHint(int gradeLevel) {
     final g = SupportedGrades.normalize(gradeLevel);
     return switch (g) {
-      6 => 'Số nguyên, tỉ lệ, phần trăm, phương trình đơn giản.',
-      7 => 'Biểu thức, tỉ lệ thức, góc trong tam giác, lũy thừa.',
-      8 => 'Đa thức, hằng đẳng thức, PT bậc nhất, Pythagore…',
-      _ => 'Căn bậc hai, PT bậc hai, hệ PT, đường tròn.',
+      6 => 'SGK KNTT lớp 6: số nguyên, tỉ lệ, phần trăm, hình phẳng.',
+      7 =>
+        'SGK KNTT lớp 7: biểu thức, lũy thừa, tỉ lệ thức, tam giác, căn bậc hai số học.',
+      8 =>
+        'SGK KNTT lớp 8: đa thức, hằng đẳng thức, phân thức, PT/hàm bậc nhất, đồng dạng, Pythagore, hình chóp.',
+      _ =>
+        'SGK KNTT lớp 9: hệ PT, căn, lượng giác, đường tròn, PT bậc hai, hình trụ.',
     };
   }
 
   static List<GradeQuestion Function()> _generatorsFor(int grade) {
     return switch (grade) {
-      6 => [
-          _intAdd,
-          _intMul,
-          _percentOf,
-          _ratioValue,
-          _simpleLinear,
-        ],
-      7 => [
-          _exprValue,
-          _powerValue,
-          _triangleAngleSum,
-          _proportion,
-          _simpleLinear,
-          _intMul,
-        ],
-      9 => [
-          _sqrtPerfect,
-          _quadraticRootSum,
-          _systemSum,
-          _circleCircumferenceCoeff,
-          _pythagoreanHyp,
-          _pythagoreanLeg,
-          _identityDiffSquares,
-        ],
+      6 => _grade6Generators,
+      7 => _grade7Generators,
+      9 => _grade9Generators,
       _ => _grade8Generators,
     };
   }
 
+  // —— Lớp 6 (KNTT) ——
+  static final List<GradeQuestion Function()> _grade6Generators = [
+    _intAdd,
+    _intMul,
+    _percentOf,
+    _ratioValue,
+    _simpleLinear,
+    _rectanglePerimeterG6,
+    _squareAreaG6,
+  ];
+
+  // —— Lớp 7 (KNTT) ——
+  static final List<GradeQuestion Function()> _grade7Generators = [
+    _exprValue,
+    _powerValue,
+    _triangleAngleSum,
+    _proportion,
+    _sqrtPerfectG7,
+    _monoDegreeOneVar,
+  ];
+
+  // —— Lớp 8 (KNTT) ——
   static final List<GradeQuestion Function()> _grade8Generators = [
     _monomialDegree,
     _polyAddCoeff,
@@ -108,7 +159,7 @@ abstract final class GradeQuestionBank {
     _rectanglePerimeter,
     _rhombusPerimeter,
     _parallelogramArea,
-    _squareDiagonalRelated,
+    _squareAreaG8,
     _thalesMidline,
     _statsMean,
     _statsRange,
@@ -126,7 +177,24 @@ abstract final class GradeQuestionBank {
     _pyramidEdges,
   ];
 
-  // —— Lớp 6–7 ——
+  // —— Lớp 9 (KNTT) —— chỉ chương lớp 9, không lấy trọng tâm lớp 8
+  static final List<GradeQuestion Function()> _grade9Generators = [
+    _systemSum,
+    _inequalityMaxInt,
+    _sqrtPerfectG9,
+    _cubeRootPerfect,
+    _trigTan45,
+    _trigSin30Times,
+    _circleCircumferenceCoeff,
+    _circleDiameter,
+    _quadraticRootSum,
+    _quadraticProduct,
+    _parabolaValue,
+    _cylinderLateralCoeff,
+  ];
+
+  // ========== Lớp 6 ==========
+
   static GradeQuestion _percentOf() {
     final p = [10, 20, 25, 50][_rng.nextInt(4)];
     final whole = [20, 40, 60, 80, 100][_rng.nextInt(5)];
@@ -186,6 +254,29 @@ abstract final class GradeQuestionBank {
     );
   }
 
+  static GradeQuestion _rectanglePerimeterG6() {
+    final l = 5 + _rng.nextInt(12);
+    final w = 3 + _rng.nextInt(10);
+    return _q(
+      'Chu vi hình chữ nhật kích thước $l × $w là?',
+      2 * (l + w),
+      chapter: 'Hình phẳng',
+      hint: 'Chu vi HCN = 2(dài + rộng).',
+    );
+  }
+
+  static GradeQuestion _squareAreaG6() {
+    final a = 3 + _rng.nextInt(10);
+    return _q(
+      'Diện tích hình vuông cạnh $a là?',
+      a * a,
+      chapter: 'Hình phẳng',
+      hint: 'S = a².',
+    );
+  }
+
+  // ========== Lớp 7 ==========
+
   static GradeQuestion _exprValue() {
     final a = 1 + _rng.nextInt(8);
     final b = 1 + _rng.nextInt(8);
@@ -238,7 +329,30 @@ abstract final class GradeQuestionBank {
     );
   }
 
-  // —— Lớp 8 (SGK KNTT) ——
+  /// KNTT lớp 7 Ch2 — căn bậc hai số học (số chính phương).
+  static GradeQuestion _sqrtPerfectG7() {
+    final a = 2 + _rng.nextInt(12);
+    return _q(
+      'Căn bậc hai số học của ${a * a} bằng?',
+      a,
+      chapter: 'Căn bậc hai số học',
+      hint: '√(a²) = a với a > 0.',
+    );
+  }
+
+  static GradeQuestion _monoDegreeOneVar() {
+    final n = 1 + _rng.nextInt(5);
+    final a = 2 + _rng.nextInt(6);
+    return _q(
+      'Bậc của đa thức ${a}x^$n (một biến) là?',
+      n,
+      chapter: 'Đa thức một biến',
+      hint: 'Bậc = số mũ cao nhất.',
+    );
+  }
+
+  // ========== Lớp 8 ==========
+
   static GradeQuestion _monomialDegree() {
     final a = 2 + _rng.nextInt(5);
     final b = 1 + _rng.nextInt(4);
@@ -267,7 +381,6 @@ abstract final class GradeQuestionBank {
     final a = 2 + _rng.nextInt(6);
     final b = 1 + _rng.nextInt(5);
     final x = 1 + _rng.nextInt(5);
-    // Keep the variable name `x` in the expression; only substitute after "khi x =".
     return _q(
       'Giá trị ${a}x(x + $b) khi x = $x là?',
       a * x * (x + b),
@@ -282,7 +395,7 @@ abstract final class GradeQuestionBank {
     return _q(
       '($a − $b)($a + $b) = ?',
       a * a - b * b,
-      chapter: 'Hằng đẳng thức',
+      chapter: 'Ch2 · Hằng đẳng thức',
       hint: 'A² − B² = (A − B)(A + B).',
     );
   }
@@ -293,7 +406,7 @@ abstract final class GradeQuestionBank {
     return _q(
       '($a + $b)² = ?',
       (a + b) * (a + b),
-      chapter: 'Hằng đẳng thức',
+      chapter: 'Ch2 · Hằng đẳng thức',
       hint: '(A + B)² = A² + 2AB + B².',
     );
   }
@@ -304,7 +417,7 @@ abstract final class GradeQuestionBank {
     return _q(
       '($a − $b)² = ?',
       (a - b) * (a - b),
-      chapter: 'Hằng đẳng thức',
+      chapter: 'Ch2 · Hằng đẳng thức',
       hint: '(A − B)² = A² − 2AB + B².',
     );
   }
@@ -316,7 +429,7 @@ abstract final class GradeQuestionBank {
     return _q(
       'Đặt nhân tử chung của ${a}x + $b (số nguyên dương lớn nhất) là?',
       g,
-      chapter: 'Phân tích nhân tử',
+      chapter: 'Ch2 · Phân tích nhân tử',
       hint: 'Tìm ước chung lớn nhất của các hệ số.',
     );
   }
@@ -338,7 +451,7 @@ abstract final class GradeQuestionBank {
     return _q(
       'Chu vi hình chữ nhật kích thước $l × $w là?',
       2 * (l + w),
-      chapter: 'Tứ giác',
+      chapter: 'Ch3 · Tứ giác',
       hint: 'Chu vi HCN = 2(dài + rộng).',
     );
   }
@@ -348,7 +461,7 @@ abstract final class GradeQuestionBank {
     return _q(
       'Chu vi hình thoi cạnh $side là?',
       4 * side,
-      chapter: 'Tứ giác',
+      chapter: 'Ch3 · Tứ giác',
       hint: 'Hình thoi có 4 cạnh bằng nhau.',
     );
   }
@@ -359,17 +472,17 @@ abstract final class GradeQuestionBank {
     return _q(
       'Diện tích hình bình hành đáy $base, chiều cao $height là?',
       base * height,
-      chapter: 'Tứ giác',
+      chapter: 'Ch3 · Tứ giác',
       hint: 'S = đáy × chiều cao.',
     );
   }
 
-  static GradeQuestion _squareDiagonalRelated() {
+  static GradeQuestion _squareAreaG8() {
     final a = 3 + _rng.nextInt(10);
     return _q(
       'Diện tích hình vuông cạnh $a là?',
       a * a,
-      chapter: 'Tứ giác',
+      chapter: 'Ch3 · Tứ giác',
       hint: 'Hình vuông: S = a².',
     );
   }
@@ -379,7 +492,7 @@ abstract final class GradeQuestionBank {
     return _q(
       'Đường trung bình của tam giác song song cạnh đáy $base thì dài bao nhiêu?',
       base ~/ 2,
-      chapter: 'Đường trung bình',
+      chapter: 'Ch4 · Đường trung bình',
       hint: 'Đường trung bình = 1/2 cạnh thứ ba.',
     );
   }
@@ -396,7 +509,7 @@ abstract final class GradeQuestionBank {
     return _q(
       'Trung bình cộng của $a, $b, $c, $d2 là?',
       mean,
-      chapter: 'Thống kê',
+      chapter: 'Ch5 · Thống kê',
       hint: 'Trung bình = tổng chia số số liệu.',
     );
   }
@@ -407,7 +520,7 @@ abstract final class GradeQuestionBank {
     return _q(
       'Khoảng biến thiên của ${values.join(', ')} là?',
       range,
-      chapter: 'Thống kê',
+      chapter: 'Ch5 · Thống kê',
       hint: 'Khoảng biến thiên = max − min.',
     );
   }
@@ -416,9 +529,9 @@ abstract final class GradeQuestionBank {
     final k = 2 + _rng.nextInt(6);
     final a = 2 + _rng.nextInt(8);
     return _q(
-      'Rút gọn phân số ${k * a}/$k được tử số (mẫu = 1) là?',
+      'Rút gọn phân thức ${k * a}/$k được tử số (mẫu = 1) là?',
       a,
-      chapter: 'Phân thức',
+      chapter: 'Ch6 · Phân thức',
       hint: 'Chia tử và mẫu cho ước chung.',
     );
   }
@@ -430,7 +543,7 @@ abstract final class GradeQuestionBank {
     return _q(
       'Tử số của $a/$d + $b/$d (sau khi cùng mẫu $d) là?',
       a + b,
-      chapter: 'Phân thức',
+      chapter: 'Ch6 · Phân thức',
       hint: 'Cùng mẫu: cộng tử, giữ mẫu.',
     );
   }
@@ -442,7 +555,7 @@ abstract final class GradeQuestionBank {
     return _q(
       '${a}x = ${a * x}  ⇒  x = ?',
       x,
-      chapter: 'PT bậc nhất',
+      chapter: 'Ch7 · PT bậc nhất',
       hint: 'Chia cả hai vế cho hệ số của x.',
     );
   }
@@ -456,7 +569,7 @@ abstract final class GradeQuestionBank {
     return _q(
       '${a}x $bStr = $c  ⇒  x = ?',
       x,
-      chapter: 'PT bậc nhất',
+      chapter: 'Ch7 · PT bậc nhất',
       hint: 'Chuyển vế số hạng tự do rồi chia.',
     );
   }
@@ -468,7 +581,7 @@ abstract final class GradeQuestionBank {
     return _q(
       'Tuổi con là x, bố hơn con $diff tuổi, tổng hai tuổi = $total. Tìm x.',
       child,
-      chapter: 'Lập phương trình',
+      chapter: 'Ch7 · Lập phương trình',
       hint: 'x + (x + $diff) = $total.',
     );
   }
@@ -482,7 +595,7 @@ abstract final class GradeQuestionBank {
     return _q(
       'y = ${a}x $bStr · khi x = $x thì y = ?',
       a * x + b,
-      chapter: 'Hàm số bậc nhất',
+      chapter: 'Ch7 · Hàm số bậc nhất',
       hint: 'Thay x vào biểu thức hàm số.',
     );
   }
@@ -492,7 +605,7 @@ abstract final class GradeQuestionBank {
     return _q(
       'Đường thẳng y = ${a}x − 2 có hệ số góc bằng?',
       a,
-      chapter: 'Hệ số góc',
+      chapter: 'Ch7 · Hệ số góc',
       hint: 'Với y = ax + b, hệ số góc là a.',
     );
   }
@@ -503,7 +616,7 @@ abstract final class GradeQuestionBank {
     return _q(
       'Có $total kết quả khả dĩ, xác suất = $fav/$total. Số kết quả thuận lợi?',
       fav,
-      chapter: 'Xác suất',
+      chapter: 'Ch8 · Xác suất',
       hint: 'P = (số thuận lợi) / (số khả dĩ).',
     );
   }
@@ -514,7 +627,7 @@ abstract final class GradeQuestionBank {
     return _q(
       'Hai tam giác đồng dạng tỉ số $k : 1. Cạnh nhỏ $small thì cạnh tương ứng?',
       small * k,
-      chapter: 'Đồng dạng',
+      chapter: 'Ch9 · Đồng dạng',
       hint: 'Cạnh tương ứng tỉ lệ với tỉ số đồng dạng.',
     );
   }
@@ -533,15 +646,15 @@ abstract final class GradeQuestionBank {
       return _q(
         'Tam giác vuông: cạnh góc vuông ${t[1]}, cạnh huyền ${t[2]}. Cạnh góc vuông còn lại?',
         t[0],
-        chapter: 'Pythagore',
-        hint: 'a² + b² = c².',
+        chapter: 'Ch9 · Pythagore',
+        hint: 'a² + b² = c² (KNTT lớp 8).',
       );
     }
     return _q(
       'Tam giác vuông: cạnh góc vuông ${t[0]}, cạnh huyền ${t[2]}. Cạnh góc vuông còn lại?',
       t[1],
-      chapter: 'Pythagore',
-      hint: 'a² + b² = c².',
+      chapter: 'Ch9 · Pythagore',
+      hint: 'a² + b² = c² (KNTT lớp 8).',
     );
   }
 
@@ -557,8 +670,8 @@ abstract final class GradeQuestionBank {
     return _q(
       'Tam giác vuông có hai cạnh góc vuông ${t[0]} và ${t[1]}. Cạnh huyền?',
       t[2],
-      chapter: 'Pythagore',
-      hint: 'c = √(a² + b²).',
+      chapter: 'Ch9 · Pythagore',
+      hint: 'c² = a² + b² (không dùng căn thức lớp 9).',
     );
   }
 
@@ -568,31 +681,103 @@ abstract final class GradeQuestionBank {
       return _q(
         'Hình chóp tam giác đều có bao nhiêu cạnh?',
         6,
-        chapter: 'Hình khối',
+        chapter: 'Ch10 · Hình chóp',
         hint: 'Đáy 3 cạnh + 3 cạnh bên.',
       );
     }
     return _q(
       'Hình chóp tứ giác đều có bao nhiêu cạnh?',
       8,
-      chapter: 'Hình khối',
+      chapter: 'Ch10 · Hình chóp',
       hint: 'Đáy 4 cạnh + 4 cạnh bên.',
     );
   }
 
-  // —— Lớp 9+ ——
-  static GradeQuestion _sqrtPerfect() {
+  // ========== Lớp 9 ==========
+
+  static GradeQuestion _systemSum() {
+    final x = 1 + _rng.nextInt(9);
+    final y = 1 + _rng.nextInt(9);
+    return _q(
+      'Hệ: x + y = ${x + y}, x − y = ${x - y}. Tìm x.',
+      x,
+      chapter: 'Ch1 · Hệ PT',
+      hint: 'Cộng hai phương trình: 2x = …',
+    );
+  }
+
+  static GradeQuestion _inequalityMaxInt() {
+    final bound = 3 + _rng.nextInt(12);
+    return _q(
+      'Nghiệm nguyên lớn nhất của x < $bound là?',
+      bound - 1,
+      chapter: 'Ch2 · Bất phương trình',
+      hint: 'x thuộc các số nguyên nhỏ hơn $bound.',
+    );
+  }
+
+  static GradeQuestion _sqrtPerfectG9() {
     final a = 2 + _rng.nextInt(12);
     return _q(
       '√${a * a} = ?',
       a,
-      chapter: 'Căn bậc hai',
+      chapter: 'Ch3 · Căn bậc hai',
       hint: '√(a²) = |a| (a > 0).',
     );
   }
 
+  static GradeQuestion _cubeRootPerfect() {
+    final a = 2 + _rng.nextInt(5);
+    return _q(
+      '∛${a * a * a} = ?',
+      a,
+      chapter: 'Ch3 · Căn bậc ba',
+      hint: '∛(a³) = a.',
+    );
+  }
+
+  static GradeQuestion _trigTan45() {
+    return _q(
+      'tan 45° = ?',
+      1,
+      chapter: 'Ch4 · Lượng giác',
+      hint: 'tan 45° = 1.',
+    );
+  }
+
+  static GradeQuestion _trigSin30Times() {
+    final k = 2 + _rng.nextInt(10);
+    // sin 30° = 1/2 → k · sin 30° = k/2; chỉ lấy k chẵn
+    final even = k.isEven ? k : k + 1;
+    return _q(
+      '$even × sin 30° = ?',
+      even ~/ 2,
+      chapter: 'Ch4 · Lượng giác',
+      hint: 'sin 30° = 1/2.',
+    );
+  }
+
+  static GradeQuestion _circleCircumferenceCoeff() {
+    final r = 2 + _rng.nextInt(12);
+    return _q(
+      'Chu vi đường tròn bán kính $r bằng kπ. k = ?',
+      2 * r,
+      chapter: 'Ch5 · Đường tròn',
+      hint: 'C = 2πr.',
+    );
+  }
+
+  static GradeQuestion _circleDiameter() {
+    final r = 2 + _rng.nextInt(15);
+    return _q(
+      'Đường kính đường tròn bán kính $r bằng?',
+      2 * r,
+      chapter: 'Ch5 · Đường tròn',
+      hint: 'd = 2r.',
+    );
+  }
+
   static GradeQuestion _quadraticRootSum() {
-    // (x-p)(x-q)=0 → tổng nghiệm p+q
     final p = -5 + _rng.nextInt(11);
     final q = -5 + _rng.nextInt(11);
     if (p == 0 && q == 0) return _quadraticRootSum();
@@ -603,30 +788,47 @@ abstract final class GradeQuestionBank {
     return _q(
       'Tổng nghiệm của x² $bStr x $cStr = 0 là?',
       p + q,
-      chapter: 'PT bậc hai',
-      hint: 'Với x² − Sx + P = 0, tổng nghiệm = S.',
+      chapter: 'Ch6 · PT bậc hai',
+      hint: 'Định lí Viète (KNTT lớp 9): tổng nghiệm = −(hệ số của x).',
     );
   }
 
-  static GradeQuestion _systemSum() {
-    final x = 1 + _rng.nextInt(9);
-    final y = 1 + _rng.nextInt(9);
+  static GradeQuestion _quadraticProduct() {
+    final p = -5 + _rng.nextInt(11);
+    final q = -5 + _rng.nextInt(11);
+    if (p == 0 && q == 0) return _quadraticProduct();
+    final b = -(p + q);
+    final c = p * q;
+    final bStr = b >= 0 ? '+ $b' : '− ${-b}';
+    final cStr = c >= 0 ? '+ $c' : '− ${-c}';
     return _q(
-      'Hệ: x + y = ${x + y}, x − y = ${x - y}. Tìm x.',
-      x,
-      chapter: 'Hệ PT',
-      hint: 'Cộng hai phương trình: 2x = …',
+      'Tích nghiệm của x² $bStr x $cStr = 0 là?',
+      p * q,
+      chapter: 'Ch6 · PT bậc hai',
+      hint: 'Định lí Viète: tích nghiệm = c.',
     );
   }
 
-  static GradeQuestion _circleCircumferenceCoeff() {
-    // Chu vi = 2πr → hỏi 2r (hệ số của π)
-    final r = 2 + _rng.nextInt(12);
+  static GradeQuestion _parabolaValue() {
+    final a = 1 + _rng.nextInt(4);
+    final x = 1 + _rng.nextInt(5);
     return _q(
-      'Chu vi đường tròn bán kính $r bằng kπ. k = ?',
-      2 * r,
-      chapter: 'Đường tròn',
-      hint: 'C = 2πr.',
+      'y = ${a}x² khi x = $x thì y = ?',
+      a * x * x,
+      chapter: 'Ch6 · Hàm số y = ax²',
+      hint: 'Thay x vào y = ax².',
+    );
+  }
+
+  static GradeQuestion _cylinderLateralCoeff() {
+    // Sxq = 2πrh → hỏi hệ số của π khi r,h nguyên
+    final r = 2 + _rng.nextInt(8);
+    final h = 2 + _rng.nextInt(10);
+    return _q(
+      'Diện tích xung quanh hình trụ bán kính $r, chiều cao $h bằng kπ. k = ?',
+      2 * r * h,
+      chapter: 'Ch10 · Hình trụ',
+      hint: 'Sxq = 2πrh.',
     );
   }
 
