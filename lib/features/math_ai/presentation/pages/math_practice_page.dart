@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:eduself_study_app/core/ai/gemini_client.dart';
 import 'package:eduself_study_app/core/error/result.dart';
+import 'package:eduself_study_app/features/math_ai/domain/literature_scope.dart';
 import 'package:eduself_study_app/features/math_ai/infrastructure/math_local_store.dart';
 import 'package:eduself_study_app/features/math_ai/presentation/providers/math_ai_providers.dart';
 import 'package:eduself_study_app/shared/utils/extract_study_document_text.dart';
@@ -104,19 +105,20 @@ class _MathPracticePageState extends ConsumerState<MathPracticePage> {
       gradeLevel: grade,
       userMessage: '''
 Bạn là trợ lý EduSelf Ngữ Văn AI dành cho học sinh THCS.
-Hãy tạo ĐÚNG 1 bài tập Ngữ văn lớp $grade (đọc hiểu / tiếng Việt / tập làm văn theo chương trình GDPT).
-Yêu cầu chủ đề: $topic (Nếu người dùng nhập chủ đề không liên quan môn Ngữ văn, hãy tự động bỏ qua và tạo 1 bài Ngữ văn THCS chuẩn mực).
+Hãy tạo ĐÚNG 1 bài tập Ngữ văn lớp $grade theo sách Kết nối tri thức với cuộc sống.
+${LiteratureScope.curriculumFor(grade)}
+Yêu cầu chủ đề: $topic (Nếu chủ đề là Toán, Lý, Hóa, Sinh, Sử, Địa, Tin hoặc Tiếng Anh thì BỎ QUA và tạo bài Ngữ văn đúng lớp).
 
 Yêu cầu chất lượng:
-- Đề bài rõ ràng, vừa sức học sinh lớp $grade, có thể chấm được (có đáp án hoặc tiêu chí đánh giá rõ).
-- Trình bày sư phạm, nêu đầy đủ yêu cầu (số chữ / hình thức nếu là làm văn).
-- Không tạo đề Toán, Lý, Hóa hay môn khác.
+- Đề chỉ hỏi đọc hiểu, tiếng Việt hoặc tập làm văn. Có thể chấm đúng/sai trong môn Ngữ văn.
+- Không đưa công thức, bài tính, thí nghiệm, bản đồ, mốc sử hay câu hỏi môn khác vào đề hoặc vào phương án.
+- Vừa sức lớp $grade. Nếu là làm văn, nêu số chữ và hình thức.
 
 Trả lời CHỈ bằng 1 đối tượng JSON duy nhất (không có markdown code fence):
 {"topic":"Tên chủ đề Ngữ văn","question":"Đề bài Ngữ văn đầy đủ bằng tiếng Việt"}
 ''',
       extraSystemContext:
-          'Chế độ luyện tập EduSelf Ngữ Văn AI: Chỉ tạo đề bài môn Ngữ văn lớp $grade. Nghiêm cấm tạo nội dung ngoài lề môn Ngữ văn.',
+          'Chế độ tạo đề Ngữ văn lớp $grade, sách Kết nối tri thức. ${LiteratureScope.hardRule}',
     );
 
     if (!mounted) return;
@@ -129,9 +131,17 @@ Trả lời CHỈ bằng 1 đối tượng JSON duy nhất (không có markdown 
           AppToast.error('AI trả về định dạng không hợp lệ. Thử lại.');
           return;
         }
+        final question = (parsed['question'] as String?) ?? value;
+        final topicName = parsed['topic'] as String? ?? topic;
+        if (LiteratureScope.leaksOtherSubject('$topicName $question')) {
+          AppToast.error(
+            'Đề vừa tạo lạc sang môn khác. EduSelf chỉ ra đề Ngữ văn THCS. Thử lại nhé.',
+          );
+          return;
+        }
         setState(() {
-          _topic = parsed['topic'] as String? ?? topic;
-          _question = parsed['question'] as String? ?? value;
+          _topic = topicName;
+          _question = question;
         });
       case FailureResult(:final failure):
         AppToast.error(failure.message);
@@ -258,6 +268,18 @@ Trả lời CHỈ bằng 1 đối tượng JSON duy nhất (không có markdown 
       return;
     }
 
+    final submitted = '$answer ${_answerDocumentText ?? ''}';
+    final offSubject = LiteratureScope.leaksOtherSubject(submitted) ||
+        (_question != null && LiteratureScope.leaksOtherSubject(_question!));
+    if (offSubject) {
+      setState(() {
+        _correct = false;
+        _feedback = LiteratureScope.offSubjectFeedback;
+      });
+      AppToast.info('Chỉ chấm bài Ngữ văn THCS.');
+      return;
+    }
+
     setState(() => _busy = true);
 
     final answerLabel = answer.isEmpty
@@ -300,12 +322,14 @@ BƯỚC 1: KIỂM TRA TÍNH HỢP LỆ VÀ LIÊN QUAN (ĐIỀU KIỆN TIÊN QUY�
      => "feedback": "Câu trả lời không liên quan đến đề Ngữ văn. Em hãy làm bài cẩn thận theo yêu cầu đề nhé!"
      => DỪNG LẠI NGAY, TUYỆT ĐỐI KHÔNG CHẤM ĐÚNG!
 
-BƯỚC 2: XÁC ĐỊNH ĐÁP ÁN / TIÊU CHÍ CHUẨN:
-- Tự xác định đáp án đúng (trắc nghiệm / điền từ / nhận biết) hoặc tiêu chí chấm (làm văn: đủ ý, đúng đề, bố cục, diễn đạt).
+BƯỚC 2: XÁC ĐỊNH ĐÁP ÁN CHUẨN TRONG MÔN NGỮ VĂN:
+- Đáp án chuẩn chỉ thuộc đọc hiểu, tiếng Việt hoặc tập làm văn, sách Kết nối tri thức lớp $_grade.
+- ${LiteratureScope.curriculumFor(_grade)}
+- Nếu đề thực chất là Toán / Lý / Hóa / Sinh / Sử / Địa / Tin / Tiếng Anh: DỪNG, "correct": false, không giải môn đó.
 
 BƯỚC 3: ĐỐI CHIẾU VÀ ĐÁNH GIÁ ĐÚNG / SAI:
-- ĐẶT "correct": true CHỈ KHI bài làm đáp ứng đúng yêu cầu đề ở mức đạt.
-- ĐẶT "correct": false KHI lạc đề, sai ý chính, thiếu bố cục nghiêm trọng, hoặc sai kiến thức tiếng Việt/văn học.
+- ĐẶT "correct": true CHỈ KHI bài làm đạt yêu cầu đề Ngữ văn.
+- ĐẶT "correct": false KHI lạc đề, sai tác giả/tác phẩm/biện pháp tu từ, thiếu bố cục nghiêm trọng, hoặc bài làm là lời giải môn khác (kể cả lời giải môn đó đúng).
 - Trong "feedback": Chỉ rõ ưu điểm/hạn chế, gợi ý cách sửa (chưa vội viết hộ toàn bài nếu học sinh chưa yêu cầu).
 
 ĐỊNH DẠNG ĐẦU RA BẮT BUỘC:
@@ -321,7 +345,8 @@ Trả lời CHỈ bằng 1 đối tượng JSON duy nhất (không có markdown 
       documentText: _answerDocumentText,
       documentName: _answerDocumentName,
       extraSystemContext:
-          'Chế độ chấm bài luyện tập Ngữ văn: BẮT BUỘC kiểm tra tính liên quan của ảnh/text trước. Nếu ảnh/text không liên quan hoặc sai yêu cầu đề, BẮT BUỘC đặt correct = false. Tuyệt đối không chấm đúng cho ảnh hoặc câu trả lời không liên quan.',
+          'Chế độ chấm Ngữ văn lớp $_grade. ${LiteratureScope.hardRule} '
+          'Nếu bài làm là môn khác thì correct = false, không giải bài đó.',
     );
 
     if (!mounted) return;
@@ -329,8 +354,14 @@ Trả lời CHỈ bằng 1 đối tượng JSON duy nhất (không có markdown 
     switch (result) {
       case Success(:final value):
         final parsed = _parseJson(value);
-        final correct = parsed?['correct'] == true;
-        final feedback = (parsed?['feedback'] as String?) ?? value;
+        final modelCorrect = parsed?['correct'] == true;
+        final rawFeedback = (parsed?['feedback'] as String?) ?? value;
+        final blocked = LiteratureScope.leaksOtherSubject(answer) ||
+            LiteratureScope.leaksOtherSubject(_question ?? '') ||
+            LiteratureScope.leaksOtherSubject(rawFeedback);
+        final correct = modelCorrect && !blocked;
+        final feedback =
+            blocked ? LiteratureScope.offSubjectFeedback : rawFeedback;
         final storedAnswer = () {
           if (answer.isNotEmpty) {
             final extras = <String>[

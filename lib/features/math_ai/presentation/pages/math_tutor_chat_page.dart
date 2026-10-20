@@ -247,7 +247,8 @@ class _MathTutorChatPageState extends ConsumerState<MathTutorChatPage> {
         documentText: documentText,
         documentName: documentName,
         extraSystemContext:
-            'Gia sư Ngữ văn: Chỉ hỗ trợ môn Ngữ văn THCS (đọc hiểu, tiếng Việt, tập làm văn). '
+            'Gia sư Ngữ văn: Chỉ hỗ trợ Ngữ văn THCS lớp 6–9, sách Kết nối tri thức (đọc hiểu, tiếng Việt, tập làm văn). '
+            'Không xác nhận đúng/sai cho bài môn khác và không giải các môn ấy. '
             'Nếu học sinh hỏi nội dung không liên quan hoặc gửi ảnh không liên quan đến Ngữ văn (ảnh người, phong cảnh, đồ vật, thú cưng, meme, ảnh rác...), '
             'hãy từ chối lịch sự, ngắn gọn và nhắc học sinh gửi bài tập Ngữ văn. '
             'Tuyệt đối không trả lời lan man hoặc tiếp chuyện ngoài lề.',

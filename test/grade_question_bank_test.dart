@@ -1,3 +1,4 @@
+import 'package:eduself_study_app/features/math_ai/domain/literature_scope.dart';
 import 'package:eduself_study_app/features/math_games/domain/grade_question_bank.dart';
 import 'package:eduself_study_app/shared/utils/supported_grades.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -40,6 +41,35 @@ void main() {
           );
         }
       }
+    });
+
+    test('ngân hàng không lẫn đề hoặc đáp án môn khác', () {
+      for (final grade in SupportedGrades.all) {
+        final texts = GradeQuestionBank.surfaceTexts(grade).toList();
+        expect(texts, isNotEmpty);
+        for (final text in texts) {
+          expect(
+            LiteratureScope.leaksOtherSubject(text),
+            isFalse,
+            reason: 'lớp $grade lẫn môn khác: $text',
+          );
+        }
+      }
+    });
+
+    test('bài môn khác không được tính là đúng', () {
+      expect(
+        LiteratureScope.leaksOtherSubject('Giải phương trình x + 2 = 5'),
+        isTrue,
+      );
+      expect(
+        LiteratureScope.leaksOtherSubject('Thánh Gióng là truyền thuyết'),
+        isFalse,
+      );
+      expect(
+        LiteratureScope.leaksOtherSubject('Nhân hóa trong câu thơ'),
+        isFalse,
+      );
     });
 
     test('out-of-range grades fall back into 6–9 bank', () {

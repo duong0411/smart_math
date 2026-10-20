@@ -1,4 +1,5 @@
 import 'package:eduself_study_app/core/ai/gemini_client.dart';
+import 'package:eduself_study_app/features/math_ai/domain/literature_scope.dart';
 import 'package:eduself_study_app/core/config/app_config.dart';
 import 'package:eduself_study_app/core/error/result.dart';
 import 'package:eduself_study_app/core/settings/app_settings_store.dart';
@@ -158,8 +159,8 @@ Future<Result<String>> askMathAi(
   if (effectiveGrade != null) {
     profileBlock.writeln('Lớp: $effectiveGrade');
     profileBlock.writeln(
-      'Chỉ dạy / ra đề / giải thích phù hợp chương trình Ngữ văn lớp $effectiveGrade '
-      '(THCS, GDPT Việt Nam). Điều chỉnh độ khó và thuật ngữ theo lớp này.',
+      'Chỉ dạy / ra đề / giải thích / chấm đúng-sai trong môn Ngữ văn lớp $effectiveGrade, '
+      'sách Kết nối tri thức với cuộc sống. ${LiteratureScope.curriculumFor(effectiveGrade)}',
     );
   }
   if (extraSystemContext != null && extraSystemContext.trim().isNotEmpty) {
@@ -175,7 +176,9 @@ Future<Result<String>> askMathAi(
       '1. BẠN LÀ CHATBOT HỖ TRỢ HỌC TẬP MÔN NGỮ VĂN THCS (LỚP 6–9). TUYỆT ĐỐI CHỈ TRẢ LỜI CÁC NỘI DUNG VỀ NGỮ VĂN: tiếng Việt, đọc hiểu, tập làm văn, văn học trong chương trình.\n'
       '2. NẾU HỌC SINH HỎI NỘI DUNG KHÔNG LIÊN QUAN (tán gẫu, đời tư, phim ảnh giải trí, chính trị, toán/lý/hóa, chuyện phiếm...): TUYỆT ĐỐI KHÔNG TRẢ LỜI LAN MAN. Hãy từ chối lịch sự và nhắc học sinh quay lại môn Ngữ văn.\n'
       '3. NẾU HỌC SINH GỬI ẢNH KHÔNG LIÊN QUAN ĐẾN NGỮ VĂN (ảnh người, đồ vật, thú cưng, ảnh rác, ảnh mờ...): TUYỆT ĐỐI TỪ CHỐI, KHÔNG SUY DIỄN VÀ KHÔNG CHẤM ĐÚNG.\n'
-      '4. ĐỘ CHÍNH XÁC: Không bịa tác giả/tác phẩm; hướng dẫn rõ bố cục và ý chính; dùng tiếng Việt chuẩn mực, phù hợp lứa tuổi THCS.';
+      '4. ĐÚNG/SAI CHỈ TÍNH TRONG NGỮ VĂN. Bài Toán, Lý, Hóa, Sinh, Sử, Địa, Tin, Tiếng Anh — dù đúng môn đó — vẫn là SAI. Không giải và không nêu đáp án các môn ấy.\n'
+      '5. ĐỘ CHÍNH XÁC: Không bịa tác giả/tác phẩm ngoài sách Kết nối tri thức; dùng tiếng Việt chuẩn mực, phù hợp đúng lớp THCS.\n\n'
+      '${LiteratureScope.hardRule}';
 
   final message = _composeUserMessage(
     userMessage: userMessage,

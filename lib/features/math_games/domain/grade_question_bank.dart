@@ -39,11 +39,19 @@ abstract final class GradeQuestionBank {
   static String curriculumHint(int gradeLevel) {
     final g = SupportedGrades.normalize(gradeLevel);
     return switch (g) {
-      6 => 'Từ ngữ, chính tả, kể chuyện, nhận biết biện pháp tu từ cơ bản.',
-      7 => 'Đọc hiểu, miêu tả, thành ngữ tục ngữ, nhân hóa – so sánh.',
-      8 => 'Phân tích văn bản, nghị luận đơn giản, biện pháp tu từ nâng cao.',
-      _ => 'Nghị luận văn học/xã hội, cảm nhận thơ văn, tiếng Việt nâng cao.',
+      6 => 'KNTT 6: truyền thuyết, cổ tích, kể chuyện, chính tả, so sánh – nhân hóa.',
+      7 => 'KNTT 7: ngụ ngôn, thành ngữ, miêu tả, biểu cảm.',
+      8 => 'KNTT 8: Thu điếu, Hịch tướng sĩ, thơ trào phúng, nghị luận đời sống.',
+      _ => 'KNTT 9: Truyện Kiều, Nam Xương, Lục Vân Tiên, nghị luận văn học.',
     };
+  }
+
+  /// Đề và phương án gốc (chưa xáo) — dùng để kiểm tra không lẫn môn khác.
+  static Iterable<String> surfaceTexts(int grade) sync* {
+    for (final item in _bankFor(SupportedGrades.normalize(grade))) {
+      yield item.stem;
+      yield* item.options;
+    }
   }
 
   static List<_LitItem> _bankFor(int grade) {
@@ -157,6 +165,29 @@ abstract final class GradeQuestionBank {
       0,
       chapter: 'Từ vựng',
     ),
+    _LitItem(
+      'Trong Ngữ văn 6 Kết nối tri thức, Thánh Gióng thuộc thể loại nào?',
+      ['Truyền thuyết', 'Truyện ngắn', 'Thơ tự do', 'Kịch'],
+      0,
+      chapter: 'KNTT 6 — Thánh Gióng',
+    ),
+    _LitItem(
+      'Thạch Sanh trong Ngữ văn 6 Kết nối tri thức thuộc thể loại nào?',
+      ['Truyện cổ tích', 'Văn bản nghị luận', 'Thơ Đường luật', 'Tin tức'],
+      0,
+      chapter: 'KNTT 6 — Thạch Sanh',
+    ),
+    _LitItem(
+      'Đọc Sơn Tinh, Thủy Tinh (Ngữ văn 6) chủ yếu để hiểu điều gì?',
+      [
+        'Ước muốn chế ngự thiên tai của người xưa',
+        'Cách viết một lá đơn xin nghỉ',
+        'Cách đặt dấu phẩy trong câu ghép',
+        'Đặc điểm của thơ tám chữ',
+      ],
+      0,
+      chapter: 'KNTT 6 — Sơn Tinh, Thủy Tinh',
+    ),
   ];
 
   // —— Lớp 7 ——
@@ -206,7 +237,7 @@ abstract final class GradeQuestionBank {
         'Ngoại hình, cử chỉ, tính cách nổi bật',
         'Chỉ nêu tên và tuổi',
         'Chỉ kể ngày tháng',
-        'Chỉ viết công thức toán',
+        'Chỉ ghi một dòng chữ không tả gì',
       ],
       0,
       chapter: 'Miêu tả',
@@ -261,6 +292,17 @@ abstract final class GradeQuestionBank {
       0,
       chapter: 'Bố cục',
     ),
+    _LitItem(
+      'Truyện "Ếch ngồi đáy giếng" (Ngữ văn 7 Kết nối tri thức) khuyên điều gì?',
+      [
+        'Không nên chủ quan, cho mình là nhất',
+        'Nên bỏ dở bài viết giữa chừng',
+        'Chỉ cần tả ngoại hình, không cần ý',
+        'Mở bài phải viết thành một bài thơ',
+      ],
+      0,
+      chapter: 'KNTT 7 — Ngụ ngôn',
+    ),
   ];
 
   // —— Lớp 8 ——
@@ -269,9 +311,9 @@ abstract final class GradeQuestionBank {
       'Nghị luận xã hội thường bàn về vấn đề nào?',
       [
         'Hiện tượng đời sống, đạo đức, lối sống',
-        'Công thức phương trình bậc hai',
-        'Bản đồ địa lý hành chính',
-        'Thí nghiệm hóa học trong phòng lab',
+        'Một câu thơ không có ý kiến cần bàn',
+        'Một đoạn chỉ kể chuyện cổ tích',
+        'Một bài chính tả không nêu luận điểm',
       ],
       0,
       chapter: 'Nghị luận',
@@ -299,7 +341,7 @@ abstract final class GradeQuestionBank {
         'Xác định nội dung chính và nghệ thuật nổi bật',
         'Đếm số chữ rồi dừng lại',
         'Chỉ chép lại nguyên văn không nhận xét',
-        'Chuyển sang giải bài toán',
+        'Bỏ đoạn văn, không nhận xét gì',
       ],
       0,
       chapter: 'Đọc hiểu',
@@ -322,7 +364,7 @@ abstract final class GradeQuestionBank {
         'Ý kiến then chốt cần chứng minh',
         'Một câu chuyện cổ tích dài',
         'Một bài thơ lục bát',
-        'Một công thức hóa học',
+        'Một câu tục ngữ không cần chứng minh',
       ],
       0,
       chapter: 'Nghị luận',
@@ -350,7 +392,7 @@ abstract final class GradeQuestionBank {
         'Rõ luận điểm, có lý lẽ – dẫn chứng, kết đoạn gọn',
         'Viết càng dài càng tốt không cần ý',
         'Chỉ kể chuyện không liên quan đề',
-        'Chỉ dùng tiếng Anh',
+        'Chỉ viết một câu không có luận điểm',
       ],
       0,
       chapter: 'Tập làm văn',
@@ -366,6 +408,24 @@ abstract final class GradeQuestionBank {
       0,
       chapter: 'Biện pháp tu từ',
     ),
+    _LitItem(
+      'Bài thơ "Thu điếu" trong Ngữ văn 8 Kết nối tri thức là của ai?',
+      ['Nguyễn Khuyến', 'Nguyễn Du', 'Hồ Xuân Hương', 'Tố Hữu'],
+      0,
+      chapter: 'KNTT 8 — Thu điếu',
+    ),
+    _LitItem(
+      '"Hịch tướng sĩ" trong Ngữ văn 8 là văn bản của ai?',
+      ['Trần Quốc Tuấn', 'Nguyễn Trãi', 'Nguyễn Du', 'Nguyễn Đình Chiểu'],
+      0,
+      chapter: 'KNTT 8 — Hịch tướng sĩ',
+    ),
+    _LitItem(
+      '"Nam quốc sơn hà" thuộc thể thơ nào?',
+      ['Thất ngôn tứ tuyệt', 'Lục bát', 'Song thất lục bát', 'Thơ tự do'],
+      0,
+      chapter: 'KNTT 8 — Nam quốc sơn hà',
+    ),
   ];
 
   // —— Lớp 9 ——
@@ -376,7 +436,7 @@ abstract final class GradeQuestionBank {
         'Nội dung cảm xúc và nghệ thuật biểu đạt',
         'Chỉ đếm số dòng thơ',
         'Chỉ nêu tên tác giả rồi kết thúc',
-        'Chỉ viết công thức vật lý',
+        'Chỉ chép lại khổ thơ rồi dừng',
       ],
       0,
       chapter: 'Cảm nhận văn học',
@@ -385,9 +445,9 @@ abstract final class GradeQuestionBank {
       'Nghị luận văn học thường yêu cầu học sinh?',
       [
         'Phân tích, đánh giá giá trị nội dung – nghệ thuật của tác phẩm',
-        'Giải phương trình bậc hai',
-        'Vẽ bản đồ Việt Nam',
-        'Thực hiện thí nghiệm sinh học',
+        'Kể một câu chuyện không liên quan tác phẩm',
+        'Chép nguyên văn cả bài không phân tích',
+        'Chỉ nêu cảm xúc chung chung',
       ],
       0,
       chapter: 'Nghị luận văn học',
@@ -469,6 +529,31 @@ abstract final class GradeQuestionBank {
       ],
       0,
       chapter: 'Bố cục bài văn',
+    ),
+    _LitItem(
+      'Đoạn "Kim — Kiều gặp gỡ" trong Ngữ văn 9 Kết nối tri thức trích từ tác phẩm nào?',
+      ['Truyện Kiều', 'Lục Vân Tiên', 'Chinh phụ ngâm', 'Truyện Lục Vân Tiên'],
+      0,
+      chapter: 'KNTT 9 — Truyện Kiều',
+      hint: 'Tác giả Nguyễn Du, thể lục bát.',
+    ),
+    _LitItem(
+      '"Chuyện người con gái Nam Xương" kể về nhân vật nào?',
+      ['Vũ Nương', 'Thúy Kiều', 'Kiều Nguyệt Nga', 'Thúy Vân'],
+      0,
+      chapter: 'KNTT 9 — Nam Xương',
+    ),
+    _LitItem(
+      'Bài "Tự tình" (bài 2) trong Ngữ văn 9 là của ai?',
+      ['Hồ Xuân Hương', 'Nguyễn Khuyến', 'Xuân Diệu', 'Tố Hữu'],
+      0,
+      chapter: 'KNTT 9 — Tự tình',
+    ),
+    _LitItem(
+      '"Lục Vân Tiên cứu Kiều Nguyệt Nga" là đoạn trích của tác giả nào?',
+      ['Nguyễn Đình Chiểu', 'Nguyễn Du', 'Nguyễn Dữ', 'Nguyễn Trãi'],
+      0,
+      chapter: 'KNTT 9 — Lục Vân Tiên',
     ),
   ];
 }

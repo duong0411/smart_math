@@ -68,7 +68,8 @@ $summary
           'Chế độ giám sát & báo cáo học tập EduSelf Ngữ Văn AI: '
           'Trung thực 100% với dữ liệu bài tập Ngữ văn. '
           'Chỉ nhận xét về năng lực Ngữ văn và kỹ năng đọc–viết, kế hoạch ôn 5 ngày bám sát chương trình Ngữ văn THCS. '
-          'Tuyệt đối không đưa nhận xét ngoài lề môn Ngữ văn.',
+          'Nếu nhật ký lẫn Toán, Lý, Hóa, Sử, Địa hoặc môn khác thì bỏ qua, không tính vào điểm mạnh/yếu. '
+          'Kế hoạch ôn chỉ gồm đọc hiểu, tiếng Việt và tập làm văn theo sách Kết nối tri thức.',
     );
 
     if (!mounted) return;
