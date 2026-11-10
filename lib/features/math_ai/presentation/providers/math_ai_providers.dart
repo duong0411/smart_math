@@ -1,4 +1,5 @@
 import 'package:eduself_study_app/core/ai/gemini_client.dart';
+import 'package:eduself_study_app/core/ai/local_rag.dart';
 import 'package:eduself_study_app/features/math_ai/domain/literature_scope.dart';
 import 'package:eduself_study_app/core/config/app_config.dart';
 import 'package:eduself_study_app/core/error/result.dart';
@@ -167,6 +168,24 @@ Future<Result<String>> askMathAi(
     profileBlock.writeln(extraSystemContext.trim());
   }
 
+  // RAG offline nhúng asset — không cần Mongo/HTTP.
+  final docSnippet = (documentText ?? '').trim();
+  final ragQuery = [
+    userMessage.trim(),
+    if (documentName != null) documentName.trim(),
+    if (docSnippet.isNotEmpty)
+      docSnippet.substring(0, docSnippet.length < 500 ? docSnippet.length : 500),
+  ].where((e) => e.isNotEmpty).join('\n');
+  final ragInject = await LocalRag.instance.buildSystemInject(
+    query: ragQuery.isEmpty
+        ? 'Ngữ văn Kết nối tri thức lớp ${effectiveGrade ?? 8}'
+        : ragQuery,
+    grade: effectiveGrade ?? 8,
+  );
+  if (ragInject.isNotEmpty) {
+    profileBlock.writeln(ragInject);
+  }
+
   final systemPrompt = profileBlock.isEmpty
       ? basePrompt
       : '$basePrompt\n\n## Thông tin học sinh hiện tại\n$profileBlock';
@@ -177,7 +196,8 @@ Future<Result<String>> askMathAi(
       '2. NẾU HỌC SINH HỎI NỘI DUNG KHÔNG LIÊN QUAN (tán gẫu, đời tư, phim ảnh giải trí, chính trị, toán/lý/hóa, chuyện phiếm...): TUYỆT ĐỐI KHÔNG TRẢ LỜI LAN MAN. Hãy từ chối lịch sự và nhắc học sinh quay lại môn Ngữ văn.\n'
       '3. NẾU HỌC SINH GỬI ẢNH KHÔNG LIÊN QUAN ĐẾN NGỮ VĂN (ảnh người, đồ vật, thú cưng, ảnh rác, ảnh mờ...): TUYỆT ĐỐI TỪ CHỐI, KHÔNG SUY DIỄN VÀ KHÔNG CHẤM ĐÚNG.\n'
       '4. ĐÚNG/SAI CHỈ TÍNH TRONG NGỮ VĂN. Bài Toán, Lý, Hóa, Sinh, Sử, Địa, Tin, Tiếng Anh — dù đúng môn đó — vẫn là SAI. Không giải và không nêu đáp án các môn ấy.\n'
-      '5. ĐỘ CHÍNH XÁC: Không bịa tác giả/tác phẩm ngoài sách Kết nối tri thức; dùng tiếng Việt chuẩn mực, phù hợp đúng lớp THCS.\n\n'
+      '5. ĐỘ CHÍNH XÁC: Không bịa tác giả/tác phẩm ngoài sách Kết nối tri thức; dùng tiếng Việt chuẩn mực, phù hợp đúng lớp THCS.\n'
+      '6. Nếu có khối ## Ngữ liệu RAG: ưu tiên bám ngữ liệu đó + chương trình KNTT; không bịa thêm ngoài ngữ liệu.\n\n'
       '${LiteratureScope.hardRule}';
 
   final message = _composeUserMessage(

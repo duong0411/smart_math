@@ -42,7 +42,9 @@ jobs:
         with:
           tag_name: nguvan-android-v1.0.${{ github.run_number }}
           name: Ngữ văn Android APK v1.0.${{ github.run_number }}
-          body: Automated release APK build for EduSelf Ngữ Văn (signed with debug keystore for CI).
+          body: |
+            EduSelf Ngữ Văn Android APK (CI debug keystore).
+            RAG KNTT offline nhúng trong app — không cần Mongo/API local.
           files: build/app/outputs/flutter-apk/app-release.apk
           fail_on_unmatched_files: true
         env:
@@ -85,7 +87,9 @@ jobs:
         with:
           tag_name: nguvan-ios-v1.0.${{ github.run_number }}
           name: Ngữ văn iOS IPA v1.0.${{ github.run_number }}
-          body: Automated unsigned iOS IPA for EduSelf Ngữ Văn (no Apple signing). Install via developer tools / sideload only.
+          body: |
+            EduSelf Ngữ Văn iOS IPA unsigned (sideload / developer tools only).
+            RAG KNTT offline nhúng trong app — không cần Mongo/API local.
           files: build/ios/ipa/EduSelfNguVan.ipa
           fail_on_unmatched_files: true
         env:

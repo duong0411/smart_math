@@ -107,6 +107,8 @@ class _MathPracticePageState extends ConsumerState<MathPracticePage> {
 Bạn là trợ lý EduSelf Ngữ Văn AI dành cho học sinh THCS.
 Hãy tạo ĐÚNG 1 bài tập Ngữ văn lớp $grade theo sách Kết nối tri thức với cuộc sống.
 ${LiteratureScope.curriculumFor(grade)}
+Gợi ý chủ đề đúng chương trình: ${LiteratureScope.suggestedPracticeTopics(grade)}
+${grade == 8 ? 'Ưu tiên văn bản trong mục lục Ngữ văn 8 KNTT (ví dụ bài mẫu: ${LiteratureScope.demoTextGrade8} – ${LiteratureScope.demoAuthorGrade8}, ${LiteratureScope.demoUnitGrade8}). Không dùng văn bản ngoài mục lục KNTT 8.' : ''}
 Yêu cầu chủ đề: $topic (Nếu chủ đề là Toán, Lý, Hóa, Sinh, Sử, Địa, Tin hoặc Tiếng Anh thì BỎ QUA và tạo bài Ngữ văn đúng lớp).
 
 Yêu cầu chất lượng:
@@ -450,11 +452,20 @@ Trả lời CHỈ bằng 1 đối tượng JSON duy nhất (không có markdown 
                         ),
                   ),
                   const SizedBox(height: 8),
+                  Text(
+                    LiteratureScope.suggestedPracticeTopics(_grade),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                  ),
+                  const SizedBox(height: 8),
                   TextField(
                     controller: _topicController,
-                    decoration: const InputDecoration(
-                      hintText: 'VD: biện pháp tu từ, tả người, nghị luận…',
-                      border: OutlineInputBorder(),
+                    decoration: InputDecoration(
+                      hintText: _grade == 8
+                          ? 'VD: Thu điếu – Nguyễn Khuyến (KNTT 8, Bài 2)…'
+                          : 'VD: biện pháp tu từ, tả người, nghị luận…',
+                      border: const OutlineInputBorder(),
                     ),
                   ),
                   const SizedBox(height: 12),

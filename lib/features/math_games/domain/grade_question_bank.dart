@@ -41,7 +41,8 @@ abstract final class GradeQuestionBank {
     return switch (g) {
       6 => 'KNTT 6: truyền thuyết, cổ tích, kể chuyện, chính tả, so sánh – nhân hóa.',
       7 => 'KNTT 7: ngụ ngôn, thành ngữ, miêu tả, biểu cảm.',
-      8 => 'KNTT 8: Thu điếu, Hịch tướng sĩ, thơ trào phúng, nghị luận đời sống.',
+      8 =>
+        'KNTT 8: Bài 1–10 (Thu điếu, Hịch tướng sĩ, Lặng lẽ Sa Pa, Đồng chí…); phân tích thơ Đường luật; nghị luận đời sống.',
       _ => 'KNTT 9: Truyện Kiều, Nam Xương, Lục Vân Tiên, nghị luận văn học.',
     };
   }
@@ -412,19 +413,61 @@ abstract final class GradeQuestionBank {
       'Bài thơ "Thu điếu" trong Ngữ văn 8 Kết nối tri thức là của ai?',
       ['Nguyễn Khuyến', 'Nguyễn Du', 'Hồ Xuân Hương', 'Tố Hữu'],
       0,
-      chapter: 'KNTT 8 — Thu điếu',
+      chapter: 'KNTT 8 — Bài 2 Thu điếu',
+      hint: 'Thu điếu thuộc chủ đề Vẻ đẹp cổ điển, thể thất ngôn bát cú.',
+    ),
+    _LitItem(
+      '"Thu điếu" thuộc thể thơ nào?',
+      ['Thất ngôn bát cú Đường luật', 'Lục bát', 'Thơ tự do', 'Song thất lục bát'],
+      0,
+      chapter: 'KNTT 8 — Bài 2 Thu điếu',
+    ),
+    _LitItem(
+      'Bài "Thiên Trường vãn vọng" trong Ngữ văn 8 KNTT là của ai?',
+      ['Trần Nhân Tông', 'Nguyễn Khuyến', 'Trần Quốc Tuấn', 'Tố Hữu'],
+      0,
+      chapter: 'KNTT 8 — Bài 2 Thiên Trường vãn vọng',
     ),
     _LitItem(
       '"Hịch tướng sĩ" trong Ngữ văn 8 là văn bản của ai?',
       ['Trần Quốc Tuấn', 'Nguyễn Trãi', 'Nguyễn Du', 'Nguyễn Đình Chiểu'],
       0,
-      chapter: 'KNTT 8 — Hịch tướng sĩ',
+      chapter: 'KNTT 8 — Bài 3 Hịch tướng sĩ',
     ),
     _LitItem(
       '"Nam quốc sơn hà" thuộc thể thơ nào?',
       ['Thất ngôn tứ tuyệt', 'Lục bát', 'Song thất lục bát', 'Thơ tự do'],
       0,
-      chapter: 'KNTT 8 — Nam quốc sơn hà',
+      chapter: 'KNTT 8 — Bài 3 Nam quốc sơn hà',
+    ),
+    _LitItem(
+      'Truyện ngắn "Lặng lẽ Sa Pa" trong Ngữ văn 8 KNTT của ai?',
+      ['Nguyễn Thành Long', 'Nguyễn Huy Tưởng', 'Bằng Việt', 'Chính Hữu'],
+      0,
+      chapter: 'KNTT 8 — Bài 6 Lặng lẽ Sa Pa',
+    ),
+    _LitItem(
+      'Bài thơ "Bếp lửa" trong Ngữ văn 8 KNTT là của ai?',
+      ['Bằng Việt', 'Chính Hữu', 'Nguyễn Khuyến', 'Tố Hữu'],
+      0,
+      chapter: 'KNTT 8 — Bài 6 Bếp lửa',
+    ),
+    _LitItem(
+      'Bài thơ "Đồng chí" trong Ngữ văn 8 KNTT là của ai?',
+      ['Chính Hữu', 'Bằng Việt', 'Tố Hữu', 'Nguyễn Đình Chiểu'],
+      0,
+      chapter: 'KNTT 8 — Bài 7 Đồng chí',
+    ),
+    _LitItem(
+      'Khi dùng Chatbot AI học "Thu điếu", thái độ đúng là gì?',
+      [
+        'Hỏi gợi ý từng bước, tự viết cảm nhận, phản biện câu trả lời AI',
+        'Nhờ AI viết hộ cả bài rồi nộp',
+        'Chỉ chép nguyên văn câu trả lời AI',
+        'Hỏi AI bài Toán thay vì Ngữ văn',
+      ],
+      0,
+      chapter: 'KNTT 8 — STEM số / liêm chính học tập',
     ),
   ];
 

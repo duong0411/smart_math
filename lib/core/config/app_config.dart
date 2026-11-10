@@ -6,11 +6,12 @@ abstract final class AppConfig {
   static const appVersion = '2.1.0';
   static const appTagline =
       'Ứng dụng AI hỗ trợ học tập và giám sát môn Ngữ văn THCS (lớp 6–9)';
-  static const storageMode = 'Local + Gemini API';
+  static const storageMode = 'Local + Gemini API + RAG offline (asset)';
   static const aiGatewayTimeout = Duration(seconds: 45);
   static const _apiBaseUrlKey = 'API_BASE_URL';
   static const _apiAccessTokenKey = 'API_ACCESS_TOKEN';
   static const _geminiApiKeyKey = 'GEMINI_API_KEY';
+  static const _ragBaseUrlKey = 'RAG_BASE_URL';
 
   /// Reliability-first chain for desktop/free-tier, then stronger models.
   /// Each model has separate quota; failover on rate-limit / overload / 404.
@@ -24,6 +25,9 @@ abstract final class AppConfig {
   /// Default Cloudflare Workers API (legacy / optional).
   static const defaultApiBaseUrl = 'http://localhost:8787';
 
+  /// Local RAG FastAPI (MongoDB) — optional; app still works if offline.
+  static const defaultRagBaseUrl = 'http://127.0.0.1:8791';
+
   static Future<void> load() async {
     await dotenv.load(fileName: 'assets/env/gemini.env', isOptional: true);
   }
@@ -34,6 +38,14 @@ abstract final class AppConfig {
     final fromEnv = dotenv.maybeGet(_apiBaseUrlKey);
     if (fromEnv != null && fromEnv.trim().isNotEmpty) return fromEnv.trim();
     return defaultApiBaseUrl;
+  }
+
+  static String get ragBaseUrl {
+    const fromDefine = String.fromEnvironment(_ragBaseUrlKey);
+    if (fromDefine.isNotEmpty) return fromDefine;
+    final fromEnv = dotenv.maybeGet(_ragBaseUrlKey);
+    if (fromEnv != null && fromEnv.trim().isNotEmpty) return fromEnv.trim();
+    return defaultRagBaseUrl;
   }
 
   /// Optional bootstrapped JWT for local/dev via dart-define / env file.

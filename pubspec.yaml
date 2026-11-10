@@ -1,7 +1,7 @@
 name: eduself_study_app
 description: "EduSelf Ngữ Văn AI — giám sát & hỗ trợ học sinh học Ngữ văn THCS (lớp 6–9)"
 publish_to: 'none'
-version: 1.0.0+1
+version: 1.0.32+32
 
 environment:
   sdk: ^3.12.2
@@ -38,3 +38,4 @@ flutter:
     - assets/prompts/eduself_system_prompt.md
     - assets/env/
     - assets/images/
+    - assets/rag/kntt_nguvan_seed.json
