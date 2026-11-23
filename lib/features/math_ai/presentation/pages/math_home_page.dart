@@ -295,15 +295,15 @@ class MathHomePage extends ConsumerWidget {
                         runSpacing: 8,
                         children: [
                           _QuickPromptChip(
-                            label: '📖 Phân tích văn bản',
+                            label: 'Đọc hiểu theo tầng',
                             onTap: () => context.push('/tutor'),
                           ),
                           _QuickPromptChip(
-                            label: '✍️ Luyện làm văn',
+                            label: 'Dàn ý làm văn',
                             onTap: () => context.push('/tutor'),
                           ),
                           _QuickPromptChip(
-                            label: '✨ Biện pháp tu từ',
+                            label: 'Chữa lỗi theo rubric',
                             onTap: () => context.push('/tutor'),
                           ),
                         ],

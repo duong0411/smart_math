@@ -113,6 +113,9 @@ Yêu cầu chủ đề: $topic (Nếu chủ đề là Toán, Lý, Hóa, Sinh, S�
 
 Yêu cầu chất lượng:
 - Đề chỉ hỏi đọc hiểu, tiếng Việt hoặc tập làm văn. Có thể chấm đúng/sai trong môn Ngữ văn.
+- Đọc hiểu: thiết kế câu hỏi theo tầng (nhận biết chi tiết/từ ngữ ấn tượng → thông hiểu nghệ thuật → liên hệ/vận dụng), không kiểu trắc nghiệm công thức.
+- Tiếng Việt: yêu cầu chỉ ra dấu hiệu nhận diện + giá trị biểu đạt trong ngữ cảnh, không chỉ hỏi gọi tên khái niệm.
+- Tập làm văn: nêu rõ hình thức (đoạn/bài), số chữ, và gợi ý làm theo chặng tìm ý–dàn ý–viết–rà soát.
 - Không đưa công thức, bài tính, thí nghiệm, bản đồ, mốc sử hay câu hỏi môn khác vào đề hoặc vào phương án.
 - Vừa sức lớp $grade. Nếu là làm văn, nêu số chữ và hình thức.
 
@@ -120,7 +123,7 @@ Trả lời CHỈ bằng 1 đối tượng JSON duy nhất (không có markdown 
 {"topic":"Tên chủ đề Ngữ văn","question":"Đề bài Ngữ văn đầy đủ bằng tiếng Việt"}
 ''',
       extraSystemContext:
-          'Chế độ tạo đề Ngữ văn lớp $grade, sách Kết nối tri thức. ${LiteratureScope.hardRule}',
+          'Chế độ tạo đề Ngữ văn lớp $grade, sách Kết nối tri thức. ${LiteratureScope.hardRule} ${LiteratureScope.pedagogyRule}',
     );
 
     if (!mounted) return;
@@ -327,12 +330,14 @@ BƯỚC 1: KIỂM TRA TÍNH HỢP LỆ VÀ LIÊN QUAN (ĐIỀU KIỆN TIÊN QUY�
 BƯỚC 2: XÁC ĐỊNH ĐÁP ÁN CHUẨN TRONG MÔN NGỮ VĂN:
 - Đáp án chuẩn chỉ thuộc đọc hiểu, tiếng Việt hoặc tập làm văn, sách Kết nối tri thức lớp $_grade.
 - ${LiteratureScope.curriculumFor(_grade)}
+- ${LiteratureScope.gradingRubricFor(_grade)}
 - Nếu đề thực chất là Toán / Lý / Hóa / Sinh / Sử / Địa / Tin / Tiếng Anh: DỪNG, "correct": false, không giải môn đó.
+- Ưu tiên ngữ liệu trong đề/ảnh/tệp; không bịa câu thơ hay chi tiết tác phẩm; không chấm cảm tính.
 
-BƯỚC 3: ĐỐI CHIẾU VÀ ĐÁNH GIÁ ĐÚNG / SAI:
-- ĐẶT "correct": true CHỈ KHI bài làm đạt yêu cầu đề Ngữ văn.
+BƯỚC 3: ĐỐI CHIẾU VÀ ĐÁNH GIÁ ĐÚNG / SAI THEO RUBRIC:
+- ĐẶT "correct": true CHỈ KHI bài làm đạt yêu cầu đề Ngữ văn theo rubric (trọng tâm + dẫn chứng + bố cục + diễn đạt vừa sức lớp $_grade).
 - ĐẶT "correct": false KHI lạc đề, sai tác giả/tác phẩm/biện pháp tu từ, thiếu bố cục nghiêm trọng, hoặc bài làm là lời giải môn khác (kể cả lời giải môn đó đúng).
-- Trong "feedback": Chỉ rõ ưu điểm/hạn chế, gợi ý cách sửa (chưa vội viết hộ toàn bài nếu học sinh chưa yêu cầu).
+- Trong "feedback" BẮT BUỘC: (1) điểm đạt theo tiêu chí (2) điểm chưa đạt + phân loại lỗi chính tả/dùng từ | câu/diễn đạt | luận điểm/bố cục (3) 1–2 gợi ý sửa cụ thể — chưa viết hộ toàn bài.
 
 ĐỊNH DẠNG ĐẦU RA BẮT BUỘC:
 Trả lời CHỈ bằng 1 đối tượng JSON duy nhất (không có markdown fence, không có chữ thừa):
@@ -348,6 +353,7 @@ Trả lời CHỈ bằng 1 đối tượng JSON duy nhất (không có markdown 
       documentName: _answerDocumentName,
       extraSystemContext:
           'Chế độ chấm Ngữ văn lớp $_grade. ${LiteratureScope.hardRule} '
+          '${LiteratureScope.pedagogyRule} '
           'Nếu bài làm là môn khác thì correct = false, không giải bài đó.',
     );
 
