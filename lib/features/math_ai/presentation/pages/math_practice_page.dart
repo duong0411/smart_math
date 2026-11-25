@@ -394,6 +394,12 @@ Trả lời CHỈ bằng 1 đối tượng JSON duy nhất (không có markdown 
         await ref.read(mathLocalStoreProvider).addAttempt(attempt);
         ref.invalidate(mathAttemptsProvider);
         ref.invalidate(mathEventsProvider);
+        if (correct) {
+          await ref.read(studyStreakStoreProvider).recordMeaningfulStudy(
+                reason: 'Luyện tập đúng: ${attempt.topic}',
+              );
+          ref.invalidate(studyStreakProvider);
+        }
         setState(() {
           _busy = false;
           _correct = correct;

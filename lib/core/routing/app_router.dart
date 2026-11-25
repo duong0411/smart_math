@@ -4,6 +4,7 @@ import 'package:eduself_study_app/features/math_ai/presentation/pages/math_pract
 import 'package:eduself_study_app/features/math_ai/presentation/pages/math_settings_page.dart';
 import 'package:eduself_study_app/features/math_ai/presentation/pages/math_tutor_chat_page.dart';
 import 'package:eduself_study_app/features/math_ai/presentation/pages/math_tutor_sessions_page.dart';
+import 'package:eduself_study_app/features/math_games/domain/game_play_mode.dart';
 import 'package:eduself_study_app/features/math_games/presentation/pages/boss_battle_game_page.dart';
 import 'package:eduself_study_app/features/math_games/presentation/pages/math_games_hub_page.dart';
 import 'package:eduself_study_app/features/math_games/presentation/pages/rocket_rush_game_page.dart';
@@ -15,6 +16,10 @@ import 'package:go_router/go_router.dart';
 int _gradeFromQuery(GoRouterState state) {
   final raw = state.uri.queryParameters['grade'];
   return SupportedGrades.normalize(int.tryParse(raw ?? ''));
+}
+
+GamePlayMode _modeFromQuery(GoRouterState state) {
+  return GamePlayModeX.fromQuery(state.uri.queryParameters['mode']);
 }
 
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -52,12 +57,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/games/treasure',
         builder: (context, state) => TreasureTrailGamePage(
           gradeLevel: _gradeFromQuery(state),
+          mode: _modeFromQuery(state),
         ),
       ),
       GoRoute(
         path: '/games/boss',
         builder: (context, state) => BossBattleGamePage(
           gradeLevel: _gradeFromQuery(state),
+          mode: _modeFromQuery(state),
         ),
       ),
       GoRoute(

@@ -19,4 +19,12 @@ Future<void> logMathGameResult(
         ),
       );
   ref.invalidate(mathEventsProvider);
+
+  if (success) {
+    await ref.read(studyStreakStoreProvider).recordMeaningfulStudy(
+          reason: 'Thắng game: $topic',
+        );
+    await ref.read(studyStreakStoreProvider).addEssence(15);
+    ref.invalidate(studyStreakProvider);
+  }
 }

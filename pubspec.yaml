@@ -1,7 +1,7 @@
 name: eduself_study_app
 description: "EduSelf Ngữ Văn AI — giám sát & hỗ trợ học sinh học Ngữ văn THCS (lớp 6–9)"
 publish_to: 'none'
-version: 1.0.33+33
+version: 1.0.34+34
 
 environment:
   sdk: ^3.12.2

@@ -151,6 +151,10 @@ $summary
             ),
           );
       ref.invalidate(mathEventsProvider);
+      await ref.read(studyStreakStoreProvider).recordMeaningfulStudy(
+            reason: 'Hoàn thành ngày ôn ${task.day}',
+          );
+      ref.invalidate(studyStreakProvider);
     }
     await StudyReminderService.instance.syncPlanReminders(updated);
     ref.invalidate(mathReviewPlanProvider);

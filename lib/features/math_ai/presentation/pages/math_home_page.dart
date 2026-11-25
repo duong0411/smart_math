@@ -1,5 +1,6 @@
 import 'package:eduself_study_app/features/math_ai/infrastructure/math_local_store.dart';
 import 'package:eduself_study_app/features/math_ai/presentation/providers/math_ai_providers.dart';
+import 'package:eduself_study_app/features/math_ai/presentation/widgets/study_streak_badge.dart';
 import 'package:eduself_study_app/shared/utils/supported_grades.dart';
 import 'package:eduself_study_app/shared/widgets/glass_card.dart';
 import 'package:eduself_study_app/shared/widgets/grade_level_selector.dart';
@@ -231,30 +232,7 @@ class MathHomePage extends ConsumerWidget {
                           ),
                         ),
                         const SizedBox(width: 12),
-                        Container(
-                          width: 54,
-                          height: 54,
-                          decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              colors: [Color(0xFF3B82F6), Color(0xFF1D4ED8)],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
-                            borderRadius: BorderRadius.circular(16),
-                            boxShadow: [
-                              BoxShadow(
-                                color: const Color(0xFF2563EB).withValues(alpha: 0.3),
-                                blurRadius: 12,
-                                offset: const Offset(0, 4),
-                              ),
-                            ],
-                          ),
-                          child: const Icon(
-                            Icons.calculate_rounded,
-                            color: Colors.white,
-                            size: 30,
-                          ),
-                        ),
+                        const StudyStreakBadge(),
                       ],
                     ),
 

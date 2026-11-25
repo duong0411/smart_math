@@ -13,8 +13,9 @@ Nhánh: `ngu-van` · Repo: [duong0411/smart_math](https://github.com/duong0411/s
 5. Dùng:
    - **Gia sư Ngữ văn AI** — hỏi đáp, phân tích văn bản, hướng dẫn làm văn
    - **Luyện tập Ngữ văn** — AI tạo đề & chấm bài
-   - **Giải trí Ngữ văn** — chọn lớp 6–9 · kho báu, boss, tên lửa (không cần API)
-   - **Giám sát học tập** — tiến độ, điểm yếu, kế hoạch ôn 5 ngày, checklist hoàn thành, **thông báo nhắc nhở HS** (sáng 7:30 / chiều 18:30) + cảnh báo khi bỏ lỡ ngày ôn
+   - **Giải trí Ngữ văn** — Truy tìm kho báu (đơn / đấu), Đại chiến Boss (đơn / song hành), tên lửa · thắng game cộng Chuỗi học tập
+   - **Chuỗi học tập (Streak/Stack)** — badge sách góc phải trang chủ, thẻ bảo vệ chuỗi, Điểm Tinh Hoa
+   - **Giám sát học tập** — tiến độ, điểm yếu, kế hoạch ôn 5 ngày, checklist, **nhắc nhở HS** + cảnh báo bỏ lỡ ngày ôn
 
 API key được lưu trên thiết bị, gọi thẳng Gemini — không cần backend.
 

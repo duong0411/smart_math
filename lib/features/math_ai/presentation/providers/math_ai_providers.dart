@@ -5,12 +5,22 @@ import 'package:eduself_study_app/core/config/app_config.dart';
 import 'package:eduself_study_app/core/error/result.dart';
 import 'package:eduself_study_app/core/settings/app_settings_store.dart';
 import 'package:eduself_study_app/features/math_ai/infrastructure/math_local_store.dart';
+import 'package:eduself_study_app/features/math_ai/infrastructure/study_streak_store.dart';
 import 'package:eduself_study_app/features/settings/presentation/providers/settings_providers.dart';
 import 'package:eduself_study_app/shared/utils/supported_grades.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final mathLocalStoreProvider = Provider<MathLocalStore>((ref) {
   return MathLocalStore();
+});
+
+final studyStreakStoreProvider = Provider<StudyStreakStore>((ref) {
+  return StudyStreakStore();
+});
+
+final studyStreakProvider =
+    FutureProvider.autoDispose<StudyStreakState>((ref) {
+  return ref.watch(studyStreakStoreProvider).read();
 });
 
 final geminiClientProvider = Provider<GeminiClient>((ref) {
