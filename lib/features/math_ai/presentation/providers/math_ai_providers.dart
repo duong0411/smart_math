@@ -109,6 +109,11 @@ final mathAttemptsProvider =
   return ref.watch(mathLocalStoreProvider).listAttempts();
 });
 
+final mathReviewPlanProvider =
+    FutureProvider.autoDispose<MathReviewPlan?>((ref) {
+  return ref.watch(mathLocalStoreProvider).readReviewPlan();
+});
+
 /// Shared helper to call Gemini with profile context.
 Future<Result<String>> askMathAi(
   WidgetRef ref, {

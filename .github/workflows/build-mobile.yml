@@ -105,6 +105,7 @@ jobs:
           body: |
             EduSelf Ngữ Văn Android APK (CI debug keystore).
             RAG KNTT offline nhúng trong app — không cần Mongo/API local.
+            v1.0.33+: Giám sát kế hoạch ôn + thông báo nhắc nhở học sinh.
           files: build/app/outputs/flutter-apk/app-release.apk
           fail_on_unmatched_files: true
         env:
@@ -151,6 +152,7 @@ jobs:
           body: |
             EduSelf Ngữ Văn iOS IPA unsigned (sideload / developer tools only).
             RAG KNTT offline nhúng trong app — không cần Mongo/API local.
+            v1.0.33+: Giám sát kế hoạch ôn + thông báo nhắc nhở học sinh.
           files: build/ios/ipa/EduSelfNguVan.ipa
           fail_on_unmatched_files: true
         env:
@@ -197,6 +199,7 @@ jobs:
           body: |
             Windows desktop build for EduSelf Ngữ Văn (unzip and run `eduself_study_app.exe`).
             Keep the whole extracted folder together (DLL + data).
+            v1.0.33+: Giám sát kế hoạch ôn + thông báo nhắc nhở học sinh.
           files: EduSelfNguVan-windows.zip
           fail_on_unmatched_files: true
         env:

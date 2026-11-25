@@ -14,6 +14,7 @@ class MathLocalStore {
   static const _sessionsKey = 'math_tutor_sessions';
   static const _eventsKey = 'math_study_events';
   static const _practiceKey = 'math_practice_attempts';
+  static const _reviewPlanKey = 'math_review_plan';
 
   Future<SharedPreferences> _prefs() async {
     return _cache ??= _prefsOverride ?? await SharedPreferences.getInstance();
@@ -200,6 +201,31 @@ class MathLocalStore {
       ),
     );
   }
+
+  // —— Review plan (5-day) + reminder flags ——
+
+  Future<MathReviewPlan?> readReviewPlan() async {
+    final prefs = await _prefs();
+    final raw = prefs.getString(_reviewPlanKey);
+    if (raw == null || raw.isEmpty) return null;
+    try {
+      return MathReviewPlan.fromJson(
+        jsonDecode(raw) as Map<String, dynamic>,
+      );
+    } on Object {
+      return null;
+    }
+  }
+
+  Future<void> writeReviewPlan(MathReviewPlan plan) async {
+    final prefs = await _prefs();
+    await prefs.setString(_reviewPlanKey, jsonEncode(plan.toJson()));
+  }
+
+  Future<void> clearReviewPlan() async {
+    final prefs = await _prefs();
+    await prefs.remove(_reviewPlanKey);
+  }
 }
 
 class MathStudentProfile {
@@ -368,7 +394,255 @@ class MathTutorSession {
   }
 }
 
-enum MathStudyEventType { tutor, practice, monitor, game }
+enum MathStudyEventType { tutor, practice, monitor, game, reminder }
+
+class MathReviewDayTask {
+  const MathReviewDayTask({
+    required this.day,
+    required this.title,
+    required this.detail,
+    this.done = false,
+    this.completedAt,
+  });
+
+  final int day;
+  final String title;
+  final String detail;
+  final bool done;
+  final DateTime? completedAt;
+
+  MathReviewDayTask copyWith({
+    String? title,
+    String? detail,
+    bool? done,
+    DateTime? completedAt,
+  }) {
+    return MathReviewDayTask(
+      day: day,
+      title: title ?? this.title,
+      detail: detail ?? this.detail,
+      done: done ?? this.done,
+      completedAt: completedAt ?? this.completedAt,
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+        'day': day,
+        'title': title,
+        'detail': detail,
+        'done': done,
+        'completedAt': completedAt?.toIso8601String(),
+      };
+
+  factory MathReviewDayTask.fromJson(Map<String, dynamic> json) {
+    return MathReviewDayTask(
+      day: json['day'] as int? ?? 1,
+      title: json['title'] as String? ?? 'Ôn tập',
+      detail: json['detail'] as String? ?? '',
+      done: json['done'] as bool? ?? false,
+      completedAt: DateTime.tryParse(json['completedAt'] as String? ?? ''),
+    );
+  }
+}
+
+enum MathReviewCompliance { none, onTrack, behind, completed }
+
+class MathReviewPlan {
+  const MathReviewPlan({
+    required this.id,
+    required this.reportText,
+    required this.days,
+    required this.createdAt,
+    required this.startDate,
+    this.remindersEnabled = true,
+  });
+
+  final String id;
+  final String reportText;
+  final List<MathReviewDayTask> days;
+  final DateTime createdAt;
+
+  /// Local calendar date (date-only) when day 1 begins.
+  final DateTime startDate;
+  final bool remindersEnabled;
+
+  int get doneCount => days.where((d) => d.done).length;
+
+  bool get isCompleted => days.isNotEmpty && days.every((d) => d.done);
+
+  /// 1–5 for the calendar day relative to [startDate]; 0 before start; >5 after.
+  int dayIndexOn(DateTime localNow) {
+    final today = DateTime(localNow.year, localNow.month, localNow.day);
+    final start = DateTime(startDate.year, startDate.month, startDate.day);
+    return today.difference(start).inDays + 1;
+  }
+
+  List<MathReviewDayTask> get overdueTasks {
+    final idx = dayIndexOn(DateTime.now());
+    return [
+      for (final d in days)
+        if (!d.done && d.day < idx) d,
+    ];
+  }
+
+  MathReviewDayTask? get todayTask {
+    final idx = dayIndexOn(DateTime.now());
+    for (final d in days) {
+      if (d.day == idx) return d;
+    }
+    return null;
+  }
+
+  MathReviewCompliance get compliance {
+    if (days.isEmpty) return MathReviewCompliance.none;
+    if (isCompleted) return MathReviewCompliance.completed;
+    if (overdueTasks.isNotEmpty) return MathReviewCompliance.behind;
+    return MathReviewCompliance.onTrack;
+  }
+
+  String get complianceLabel => switch (compliance) {
+        MathReviewCompliance.none => 'Chưa có kế hoạch',
+        MathReviewCompliance.onTrack => 'Đang theo đúng kế hoạch',
+        MathReviewCompliance.behind =>
+          'Cảnh báo: HS chưa ôn ${overdueTasks.length} ngày',
+        MathReviewCompliance.completed => 'Đã hoàn thành 5 ngày ôn',
+      };
+
+  MathReviewPlan copyWith({
+    String? reportText,
+    List<MathReviewDayTask>? days,
+    bool? remindersEnabled,
+  }) {
+    return MathReviewPlan(
+      id: id,
+      reportText: reportText ?? this.reportText,
+      days: days ?? this.days,
+      createdAt: createdAt,
+      startDate: startDate,
+      remindersEnabled: remindersEnabled ?? this.remindersEnabled,
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'reportText': reportText,
+        'days': [for (final d in days) d.toJson()],
+        'createdAt': createdAt.toIso8601String(),
+        'startDate':
+            '${startDate.year.toString().padLeft(4, '0')}-${startDate.month.toString().padLeft(2, '0')}-${startDate.day.toString().padLeft(2, '0')}',
+        'remindersEnabled': remindersEnabled,
+      };
+
+  factory MathReviewPlan.fromJson(Map<String, dynamic> json) {
+    final daysRaw = json['days'];
+    final startRaw = json['startDate'] as String? ?? '';
+    final startParsed = DateTime.tryParse(startRaw);
+    final created =
+        DateTime.tryParse(json['createdAt'] as String? ?? '') ??
+            DateTime.now().toUtc();
+    final start = startParsed != null
+        ? DateTime(startParsed.year, startParsed.month, startParsed.day)
+        : DateTime(created.toLocal().year, created.toLocal().month,
+            created.toLocal().day);
+
+    return MathReviewPlan(
+      id: json['id'] as String? ?? '',
+      reportText: json['reportText'] as String? ?? '',
+      days: [
+        if (daysRaw is List)
+          for (final d in daysRaw)
+            if (d is Map<String, dynamic>) MathReviewDayTask.fromJson(d),
+      ],
+      createdAt: created,
+      startDate: start,
+      remindersEnabled: json['remindersEnabled'] as bool? ?? true,
+    );
+  }
+
+  /// Build a plan from AI text + optional weak topics (fallback tasks).
+  static MathReviewPlan fromAiReport({
+    required String reportText,
+    required List<String> weakTopics,
+  }) {
+    final now = DateTime.now();
+    final start = DateTime(now.year, now.month, now.day);
+    final parsed = _parsePlanJson(reportText);
+    final displayText = _stripPlanJson(reportText).trim();
+    final days = parsed.isNotEmpty
+        ? parsed
+        : _fallbackDays(weakTopics);
+
+    return MathReviewPlan(
+      id: now.millisecondsSinceEpoch.toString(),
+      reportText: displayText.isEmpty ? reportText : displayText,
+      days: days,
+      createdAt: now.toUtc(),
+      startDate: start,
+      remindersEnabled: true,
+    );
+  }
+
+  static List<MathReviewDayTask> _fallbackDays(List<String> weakTopics) {
+    final topics = weakTopics.isEmpty
+        ? const [
+            'Đọc hiểu văn bản',
+            'Từ ngữ & tiếng Việt',
+            'Tập làm văn nghị luận',
+            'Ôn ngữ liệu KNTT',
+            'Luyện đề tổng hợp',
+          ]
+        : [
+            ...weakTopics.take(5),
+            ...List.filled(5, 'Ôn Ngữ văn'),
+          ].take(5).toList();
+
+    return [
+      for (var i = 0; i < 5; i++)
+        MathReviewDayTask(
+          day: i + 1,
+          title: 'Ngày ${i + 1}: ${topics[i]}',
+          detail:
+              'Ôn chủ đề "${topics[i]}" 20–30 phút: đọc ngữ liệu + làm 1 bài luyện.',
+        ),
+    ];
+  }
+
+  static final _planJsonRe = RegExp(
+    r'<<<PLAN_JSON\s*([\s\S]*?)\s*PLAN_JSON>>>',
+    multiLine: true,
+  );
+
+  static List<MathReviewDayTask> _parsePlanJson(String text) {
+    final match = _planJsonRe.firstMatch(text);
+    if (match == null) return const [];
+    try {
+      final decoded = jsonDecode(match.group(1)!.trim());
+      if (decoded is! List) return const [];
+      final out = <MathReviewDayTask>[];
+      for (final item in decoded) {
+        if (item is! Map) continue;
+        final map = Map<String, dynamic>.from(item);
+        out.add(
+          MathReviewDayTask(
+            day: map['day'] as int? ?? out.length + 1,
+            title: (map['title'] as String?)?.trim().isNotEmpty == true
+                ? (map['title'] as String).trim()
+                : 'Ngày ${out.length + 1}',
+            detail: (map['detail'] as String?)?.trim() ?? '',
+          ),
+        );
+      }
+      out.sort((a, b) => a.day.compareTo(b.day));
+      return out.take(5).toList();
+    } on Object {
+      return const [];
+    }
+  }
+
+  static String _stripPlanJson(String text) {
+    return text.replaceAll(_planJsonRe, '').trim();
+  }
+}
 
 class MathStudyEvent {
   const MathStudyEvent({

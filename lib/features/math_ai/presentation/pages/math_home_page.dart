@@ -1,3 +1,4 @@
+import 'package:eduself_study_app/features/math_ai/infrastructure/math_local_store.dart';
 import 'package:eduself_study_app/features/math_ai/presentation/providers/math_ai_providers.dart';
 import 'package:eduself_study_app/shared/utils/supported_grades.dart';
 import 'package:eduself_study_app/shared/widgets/glass_card.dart';
@@ -129,6 +130,7 @@ class MathHomePage extends ConsumerWidget {
           child: ListView(
             padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
             children: [
+              _ReviewReminderBanner(plan: ref.watch(mathReviewPlanProvider).valueOrNull),
               // Hero Banner - Tailored specifically for Literature students
               Container(
                 padding: const EdgeInsets.all(20),
@@ -767,6 +769,78 @@ class _RecentActivityTile extends StatelessWidget {
         ),
         trailing: Icon(Icons.chevron_right_rounded, size: 18, color: scheme.outline),
         onTap: onTap,
+      ),
+    );
+  }
+}
+
+class _ReviewReminderBanner extends StatelessWidget {
+  const _ReviewReminderBanner({required this.plan});
+
+  final MathReviewPlan? plan;
+
+  @override
+  Widget build(BuildContext context) {
+    if (plan == null || plan!.isCompleted) return const SizedBox.shrink();
+
+    final scheme = Theme.of(context).colorScheme;
+    final behind = plan!.compliance == MathReviewCompliance.behind;
+    final today = plan!.todayTask;
+    final color = behind ? scheme.error : scheme.primary;
+    final title = behind
+        ? 'Cảnh báo: chưa theo kế hoạch ôn'
+        : 'Nhắc nhở ôn tập hôm nay';
+    final detail = behind
+        ? 'Còn ${plan!.overdueTasks.length} ngày bỏ lỡ. Vào Giám sát để ôn và nhận nhắc nhở.'
+        : (today == null
+            ? 'Mở Giám sát học tập để xem checklist & bật nhắc nhở.'
+            : '${today.title} — ${today.done ? 'đã xong' : 'chưa hoàn thành'}');
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Material(
+        color: color.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(16),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: () => context.push('/monitor'),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+            child: Row(
+              children: [
+                Icon(
+                  behind
+                      ? Icons.warning_amber_rounded
+                      : Icons.notifications_active_outlined,
+                  color: color,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w800,
+                          color: color,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        detail,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: scheme.onSurfaceVariant,
+                            ),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(Icons.chevron_right_rounded, color: color),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

@@ -1,6 +1,7 @@
 import 'package:eduself_study_app/core/config/app_config.dart';
 import 'package:eduself_study_app/core/routing/app_router.dart';
 import 'package:eduself_study_app/core/theme/app_theme.dart';
+import 'package:eduself_study_app/features/math_ai/infrastructure/study_reminder_service.dart';
 import 'package:eduself_study_app/features/settings/presentation/providers/settings_providers.dart';
 import 'package:eduself_study_app/shared/widgets/app_toast.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +13,11 @@ Future<void> main() async {
   // Required before PdfDocument.openData (tutor/practice PDF upload).
   await pdfrxFlutterInitialize();
   await AppConfig.load();
+  try {
+    await StudyReminderService.instance.ensureInitialized();
+  } on Object {
+    // Notifications are optional on some desktop/web hosts.
+  }
   runApp(const ProviderScope(child: EduSelfApp()));
 }
 
